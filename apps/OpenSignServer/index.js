@@ -17,6 +17,7 @@ import S3Adapter from 'parse-server-s3-adapter';
 import FSFilesAdapter from 'parse-server-fs-adapter';
 import AWS from 'aws-sdk';
 import { app as customRoute } from './cloud/customRoute/customApp.js';
+import {app as versionOne} from './cloud/customRoute/v1/verisonOneApp.js'
 import { exec } from 'child_process';
 import { createTransport } from 'nodemailer';
 
@@ -161,6 +162,9 @@ if (!process.env.TESTING) {
 }
 // Mount your custom express app
 app.use('/', customRoute);
+
+// Mount v1 express app
+app.use("/v1", versionOne)
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function (req, res) {

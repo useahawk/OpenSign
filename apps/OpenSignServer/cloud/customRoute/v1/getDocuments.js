@@ -1,5 +1,5 @@
 import axios from 'axios';
-import reportJson from '../parsefunction/reportsJson.js';
+import reportJson from '../../parsefunction/reportsJson.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
