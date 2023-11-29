@@ -8,5 +8,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 import uploadFile from './uploadFile.js';
-
+import getDocuments from './getDocuments.js'
 app.post('/file_upload', uploadFile);
+app.get('/getdocuments', getDocuments)
