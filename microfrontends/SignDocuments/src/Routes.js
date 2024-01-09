@@ -10,6 +10,7 @@ import PdfRequestFiles from "./Component/PdfRequestFiles";
 import LegaDrive from "./Component/LegaDrive/LegaDrive";
 import PageNotFound from "./Component/PageNotFound";
 import TemplatePlaceHolder from "./Component/TemplatePlaceholder";
+import GuestLogin from "./Component/GuestLogin";
 
 // `AppRoutes` is used to define route path of app and
 // it expose to host app, check moduleFederation.config.js for more
@@ -38,6 +39,10 @@ function AppRoutes() {
         <Route
           path="/login/:id/:userMail/:contactBookId/:serverUrl"
           element={<Login />}
+        />
+          <Route
+          path="/login/:id/:userMail/:serverUrl"
+          element={<GuestLogin />}
         />
         {/* draft document route to handle and navigate route page accordiing to document status */}
         <Route path="/draftDocument" element={<DraftDocument />} />

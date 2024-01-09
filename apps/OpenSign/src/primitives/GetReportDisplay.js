@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import pad from "../assets/images/pad.svg";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/report.css";
 import ModalUi from "./ModalUi";
 import AppendFormInForm from "../components/AppendFormInForm";
+import QuickSendUi from "./QuickSendUi";
 const ReportTable = ({
   ReportName,
   List,
@@ -24,6 +25,12 @@ const ReportTable = ({
   const [isDocErr, setIsDocErr] = useState(false);
   const [isContactform, setIsContactform] = useState(false);
   const [isDeleteModal, setIsDeleteModal] = useState({});
+  const [templateDeatils, setTemplateDetails] = useState({});
+  const [isQuickSend, setIsQuickSend] = useState({});
+  const [placeholders, setPlaceholders] = useState([]);
+  const [isLoader, setIsLoader] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
+  const menuRef = useRef(null);
   const startIndex = (currentPage - 1) * docPerPage;
 
   // For loop is used to calculate page numbers visible below table
@@ -35,6 +42,19 @@ const ReportTable = ({
     }
     return calculatedPageNumbers;
   }, [List, docPerPage]);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", Clickout);
+    return () => {
+      document.removeEventListener("mousedown", Clickout);
+    };
+  }, []);
+
+  const Clickout = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setActLoader({});
+    }
+  };
   //  below useEffect reset currenpage to 1 if user change route
   useEffect(() => {
     return () => setCurrentPage(1);
@@ -125,7 +145,7 @@ const ReportTable = ({
                   className: "_User",
                   objectId: Doc.CreatedBy.objectId
                 },
-                Signers: signers
+                Signers: signers.length > 0 ? signers : undefined
               };
               try {
                 const res = await axios.post(
@@ -185,6 +205,34 @@ const ReportTable = ({
   const handlebtn = async (item) => {
     if (ReportName === "Contactbook") {
       setIsDeleteModal({ [item.objectId]: true });
+    } else if (ReportName === "Templates") {
+      setIsLoader(true);
+      const params = {
+        templateId: item.objectId,
+        include: ["Placeholders.signerPtr"]
+      };
+      const templateDeatils = await axios.post(
+        `${localStorage.getItem("baseUrl")}functions/getTemplate`,
+        params,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Parse-Application-Id": localStorage.getItem("parseAppId"),
+            sessionToken: localStorage.getItem("accesstoken")
+          }
+        }
+      );
+
+      // console.log("templateDeatils.data ", templateDeatils.data);
+      const templateData = templateDeatils.data && templateDeatils.data.result;
+      if (templateData?.Placeholders?.length > 0) {
+        setPlaceholders(templateData?.Placeholders);
+        setTemplateDetails(templateData);
+        setIsQuickSend({ [`${item.objectId}`]: true });
+      } else {
+        setIsDocErr(true);
+      }
+      setIsLoader(false);
     }
   };
 
@@ -236,8 +284,34 @@ const ReportTable = ({
   };
   const handleCloseDeleteModal = () => setIsDeleteModal({});
 
+  const handleQuickSendClose = (status, count) => {
+    setIsQuickSend({});
+    setIsAlert(true);
+    if (status === "success") {
+      if (count > 1) {
+        setAlertMsg(count + " Documents sent successfully!");
+      } else {
+        setAlertMsg(count + " Document sent successfully!");
+      }
+    } else {
+      setIsAlert(true);
+      setIsErr(true);
+    }
+  };
+
   return (
     <div className="p-2 overflow-x-scroll w-full bg-white rounded-md">
+      {isLoader && (
+        <div className="absolute z-[999] min-h-screen w-[96%] flex justify-center items-center">
+          <div
+            style={{
+              fontSize: "45px",
+              color: "#3dd3e0"
+            }}
+            className="loader-37 "
+          ></div>
+        </div>
+      )}
       {isAlert && (
         <div
           className={`alert alert-${isErr ? "danger" : "success"} alertBox`}
@@ -246,6 +320,8 @@ const ReportTable = ({
         >
           {isErr
             ? "Something went wrong, Please try again later!"
+            : alertMsg
+            ? alertMsg
             : "Record deleted successfully!"}
         </div>
       )}
@@ -367,7 +443,7 @@ const ReportTable = ({
                       {item?.Name}{" "}
                     </td>
                     {heading.includes("Note") && (
-                      <td className="px-4 py-2">{item?.Note || "-"}</td>
+                      <td className="px-4 py-2 w-44">{item?.Note || "-"}</td>
                     )}
                     {heading.includes("Folder") && (
                       <td className="px-4 py-2">
@@ -388,49 +464,126 @@ const ReportTable = ({
                     </td>
 
                     <td className="px-4 py-2">{formatRow(item?.ExtUserPtr)}</td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 w-36">
                       {item?.Signers ? formatRow(item?.Signers) : "-"}
                     </td>
                     <td className="px-3 py-2 text-white">
-                      {actions?.length > 0 &&
-                        actions.map((act, index) => (
-                          <button
-                            key={index}
-                            onClick={() =>
-                              act?.redirectUrl
-                                ? handlemicroapp(
-                                    item,
-                                    act.redirectUrl,
-                                    act.btnLabel
-                                  )
-                                : handlebtn(item)
-                            }
-                            className={`mb-1 flex justify-center items-center gap-1 px-2 py-1 rounded shadow`}
-                            style={{
-                              backgroundColor: act.btnColor
-                                ? act.btnColor
-                                : "#3ac9d6",
-                              color: act?.textColor ? act?.textColor : "white"
-                            }}
-                          >
-                            <span>
-                              {act?.btnIcon && (
-                                <i
-                                  className={
-                                    actLoader[
-                                      `${item.objectId}_${act.btnLabel}`
-                                    ]
-                                      ? "fa-solid fa-spinner fa-spin-pulse"
-                                      : act.btnIcon
+                      <div className="flex flex-row items-center gap-1">
+                        {actions?.length > 0 &&
+                          actions.map((act, index) =>
+                            act?.target === "menu" ? (
+                              <div key={index} className="relative">
+                                <span
+                                  className="cursor-pointer items-center focus:outline-transparent"
+                                  onClick={() =>
+                                    setActLoader({
+                                      [`${item.objectId}_${act.btnLabel}`]:
+                                        !actLoader[
+                                          `${item.objectId}_${act.btnLabel}`
+                                        ]
+                                    })
                                   }
-                                ></i>
-                              )}
-                            </span>
-                            <span className="uppercase">
-                              {act?.btnLabel ? act.btnLabel : "view"}
-                            </span>
-                          </button>
-                        ))}
+                                >
+                                  {act?.btnIcon && (
+                                    <i
+                                      className={act.btnIcon + " text-black"}
+                                    ></i>
+                                  )}
+                                </span>
+                                {actLoader[
+                                  `${item.objectId}_${act.btnLabel}`
+                                ] && (
+                                  <div
+                                    ref={menuRef}
+                                    className="absolute z-30 bg-white border border-black rounded min-w-max right-0"
+                                  >
+                                    {act?.items.map((menuItem, index) => (
+                                      <div key={index + "menu"}>
+                                        <button
+                                          onClick={() =>
+                                            menuItem?.redirectUrl
+                                              ? handlemicroapp(
+                                                  item,
+                                                  menuItem.redirectUrl,
+                                                  menuItem.btnLabel
+                                                )
+                                              : handlebtn(item)
+                                          }
+                                          className={`my-1 text-black flex items-center gap-1 px-2 py-1 hover:bg-gray-200 w-full`}
+                                        >
+                                          <span>
+                                            {menuItem?.btnIcon && (
+                                              <i
+                                                className={menuItem.btnIcon}
+                                              ></i>
+                                            )}
+                                          </span>
+                                          <span className="">
+                                            {menuItem?.btnLabel
+                                              ? menuItem.btnLabel
+                                              : "view"}
+                                          </span>
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <button
+                                key={index}
+                                onClick={() =>
+                                  act?.redirectUrl
+                                    ? handlemicroapp(
+                                        item,
+                                        act.redirectUrl,
+                                        act.btnLabel
+                                      )
+                                    : handlebtn(item)
+                                }
+                                className={`mb-1 flex justify-center items-center gap-1 px-2 py-1 rounded shadow`}
+                                style={{
+                                  backgroundColor: act.btnColor
+                                    ? act.btnColor
+                                    : "#3ac9d6",
+                                  color: act?.textColor
+                                    ? act?.textColor
+                                    : "white"
+                                }}
+                              >
+                                <span>
+                                  {act?.btnIcon && (
+                                    <i
+                                      className={
+                                        actLoader[
+                                          `${item.objectId}_${act.btnLabel}`
+                                        ]
+                                          ? "fa-solid fa-spinner fa-spin-pulse"
+                                          : act.btnIcon
+                                      }
+                                    ></i>
+                                  )}
+                                </span>
+                                <span className="uppercase">
+                                  {act?.btnLabel ? act.btnLabel : "view"}
+                                </span>
+                              </button>
+                            )
+                          )}
+                      </div>
+                      {isQuickSend[`${item.objectId}`] && (
+                        <ModalUi
+                          isOpen
+                          title={"Quick send"}
+                          handleClose={() => setIsQuickSend({})}
+                        >
+                          <QuickSendUi
+                            Placeholders={placeholders}
+                            item={templateDeatils}
+                            handleClose={handleQuickSendClose}
+                          />
+                        </ModalUi>
+                      )}
                     </td>
                   </tr>
                 )

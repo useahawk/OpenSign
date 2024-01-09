@@ -3,7 +3,7 @@ import axios from 'axios';
 export default async function GetTemplate(request) {
   const serverUrl = process.env.SERVER_URL;
   const templateId = request.params.templateId;
-
+  const include = request.params.include;
   try {
     const userRes = await axios.get(serverUrl + '/users/me', {
       headers: {
@@ -21,12 +21,18 @@ export default async function GetTemplate(request) {
         template.include('ExtUserPtr');
         template.include('Signers');
         template.include('CreateBy');
+
+        if (include && include.length > 0) {
+          include.forEach(element => {
+            template.include(element);
+          });
+        }
         const res = await template.first({ useMasterKey: true });
         // console.log("res ", res)
         if (res) {
           // console.log("res ",res)
           const acl = res.getACL();
-          console.log("acl", acl.getReadAccess(userId))
+          // console.log('acl', acl.getReadAccess(userId));
           if (acl && acl.getReadAccess(userId)) {
             return res;
           } else {

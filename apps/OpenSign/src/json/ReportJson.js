@@ -185,6 +185,29 @@ export default function reportJson(id) {
             btnIcon: "fa fa-plus",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/template"
+          },
+          {
+            btnLabel: "",
+            btnColor: "#4bd396",
+            textColor: "white",
+            btnIcon: "fa-solid fa-ellipsis-vertical fa-xl",
+            target: "menu",
+            items: [
+              {
+                btnLabel: "Quick send",
+                btnColor: "#4bd396",
+                textColor: "white",
+                btnIcon: "fa-solid fa-paper-plane",
+                redirectUrl: ""
+              },
+              {
+                btnLabel: "Delete",
+                btnColor: "#00c9d5",
+                textColor: "white",
+                btnIcon: "fa-solid fa-trash",
+                redirectUrl: ""
+              }
+            ]
           }
         ]
       };

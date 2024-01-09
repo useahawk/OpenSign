@@ -1016,7 +1016,7 @@ export const createDocument = async (template, placeholders, signerData) => {
         className: "_User",
         objectId: Doc.CreatedBy.objectId
       },
-      Signers: signers
+      Signers: signers?.length > 0 ? signers : undefined
     };
 
     try {

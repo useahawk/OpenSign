@@ -202,86 +202,91 @@ const TemplatePlaceholder = () => {
         templateDeatils.data && templateDeatils.data.result
           ? [templateDeatils.data.result]
           : [];
+      if (!templateDeatils?.data?.result?.hasOwnProperty("error")) {
+        if (documentData && documentData.length > 0) {
+          setPdfDetails(documentData);
+          setIsSigners(true);
 
-      if (documentData && documentData.length > 0) {
-        setPdfDetails(documentData);
-        setIsSigners(true);
-        if (documentData[0].Signers && documentData[0].Signers.length > 0) {
-          setSignerObjId(documentData[0].Signers[0].objectId);
-          setContractName(documentData[0].Signers[0].className);
-          setIsSelectId(0);
-          if (
-            documentData[0].Placeholders &&
-            documentData[0].Placeholders.length > 0
-          ) {
-            setSignerPos(documentData[0].Placeholders);
-            let signers = [...documentData[0].Signers];
-            let updatedSigners = documentData[0].Placeholders.map((x) => {
-              let matchingSigner = signers.find(
-                (y) => x.signerObjId && x.signerObjId === y.objectId
+          if (documentData[0].Signers && documentData[0].Signers.length > 0) {
+            setSignerObjId(documentData[0].Signers[0].objectId);
+            setContractName(documentData[0].Signers[0].className);
+            setIsSelectId(0);
+            if (
+              documentData[0].Placeholders &&
+              documentData[0].Placeholders.length > 0
+            ) {
+              setSignerPos(documentData[0].Placeholders);
+              let signers = [...documentData[0].Signers];
+              let updatedSigners = documentData[0].Placeholders.map((x) => {
+                let matchingSigner = signers.find(
+                  (y) => x.signerObjId && x.signerObjId === y.objectId
+                );
+
+                if (matchingSigner) {
+                  return {
+                    ...matchingSigner,
+                    Role: x.Role ? x.Role : matchingSigner.Role,
+                    Id: x.Id,
+                    blockColor: x.blockColor
+                  };
+                } else {
+                  return {
+                    Role: x.Role,
+                    Id: x.Id,
+                    blockColor: x.blockColor
+                  };
+                }
+              });
+              setSignersData(updatedSigners);
+              setUniqueId(updatedSigners[0].Id);
+            } else {
+              const updatedSigners = documentData[0].Signers.map(
+                (x, index) => ({
+                  ...x,
+                  Id: randomId(),
+                  Role: "User " + (index + 1)
+                })
               );
-
-              if (matchingSigner) {
-                return {
-                  ...matchingSigner,
-                  Role: x.Role ? x.Role : matchingSigner.Role,
-                  Id: x.Id,
-                  blockColor: x.blockColor
-                };
-              } else {
+              setSignersData(updatedSigners);
+              setUniqueId(updatedSigners[0].Id);
+            }
+          } else {
+            setRoleName("User 1");
+            if (
+              documentData[0].Placeholders &&
+              documentData[0].Placeholders.length > 0
+            ) {
+              let updatedSigners = documentData[0].Placeholders.map((x) => {
                 return {
                   Role: x.Role,
                   Id: x.Id,
                   blockColor: x.blockColor
                 };
-              }
-            });
-            setSignersData(updatedSigners);
-            setUniqueId(updatedSigners[0].Id);
-          } else {
-            const updatedSigners = documentData[0].Signers.map((x, index) => ({
-              ...x,
-              Id: randomId(),
-              Role: "User " + (index + 1)
-            }));
-            setSignersData(updatedSigners);
-            setUniqueId(updatedSigners[0].Id);
+              });
+              setSignerPos(documentData[0].Placeholders);
+              setUniqueId(updatedSigners[0].Id);
+              setSignersData(updatedSigners);
+              setIsSelectId(0);
+            }
           }
+        } else if (
+          documentData === "Error: Something went wrong!" ||
+          (documentData.result && documentData.result.error)
+        ) {
+          const loadObj = {
+            isLoad: false
+          };
+          setHandleError("Error: Something went wrong!");
+          setIsLoading(loadObj);
         } else {
-          setRoleName("User 1");
-          if (
-            documentData[0].Placeholders &&
-            documentData[0].Placeholders.length > 0
-          ) {
-            let updatedSigners = documentData[0].Placeholders.map((x) => {
-              return {
-                Role: x.Role,
-                Id: x.Id,
-                blockColor: x.blockColor
-              };
-            });
-            setSignerPos(documentData[0].Placeholders);
-            setUniqueId(updatedSigners[0].Id);
-            setSignersData(updatedSigners);
-            setIsSelectId(0);
-          }
+          setNoData(true);
+          const loadObj = {
+            isLoad: false
+          };
+          setIsLoading(loadObj);
         }
-      } else if (
-        documentData === "Error: Something went wrong!" ||
-        (documentData.result && documentData.result.error)
-      ) {
-        const loadObj = {
-          isLoad: false
-        };
-        setHandleError("Error: Something went wrong!");
-        setIsLoading(loadObj);
       } else {
-        setNoData(true);
-
-        const loadObj = {
-          isLoad: false
-        };
-        setIsLoading(loadObj);
+        setHandleError("Error: Template not found!");
       }
     } catch (err) {
       console.log("err ", err);
