@@ -64,9 +64,9 @@ async function sendMail(document, sessionToken) {
           ' target=_blank>here</a>.</p> </div></div></body> </html>',
       };
       const sendMail = await axios.post(url, params, { headers: headers });
-      if (sendMail.data.result.status === 'success') {
-        console.log('batch login mail sent');
-      }
+      // if (sendMail.data.result.status === 'success') {
+      //   console.log('batch login mail sent');
+      // }
     } catch (error) {
       console.log('error', error);
     }

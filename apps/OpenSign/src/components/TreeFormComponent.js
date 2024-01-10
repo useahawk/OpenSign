@@ -34,8 +34,6 @@ function TreeFormComponent(props) {
   const [ui_schema, setUi_schema] = useState({});
   const active = true;
 
-  console.log("new form", props);
-
   const getForm = async (id) => {
     setLoding(true);
     try {

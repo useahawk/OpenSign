@@ -69,7 +69,7 @@ export class HiddenField extends Component {
             if (splitArray.length > 1) {
               custome_Filed = _rdata[0][splitArray[0]][splitArray[1]];
             } else {
-              console.log(_rdata[0][splitArray[0]]);
+              // console.log(_rdata[0][splitArray[0]]);
               custome_Filed = _rdata[0][splitArray[0]];
             }
             this.setState({ _fields: custome_Filed });

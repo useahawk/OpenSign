@@ -262,7 +262,7 @@ const FileUpload = (props) => {
               </div>
               <div
                 onClick={() => {
-                  console.log("clicked");
+                  // console.log("clicked");
                   setFileUpload([]);
                   props.onChange(undefined);
                 }}

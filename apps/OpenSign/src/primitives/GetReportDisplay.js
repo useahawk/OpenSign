@@ -199,8 +199,6 @@ const ReportTable = ({
       navigate("/rpmf/" + url);
       localStorage.setItem("rowlevel", JSON.stringify(item));
     }
-
-    // localStorage.setItem("rowlevelMicro");
   };
   const handlebtn = async (item) => {
     if (ReportName === "Contactbook") {
@@ -233,6 +231,8 @@ const ReportTable = ({
         setIsDocErr(true);
       }
       setIsLoader(false);
+    } else {
+      setIsDeleteModal({ [item.objectId]: true });
     }
   };
 
@@ -254,32 +254,59 @@ const ReportTable = ({
     setList((prevData) => [data, ...prevData]);
   };
 
-  const handleDelete = async (item) => {
-    setIsDeleteModal({});
-    setActLoader({ [item.objectId]: true });
-    try {
-      const url =
-        process.env.REACT_APP_SERVERURL + "/classes/contracts_Contactbook/";
-      const body = { IsDeleted: true };
-      const res = await axios.put(url + item.objectId, body, {
-        headers: {
-          "Content-Type": "application/json",
-          "X-Parse-Application-Id": localStorage.getItem("AppID12"),
-          "X-Parse-Session-Token": localStorage.getItem("accesstoken")
+  const handleDelete = async (item, label) => {
+    if (ReportName === "Contactbook") {
+      setIsDeleteModal({});
+      setActLoader({ [item.objectId]: true });
+      try {
+        const url =
+          process.env.REACT_APP_SERVERURL + "/classes/contracts_Contactbook/";
+        const body = { IsDeleted: true };
+        const res = await axios.put(url + item.objectId, body, {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Parse-Application-Id": localStorage.getItem("AppID12"),
+            "X-Parse-Session-Token": localStorage.getItem("accesstoken")
+          }
+        });
+        // console.log("Res ", res.data);
+        if (res.data && res.data.updatedAt) {
+          const upldatedList = List.filter((x) => x.objectId !== item.objectId);
+          setList(upldatedList);
         }
-      });
-      // console.log("Res ", res.data);
-      if (res.data && res.data.updatedAt) {
-        setActLoader({});
+      } catch (err) {
+        console.log("err", err);
+        setIsErr(true);
+      } finally {
         setIsAlert(true);
-        const upldatedList = List.filter((x) => x.objectId !== item.objectId);
-        setList(upldatedList);
+        setActLoader({});
       }
-    } catch (err) {
-      console.log("err", err);
-      setIsAlert(true);
-      setIsErr(true);
-      setActLoader({});
+    } else {
+      setIsDeleteModal({});
+      setActLoader({ [`${item.objectId}_${label}`]: true });
+      try {
+        const url =
+          process.env.REACT_APP_SERVERURL + "/classes/contracts_Document/";
+        const body = { IsArchive: true };
+        const res = await axios.put(url + item.objectId, body, {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Parse-Application-Id": localStorage.getItem("AppID12"),
+            "X-Parse-Session-Token": localStorage.getItem("accesstoken")
+          }
+        });
+        // console.log("Res ", res.data);
+        if (res.data && res.data.updatedAt) {
+          const upldatedList = List.filter((x) => x.objectId !== item.objectId);
+          setList(upldatedList);
+        }
+      } catch (err) {
+        console.log("err", err);
+        setIsErr(true);
+      } finally {
+        setIsAlert(true);
+        setActLoader({});
+      }
     }
   };
   const handleCloseDeleteModal = () => setIsDeleteModal({});
@@ -530,44 +557,76 @@ const ReportTable = ({
                                 )}
                               </div>
                             ) : (
-                              <button
-                                key={index}
-                                onClick={() =>
-                                  act?.redirectUrl
-                                    ? handlemicroapp(
-                                        item,
-                                        act.redirectUrl,
-                                        act.btnLabel
-                                      )
-                                    : handlebtn(item)
-                                }
-                                className={`mb-1 flex justify-center items-center gap-1 px-2 py-1 rounded shadow`}
-                                style={{
-                                  backgroundColor: act.btnColor
-                                    ? act.btnColor
-                                    : "#3ac9d6",
-                                  color: act?.textColor
-                                    ? act?.textColor
-                                    : "white"
-                                }}
-                              >
-                                <span>
-                                  {act?.btnIcon && (
-                                    <i
-                                      className={
-                                        actLoader[
-                                          `${item.objectId}_${act.btnLabel}`
-                                        ]
-                                          ? "fa-solid fa-spinner fa-spin-pulse"
-                                          : act.btnIcon
-                                      }
-                                    ></i>
-                                  )}
-                                </span>
-                                <span className="uppercase">
-                                  {act?.btnLabel ? act.btnLabel : "view"}
-                                </span>
-                              </button>
+                              <React.Fragment key={index}>
+                                <button
+                                  onClick={() =>
+                                    act?.redirectUrl
+                                      ? handlemicroapp(
+                                          item,
+                                          act.redirectUrl,
+                                          act.btnLabel
+                                        )
+                                      : handlebtn(item)
+                                  }
+                                  className={`mb-1 flex justify-center items-center gap-1 px-2 py-1 rounded shadow`}
+                                  style={{
+                                    backgroundColor: act.btnColor
+                                      ? act.btnColor
+                                      : "#3ac9d6",
+                                    color: act?.textColor
+                                      ? act?.textColor
+                                      : "white"
+                                  }}
+                                >
+                                  <span>
+                                    {act?.btnIcon && (
+                                      <i
+                                        className={
+                                          actLoader[
+                                            `${item.objectId}_${act.btnLabel}`
+                                          ]
+                                            ? "fa-solid fa-spinner fa-spin-pulse"
+                                            : act.btnIcon
+                                        }
+                                      ></i>
+                                    )}
+                                  </span>
+                                  <span className="uppercase">
+                                    {act?.btnLabel ? act.btnLabel : "view"}
+                                  </span>
+                                </button>
+                                {isDeleteModal[item.objectId] && (
+                                  <ModalUi
+                                    isOpen
+                                    title={"Delete Document"}
+                                    handleClose={handleCloseDeleteModal}
+                                  >
+                                    <div className="m-[20px]">
+                                      <div className="text-lg font-normal text-black">
+                                        Are you sure you want to delete this
+                                        document?
+                                      </div>
+                                      <hr className="bg-[#ccc] mt-4 " />
+                                      <div className="flex items-center mt-3 gap-2 text-white">
+                                        <button
+                                          onClick={() =>
+                                            handleDelete(item, act.btnLabel)
+                                          }
+                                          className="bg-[#1ab6ce] rounded-sm shadow-md text-[12px] font-semibold uppercase text-white py-1.5 px-4 focus:outline-none"
+                                        >
+                                          Yes
+                                        </button>
+                                        <button
+                                          onClick={handleCloseDeleteModal}
+                                          className="bg-[#ffffff] rounded-sm shadow-md border-[1px] text-[12px] font-semibold uppercase text-black py-1.5 px-4 text-center ml-[2px] focus:outline-none"
+                                        >
+                                          No
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </ModalUi>
+                                )}
+                              </React.Fragment>
                             )
                           )}
                       </div>

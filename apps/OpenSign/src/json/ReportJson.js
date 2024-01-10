@@ -18,6 +18,13 @@ export default function reportJson(id) {
             btnIcon: "fa fa-plus",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/draftDocument"
+          },
+          {
+            btnLabel: "Delete",
+            btnColor: "#ff5a48",
+            textColor: "white",
+            btnIcon: "fa-solid fa-trash",
+            redirectUrl: ""
           }
         ]
       };
@@ -50,6 +57,13 @@ export default function reportJson(id) {
             btnIcon: "fa fa-eye",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/pdfRequestFiles"
+          },
+          {
+            btnLabel: "Delete",
+            btnColor: "#ff5a48",
+            textColor: "white",
+            btnIcon: "fa-solid fa-trash",
+            redirectUrl: ""
           }
         ]
       };
@@ -82,6 +96,13 @@ export default function reportJson(id) {
             btnIcon: "fa fa-eye",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/draftDocument"
+          },
+          {
+            btnLabel: "Delete",
+            btnColor: "#ff5a48",
+            textColor: "white",
+            btnIcon: "fa-solid fa-trash",
+            redirectUrl: ""
           }
         ]
       };
@@ -98,6 +119,13 @@ export default function reportJson(id) {
             btnIcon: "fa fa-eye",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/draftDocument"
+          },
+          {
+            btnLabel: "Delete",
+            btnColor: "#ff5a48",
+            textColor: "white",
+            btnIcon: "fa-solid fa-trash",
+            redirectUrl: ""
           }
         ]
       };
@@ -114,6 +142,13 @@ export default function reportJson(id) {
             btnIcon: "fa fa-eye",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/pdfRequestFiles"
+          },
+          {
+            btnLabel: "Delete",
+            btnColor: "#ff5a48",
+            textColor: "white",
+            btnIcon: "fa-solid fa-trash",
+            redirectUrl: ""
           }
         ]
       };
@@ -146,6 +181,13 @@ export default function reportJson(id) {
             btnIcon: "fa fa-plus",
             redirectUrl:
               "remoteUrl=aHR0cHM6Ly9xaWstYWktb3JnLmdpdGh1Yi5pby9TaWduLU1pY3JvYXBwVjIvcmVtb3RlRW50cnkuanM=&moduleToLoad=AppRoutes&remoteName=signmicroapp/draftDocument"
+          },
+          {
+            btnLabel: "Delete",
+            btnColor: "#ff5a48",
+            textColor: "white",
+            btnIcon: "fa-solid fa-trash",
+            redirectUrl: ""
           }
         ]
       };
