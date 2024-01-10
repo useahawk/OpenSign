@@ -513,7 +513,7 @@ const ReportTable = ({
                                 >
                                   {act?.btnIcon && (
                                     <i
-                                      className={act.btnIcon + " text-black"}
+                                      className={act.btnIcon + " ml-1 text-black"}
                                     ></i>
                                   )}
                                 </span>
