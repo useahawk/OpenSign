@@ -466,11 +466,11 @@ const ReportTable = ({
                     {heading.includes("Sr.No") && (
                       <td className="px-4 py-2">{startIndex + index + 1}</td>
                     )}
-                    <td className="px-4 py-2 font-semibold w-56">
+                    <td className="px-4 py-2 font-semibold min-w-[200px]">
                       {item?.Name}{" "}
                     </td>
                     {heading.includes("Note") && (
-                      <td className="px-4 py-2 w-44">{item?.Note || "-"}</td>
+                      <td className="px-4 py-2 min-w-[120px]">{item?.Note || "-"}</td>
                     )}
                     {heading.includes("Folder") && (
                       <td className="px-4 py-2">
