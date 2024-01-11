@@ -665,7 +665,10 @@ const TemplatePlaceholder = () => {
         const data = {
           Placeholders: signerPos,
           SignedUrl: pdfDetails[0].URL,
-          Signers: signers
+          Signers: signers,
+          Name: pdfDetails[0]?.Name || "",
+          Note: pdfDetails[0]?.Note || "",
+          Description: pdfDetails[0]?.Description || ""
         };
 
         await axios
@@ -746,7 +749,7 @@ const TemplatePlaceholder = () => {
       selector: '[data-tut="reactourThird"]',
       content: () => (
         <TourContentWithBtn
-          message={`The PDF content area already displays the template's existing placeholders. For your convenience, these placeholders will match the color of the recipient's name, making them easily identifiable.`}
+          message={`Drag the placeholder for a recipient anywhere on the document.Remember, it will appear in the same colour as the name of the recipient for easy reference.`}
           isChecked={handleDontShow}
         />
       ),

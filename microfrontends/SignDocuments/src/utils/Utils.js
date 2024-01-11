@@ -95,19 +95,19 @@ export function onSaveImage(xyPostion, index, signKey, imgWH, image) {
   let getIMGWH;
   //get current page position
   const getXYData = xyPostion[index].pos;
-  const updateXYData = getXYData.map((url) => {
-    if (url.key === signKey) {
-      getIMGWH = calculateImgAspectRatio(imgWH, url);
+  const updateXYData = getXYData.map((position) => {
+    if (position.key === signKey) {
+      getIMGWH = calculateImgAspectRatio(imgWH, position);
 
       return {
-        ...url,
+        ...position,
         Width: getIMGWH.newWidth,
         Height: getIMGWH.newHeight,
         SignUrl: image.src,
         ImageType: image.imgType
       };
     }
-    return url;
+    return position;
   });
 
   const updateXYposition = xyPostion.map((obj, ind) => {
@@ -126,7 +126,8 @@ export function onSaveSign(
   signKey,
   signatureImg,
   imgWH,
-  isDefaultSign
+  isDefaultSign,
+  isTypeText
 ) {
   let getIMGWH;
   let getXYdata = xyPostion[index].pos;
@@ -134,21 +135,17 @@ export function onSaveSign(
     if (position.key === signKey) {
       if (isDefaultSign) {
         getIMGWH = calculateImgAspectRatio(imgWH, position);
+      } else if (isTypeText) {
+        getIMGWH = { newWidth: imgWH.width, newHeight: imgWH.height };
+      } else {
+        getIMGWH = calculateImgAspectRatio(
+          { width: 150, height: 60 },
+          position
+        );
       }
-      const getSignImgWH = calculateImgAspectRatio(
-        { width: 150, height: 60 },
-        position
-      );
-      const posWidth = isDefaultSign
-        ? getIMGWH.newWidth
-        : position.Width
-          ? getSignImgWH.newWidth
-          : 150;
-      const posHeight = isDefaultSign
-        ? getIMGWH.newHeight
-        : position.Height
-          ? getSignImgWH.newHeight
-          : 60;
+
+      const posWidth = getIMGWH ? getIMGWH.newWidth : 150;
+      const posHeight = getIMGWH ? getIMGWH.newHeight : 60;
 
       return {
         ...position,
@@ -218,18 +215,18 @@ export const addDefaultSignatureImg = (xyPostion, defaultSignImg) => {
     const getPageNo = xyPostion[i].pageNumber;
     const getPosData = getXYdata;
 
-    const addSign = getPosData.map((url, ind) => {
-      getIMGWH = calculateImgAspectRatio(imgWH, url);
-      if (url) {
+    const addSign = getPosData.map((position, ind) => {
+      getIMGWH = calculateImgAspectRatio(imgWH, position);
+      if (position && !position.isStamp) {
         return {
-          ...url,
+          ...position,
           SignUrl: defaultSignImg,
           Width: getIMGWH.newWidth,
           Height: getIMGWH.newHeight,
           ImageType: "default"
         };
       }
-      return url;
+      return position;
     });
 
     const newXypos = {
@@ -769,58 +766,58 @@ export const handleSignYourselfImageResize = (
   index,
   setXyPostion
 ) => {
-  const updateFilter = xyPostion[index].pos.filter(
-    (data) => data.key === key && data.Width && data.Height
-  );
+  // const updateFilter = xyPostion[index].pos.filter(
+  //   (data) => data.key === key && data.Width && data.Height
+  // );
 
-  if (updateFilter.length > 0) {
-    const getXYdata = xyPostion[index].pos;
-    const getPosData = getXYdata;
-    const addSign = getPosData.map((url, ind) => {
-      if (url.key === key) {
-        return {
-          ...url,
-          Width: ref.offsetWidth,
-          Height: ref.offsetHeight,
-          IsResize: true
-        };
-      }
-      return url;
-    });
+  // if (updateFilter.length > 0) {
+  //   const getXYdata = xyPostion[index].pos;
+  //   const getPosData = getXYdata;
+  //   const addSign = getPosData.map((url, ind) => {
+  //     if (url.key === key) {
+  //       return {
+  //         ...url,
+  //         Width: ref.offsetWidth,
+  //         Height: ref.offsetHeight,
+  //         IsResize: true
+  //       };
+  //     }
+  //     return url;
+  //   });
 
-    const newUpdateUrl = xyPostion.map((obj, ind) => {
-      if (ind === index) {
-        return { ...obj, pos: addSign };
-      }
-      return obj;
-    });
+  //   const newUpdateUrl = xyPostion.map((obj, ind) => {
+  //     if (ind === index) {
+  //       return { ...obj, pos: addSign };
+  //     }
+  //     return obj;
+  //   });
 
-    setXyPostion(newUpdateUrl);
-  } else {
-    const getXYdata = xyPostion[index].pos;
+  //   setXyPostion(newUpdateUrl);
+  // } else {
+  const getXYdata = xyPostion[index].pos;
 
-    const getPosData = getXYdata;
+  const getPosData = getXYdata;
 
-    const addSign = getPosData.map((url, ind) => {
-      if (url.key === key) {
-        return {
-          ...url,
-          Width: ref.offsetWidth,
-          Height: ref.offsetHeight,
-          IsResize: true
-        };
-      }
-      return url;
-    });
+  const addSign = getPosData.map((url, ind) => {
+    if (url.key === key) {
+      return {
+        ...url,
+        Width: ref.offsetWidth,
+        Height: ref.offsetHeight,
+        IsResize: true
+      };
+    }
+    return url;
+  });
 
-    const newUpdateUrl = xyPostion.map((obj, ind) => {
-      if (ind === index) {
-        return { ...obj, pos: addSign };
-      }
-      return obj;
-    });
-    setXyPostion(newUpdateUrl);
-  }
+  const newUpdateUrl = xyPostion.map((obj, ind) => {
+    if (ind === index) {
+      return { ...obj, pos: addSign };
+    }
+    return obj;
+  });
+  setXyPostion(newUpdateUrl);
+  // }
 };
 
 //function for call cloud function signPdf and generate digital signature

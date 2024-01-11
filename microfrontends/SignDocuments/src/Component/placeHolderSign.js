@@ -639,6 +639,7 @@ function PlaceHolderSign() {
       setIsSendAlert(alert);
     }
   };
+
   const sendEmailToSigners = async () => {
     const loadObj = {
       isLoad: true,
@@ -678,7 +679,7 @@ function PlaceHolderSign() {
 
         const hostUrl = window.location.origin + "/loadmf/signmicroapp";
         let signPdf = `${hostUrl}/login/${pdfDetails?.[0].objectId}/${signerMail[i].Email}/${objectId}/${serverParams}`;
-        const openSignUrl = "https://www.opensignlabs.com/";
+        const openSignUrl = "https://www.opensignlabs.com/contact-us";
         const themeBGcolor = themeColor();
         let params = {
           recipient: signerMail[i].Email,
@@ -692,17 +693,17 @@ function PlaceHolderSign() {
             themeBGcolor +
             ";'><p style='font-size: 20px;font-weight: 400;color: white;padding-left: 20px;' > Digital Signature Request</p></div><div><p style='padding: 20px;font-family: system-ui;font-size: 14px;   margin-bottom: 10px;'> " +
             pdfDetails?.[0].ExtUserPtr.Name +
-            " has requested you to review and sign " +
+            " has requested you to review and sign <strong> " +
             pdfDetails?.[0].Name +
-            "</p><div style='padding: 5px 0px 5px 25px;display: flex;flex-direction: row;justify-content: space-around;'><table> <tr> <td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Sender</td> <td> </td> <td  style='color:#626363;font-weight:bold'>" +
+            "</strong>.</p><div style='padding: 5px 0px 5px 25px;display: flex;flex-direction: row;justify-content: space-around;'><table> <tr> <td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Sender</td> <td> </td> <td  style='color:#626363;font-weight:bold'>" +
             sender +
             "</td></tr><tr><td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Organization Name</td> <td> </td><td style='color:#626363;font-weight:bold'>__</td></tr> <tr> <td style='font-weight:bold;font-family:sans-serif;font-size:15px'>Expire on</td><td> </td> <td style='color:#626363;font-weight:bold'>" +
             localExpireDate +
             "</td></tr><tr> <td></td> <td> <div style='display: flex; justify-content: center;margin-top: 50px;'><a href=" +
             signPdf +
-            ">  <button style='padding: 12px 20px 12px 20px;background-color: #d46b0f;color: white;  border: 0px;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;font-weight:bold'>Sign here</button></a> </div> </td><td> </td></tr></table> </div><div style='display: flex; justify-content: center;margin-top: 10px;'> </div></div></div><div><p> This is an automated email from OpenSign. For any queries regarding this email, please contact the sender " +
+            ">  <button style='padding: 12px 20px 12px 20px;background-color: #d46b0f;color: white;  border: 0px;box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;font-weight:bold'>Sign here</button></a> </div> </td><td> </td></tr></table> </div><div style='display: flex; justify-content: center;margin-top: 10px;'> </div></div></div><div><p> This is an automated email from OpenSign™. For any queries regarding this email, please contact the sender " +
             sender +
-            " directly.If you think this email is inappropriate or spam, you may file a complaint with OpenSign   <a href= " +
+            " directly.If you think this email is inappropriate or spam, you may file a complaint with OpenSign™   <a href= " +
             openSignUrl +
             " target=_blank>here</a>.</p> </div></div></body> </html>"
         };
@@ -720,15 +721,33 @@ function PlaceHolderSign() {
           objectId: x.objectId
         };
       });
+      const addExtraDays = pdfDetails[0]?.TimeToCompleteDays
+        ? pdfDetails[0].TimeToCompleteDays
+        : 15;
       const currentUser = signersdata.find((x) => x.Email === currentId);
       setCurrentId(currentUser?.objectId);
-      // console.log("signers ", signers);
+      let updateExpiryDate, data;
+      updateExpiryDate = new Date();
+      updateExpiryDate.setDate(updateExpiryDate.getDate() + addExtraDays);
+
       try {
-        const data = {
-          Placeholders: signerPos,
-          SignedUrl: pdfDetails[0].URL,
-          Signers: signers
-        };
+        if (updateExpiryDate) {
+          data = {
+            Placeholders: signerPos,
+            SignedUrl: pdfDetails[0].URL,
+            Signers: signers,
+            ExpiryDate: {
+              iso: updateExpiryDate,
+              __type: "Date"
+            }
+          };
+        } else {
+          data = {
+            Placeholders: signerPos,
+            SignedUrl: pdfDetails[0].URL,
+            Signers: signers
+          };
+        }
 
         await axios
           .put(
@@ -898,7 +917,17 @@ function PlaceHolderSign() {
         }
         return { ...x };
       });
-      // console.log("updateSigner ", updateSigner);
+      //  console.log("updateSigner ", updateSigner);
+      if (updateSigner && updateSigner.length > 0) {
+        const currEmail = pdfDetails[0].ExtUserPtr.Email;
+        const getCurrentUserDeatils = updateSigner.filter(
+          (x) => x.Email === currEmail
+        );
+        if (getCurrentUserDeatils && getCurrentUserDeatils.length > 0) {
+          setCurrentId(getCurrentUserDeatils[0].Email);
+        }
+      }
+
       setSignersData(updateSigner);
       const index = signersdata.findIndex((x) => x.Id === uniqueId);
       setIsSelectId(index);
@@ -987,16 +1016,7 @@ function PlaceHolderSign() {
                       marginBottom: "15px"
                     }}
                   ></div>
-                  <button
-                    onClick={() => setIsSendAlert({})}
-                    style={{
-                      color: "black"
-                    }}
-                    type="button"
-                    className="finishBtn"
-                  >
-                    Close
-                  </button>
+
                   {isSendAlert.mssg === "confirm" && (
                     <button
                       onClick={() => sendEmailToSigners()}
@@ -1009,6 +1029,16 @@ function PlaceHolderSign() {
                       Yes
                     </button>
                   )}
+                  <button
+                    onClick={() => setIsSendAlert({})}
+                    style={{
+                      color: "black"
+                    }}
+                    type="button"
+                    className="finishBtn"
+                  >
+                    Close
+                  </button>
                 </div>
               </ModalUi>
 
@@ -1039,20 +1069,6 @@ function PlaceHolderSign() {
                     <>
                       <button
                         onClick={() => {
-                          setIsSend(false);
-                          setSignerPos([]);
-                        }}
-                        style={{
-                          color: "black"
-                        }}
-                        type="button"
-                        className="finishBtn"
-                      >
-                        No
-                      </button>
-
-                      <button
-                        onClick={() => {
                           handleRecipientSign();
                         }}
                         style={{
@@ -1063,6 +1079,19 @@ function PlaceHolderSign() {
                         className="finishBtn"
                       >
                         Yes
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsSend(false);
+                          setSignerPos([]);
+                        }}
+                        style={{
+                          color: "black"
+                        }}
+                        type="button"
+                        className="finishBtn"
+                      >
+                        No
                       </button>
                     </>
                   ) : (
@@ -1225,16 +1254,26 @@ function PlaceHolderSign() {
         )}
       </DndProvider>
       <div>
-        <Modal show={signerExistModal}>
-          <Modal.Header className="bg-danger">
-            <span style={{ color: "white" }}>Users required</span>
-          </Modal.Header>
+        <ModalUi
+          headerColor={"#dc3545"}
+          isOpen={signerExistModal}
+          title={"Users required"}
+          handleClose={() => {
+            setSignerExistModal(false);
+          }}
+        >
+          <div style={{ height: "100%", padding: 20 }}>
+            <p>Please assign signers to all placeholders</p>
 
-          {/* signature modal */}
-          <Modal.Body>
-            <p>Please attach users to all fields</p>
-          </Modal.Body>
-          <Modal.Footer>
+            <div
+              style={{
+                height: "1px",
+                backgroundColor: "#9f9f9f",
+                width: "100%",
+                marginTop: "15px",
+                marginBottom: "15px"
+              }}
+            ></div>
             <button
               onClick={() => setSignerExistModal(false)}
               style={{
@@ -1245,8 +1284,9 @@ function PlaceHolderSign() {
             >
               Close
             </button>
-          </Modal.Footer>
-        </Modal>
+          </div>
+        </ModalUi>
+
         <LinkUserModal
           handleAddUser={handleAddUser}
           isAddUser={isAddUser}
