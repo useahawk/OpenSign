@@ -42,6 +42,7 @@ import TourContentWithBtn from "../primitives/TourContentWithBtn";
 import Title from "../components/Title";
 import ModalUi from "../primitives/ModalUi";
 import DropdownWidgetOption from "../components/pdf/DropdownWidgetOption";
+import { useSelector } from "react-redux";
 
 //For signYourself inProgress section signer can add sign and complete doc sign.
 function SignYourSelf() {
@@ -104,6 +105,7 @@ function SignYourSelf() {
   const [extUserId, setExtUserId] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState("");
+  const isHeader = useSelector((state) => state.showHeader);
   const divRef = useRef(null);
   const nodeRef = useRef(null);
   const [, drop] = useDrop({
@@ -181,7 +183,7 @@ function SignYourSelf() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
+  }, [divRef.current, isHeader]);
 
   //function for get document details for perticular signer with signer'object id
   const getDocumentDetails = async (showComplete) => {
@@ -985,8 +987,7 @@ function SignYourSelf() {
               </span>
             </div>
           )}
-
-          <div className="signatureContainer" ref={divRef}>
+          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
             {/* this component used for UI interaction and show their functionality */}
             {pdfLoadFail && !checkTourStatus && (
               <Tour
@@ -1009,15 +1010,9 @@ function SignYourSelf() {
               setPageNumber={setPageNumber}
               setSignBtnPosition={setSignBtnPosition}
               pageNumber={pageNumber}
+              containerWH={containerWH}
             />
-
-            {/* pdf render view */}
-            <div
-              style={{
-                marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-              }}
-            >
+            <div className="min-h-screen w-full md:w-[57%]">
               <ModalUi
                 headerColor={"#dc3545"}
                 isOpen={isAlert.isShow}
@@ -1155,7 +1150,7 @@ function SignYourSelf() {
                 isCompleted={isCompleted}
               />
 
-              <div data-tut="reactourSecond">
+              <div ref={divRef} data-tut="reactourSecond" className="h-[95%]">
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
@@ -1195,15 +1190,8 @@ function SignYourSelf() {
                 )}
               </div>
             </div>
-
-            {/*if document is not completed then render signature and stamp button in the right side */}
-            {/*else document is  completed then render signed by signer name in the right side */}
             <div
-              style={{
-                maxHeight: window.innerHeight - 70 + "px",
-                backgroundColor: "white"
-              }}
-              className="autoSignScroll"
+              className={`h-100vh  w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
             >
               {!isCompleted ? (
                 <div>

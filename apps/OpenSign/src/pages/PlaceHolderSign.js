@@ -49,6 +49,7 @@ import { SaveFileSize } from "../constant/saveFileSize";
 import { EmailBody } from "../components/pdf/EmailBody";
 import Upgrade from "../primitives/Upgrade";
 import Alert from "../primitives/Alert";
+import { useSelector } from "react-redux";
 
 function PlaceHolderSign() {
   const editorRef = useRef();
@@ -123,6 +124,7 @@ function PlaceHolderSign() {
   const [requestSubject, setRequestSubject] = useState("");
   const [requestBody, setRequestBody] = useState("");
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState("");
+  const isHeader = useSelector((state) => state.showHeader);
   const [isAlreadyPlace, setIsAlreadyPlace] = useState({
     status: false,
     message: ""
@@ -240,7 +242,7 @@ function PlaceHolderSign() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
+  }, [divRef.current, isHeader]);
 
   async function checkIsSubscribed() {
     const res = await fetchSubscription();
@@ -1609,7 +1611,7 @@ function PlaceHolderSign() {
         ) : handleError ? (
           <HandleError handleError={handleError} />
         ) : (
-          <div className="signatureContainer" ref={divRef}>
+          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
             {isUiLoading && (
               <div
                 style={{
@@ -1667,12 +1669,7 @@ function PlaceHolderSign() {
             />
 
             {/* pdf render view */}
-            <div
-              style={{
-                marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-              }}
-            >
+            <div className="min-h-screen w-full md:w-[57%]">
               {/* this modal is used show alert set placeholder for all signers before send mail */}
 
               <ModalUi
@@ -1963,7 +1960,11 @@ function PlaceHolderSign() {
                 currentSigner={true}
                 dataTut4="reactourFour"
               />
-              <div data-tut="reactourThird">
+              <div
+                ref={divRef}
+                data-tut="reactourSecond"
+                className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+              >
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
@@ -2008,53 +2009,50 @@ function PlaceHolderSign() {
             </div>
 
             {/* signature button */}
-            {isMobile ? (
-              <div>
-                <WidgetComponent
-                  dataTut="reactourFirst"
-                  dataTut2="reactourSecond"
-                  pdfUrl={isMailSend}
-                  dragSignature={dragSignature}
-                  signRef={signRef}
-                  handleDivClick={handleDivClick}
-                  handleMouseLeave={handleMouseLeave}
-                  isDragSign={isDragSign}
-                  dragStamp={dragStamp}
-                  dragRef={dragRef}
-                  isDragStamp={isDragStamp}
-                  isSignYourself={false}
-                  addPositionOfSignature={addPositionOfSignature}
-                  signerPos={signerPos}
-                  signersdata={signersdata}
-                  isSelectListId={isSelectListId}
-                  setSignerObjId={setSignerObjId}
-                  setIsSelectId={setIsSelectId}
-                  setContractName={setContractName}
-                  isSigners={true}
-                  setIsShowEmail={setIsShowEmail}
-                  isMailSend={isMailSend}
-                  setSelectedEmail={setSelectedEmail}
-                  selectedEmail={selectedEmail}
-                  setUniqueId={setUniqueId}
-                  setRoleName={setRoleName}
-                  initial={true}
-                  sendInOrder={pdfDetails[0].SendinOrder}
-                  setSignersData={setSignersData}
-                  blockColor={blockColor}
-                  setBlockColor={setBlockColor}
-                  setIsAddSigner={setIsAddSigner}
-                  handleDeleteUser={handleDeleteUser}
-                />
-              </div>
-            ) : (
-              <div>
-                <div className="signerComponent" aria-disabled>
-                  <div
-                    style={{
-                      maxHeight: window.innerHeight - 70 + "px"
-                    }}
-                    className="autoSignScroll"
-                  >
+            <div
+              className={`w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
+            >
+              {isMobile ? (
+                <div>
+                  <WidgetComponent
+                    dataTut="reactourFirst"
+                    dataTut2="reactourSecond"
+                    pdfUrl={isMailSend}
+                    dragSignature={dragSignature}
+                    signRef={signRef}
+                    handleDivClick={handleDivClick}
+                    handleMouseLeave={handleMouseLeave}
+                    isDragSign={isDragSign}
+                    dragStamp={dragStamp}
+                    dragRef={dragRef}
+                    isDragStamp={isDragStamp}
+                    isSignYourself={false}
+                    addPositionOfSignature={addPositionOfSignature}
+                    signerPos={signerPos}
+                    signersdata={signersdata}
+                    isSelectListId={isSelectListId}
+                    setSignerObjId={setSignerObjId}
+                    setIsSelectId={setIsSelectId}
+                    setContractName={setContractName}
+                    isSigners={true}
+                    setIsShowEmail={setIsShowEmail}
+                    isMailSend={isMailSend}
+                    setSelectedEmail={setSelectedEmail}
+                    selectedEmail={selectedEmail}
+                    setUniqueId={setUniqueId}
+                    setRoleName={setRoleName}
+                    initial={true}
+                    sendInOrder={pdfDetails[0].SendinOrder}
+                    setSignersData={setSignersData}
+                    blockColor={blockColor}
+                    setBlockColor={setBlockColor}
+                    setIsAddSigner={setIsAddSigner}
+                    handleDeleteUser={handleDeleteUser}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <div className="signerComponent" aria-disabled>
                     <SignerListPlace
                       signerPos={signerPos}
                       signersdata={signersdata}
@@ -2092,8 +2090,8 @@ function PlaceHolderSign() {
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </DndProvider>

@@ -34,6 +34,7 @@ import PdfDeclineModal from "../primitives/PdfDeclineModal";
 import Title from "../components/Title";
 import DefaultSignature from "../components/pdf/DefaultSignature";
 import ModalUi from "../primitives/ModalUi";
+import { useSelector } from "react-redux";
 
 function PdfRequestFiles() {
   const { docId } = useParams();
@@ -99,8 +100,8 @@ function PdfRequestFiles() {
   const [isSubscriptionExpired, setIsSubscriptionExpired] = useState(false);
   const [extUserId, setExtUserId] = useState("");
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState("");
+  const isHeader = useSelector((state) => state.showHeader);
   const divRef = useRef(null);
-  const isMobile = window.innerWidth < 767;
   const rowLevel =
     localStorage.getItem("rowlevel") &&
     JSON.parse(localStorage.getItem("rowlevel"));
@@ -136,7 +137,7 @@ function PdfRequestFiles() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
+  }, [divRef.current, isHeader]);
 
   async function checkIsSubscribed(extUserId) {
     const res = await fetchSubscription(extUserId);
@@ -1041,7 +1042,6 @@ function PdfRequestFiles() {
               )}
 
               <div
-                className="relative flex flex-col md:flex-row justify-between bg-[#ebebeb]"
                 style={{
                   pointerEvents:
                     isExpired ||
@@ -1049,7 +1049,7 @@ function PdfRequestFiles() {
                       ? "none"
                       : "auto"
                 }}
-                ref={divRef}
+                className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]"
               >
                 <ModalUi
                   headerColor={"#dc3545"}
@@ -1198,12 +1198,7 @@ function PdfRequestFiles() {
                 />
 
                 {/* pdf render view */}
-                <div
-                  style={{
-                    marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                    marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-                  }}
-                >
+                <div className="min-h-screen w-full md:w-[57%]">
                   {/* this modal is used show this document is already sign */}
                   <ModalUi
                     isOpen={isCompleted.isModal}
@@ -1283,188 +1278,159 @@ function PdfRequestFiles() {
                     pdfUrl={pdfUrl}
                     alreadySign={alreadySign}
                   />
-                  {containerWH && (
-                    <RenderPdf
-                      pageNumber={pageNumber}
-                      pdfOriginalWidth={pdfOriginalWidth}
-                      pdfNewWidth={pdfNewWidth}
-                      setIsSignPad={setIsSignPad}
-                      setIsStamp={setIsStamp}
-                      setSignKey={setSignKey}
-                      pdfDetails={pdfDetails}
-                      signerPos={signerPos}
-                      successEmail={false}
-                      pdfUrl={pdfUrl}
-                      numPages={numPages}
-                      pageDetails={pageDetails}
-                      pdfRequest={true}
-                      signerObjectId={signerObjectId}
-                      signedSigners={signedSigners}
-                      setCurrentSigner={setCurrentSigner}
-                      setPdfLoadFail={setPdfLoadFail}
-                      pdfLoadFail={pdfLoadFail}
-                      setSignerPos={setSignerPos}
-                      containerWH={containerWH}
-                      setIsInitial={setIsInitial}
-                      setValidateAlert={setValidateAlert}
-                      unSignedWidgetId={unSignedWidgetId}
-                      setSelectWidgetId={setSelectWidgetId}
-                      selectWidgetId={selectWidgetId}
-                      setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  <div
+                    ref={divRef}
+                    data-tut="reactourSecond"
+                    className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+                  >
+                    {containerWH && (
+                      <RenderPdf
+                        pageNumber={pageNumber}
+                        pdfOriginalWidth={pdfOriginalWidth}
+                        pdfNewWidth={pdfNewWidth}
+                        setIsSignPad={setIsSignPad}
+                        setIsStamp={setIsStamp}
+                        setSignKey={setSignKey}
+                        pdfDetails={pdfDetails}
+                        signerPos={signerPos}
+                        successEmail={false}
+                        pdfUrl={pdfUrl}
+                        numPages={numPages}
+                        pageDetails={pageDetails}
+                        pdfRequest={true}
+                        signerObjectId={signerObjectId}
+                        signedSigners={signedSigners}
+                        setCurrentSigner={setCurrentSigner}
+                        setPdfLoadFail={setPdfLoadFail}
+                        pdfLoadFail={pdfLoadFail}
+                        setSignerPos={setSignerPos}
+                        containerWH={containerWH}
+                        setIsInitial={setIsInitial}
+                        setValidateAlert={setValidateAlert}
+                        unSignedWidgetId={unSignedWidgetId}
+                        setSelectWidgetId={setSelectWidgetId}
+                        selectWidgetId={selectWidgetId}
+                        setCurrWidgetsDetails={setCurrWidgetsDetails}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* <div className="signerComponent"> */}
+                <div
+                  className={`h-100vh  w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
+                >
+                  {signedSigners.length > 0 && (
+                    <>
+                      <div
+                        style={{ backgroundColor: themeColor }}
+                        className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+                      >
+                        <span> Signed by</span>
+                      </div>
+                      <div style={{ marginTop: "2px" }}>
+                        {signedSigners.map((obj, ind) => {
+                          return (
+                            <div
+                              className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
+                              style={{
+                                background: checkSignerBackColor(obj)
+                              }}
+                              key={ind}
+                            >
+                              <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
+                                <span className="text-[1.5vw]">
+                                  {getFirstLetter(obj.Name)}
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column"
+                                }}
+                              >
+                                <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
+                                  {obj.Name}
+                                </span>
+                                <span
+                                  className={
+                                    isHeader
+                                      ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
+                                      : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
+                                  }
+                                >
+                                  {obj.Email}
+                                </span>
+                              </div>
+                              <hr />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  {unsignedSigners.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          background: themeColor
+                        }}
+                        className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+                      >
+                        <span>Yet to sign</span>
+                      </div>
+                      <div style={{ marginTop: "5px" }}>
+                        {unsignedSigners.map((obj, ind) => {
+                          return (
+                            <div
+                              className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
+                              style={{
+                                background: checkSignerBackColor(obj)
+                              }}
+                              key={ind}
+                            >
+                              <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
+                                <span className="text-[1.5vw]">
+                                  {getFirstLetter(obj.Name)}
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column"
+                                }}
+                              >
+                                <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
+                                  {obj.Name}
+                                </span>
+                                <span
+                                  className={
+                                    isHeader
+                                      ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
+                                      : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
+                                  }
+                                >
+                                  {obj.Email}
+                                </span>
+                              </div>
+                              <hr />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                  {defaultSignImg && !alreadySign && (
+                    <DefaultSignature
+                      defaultSignImg={defaultSignImg}
+                      setDefaultSignImg={setDefaultSignImg}
+                      userObjectId={signerObjectId}
+                      setIsLoading={setIsLoading}
+                      xyPostion={signerPos}
+                      setDefaultSignAlert={setDefaultSignAlert}
                     />
                   )}
-                </div>
-                <div>
-                  <div className="signerComponent">
-                    <div
-                      style={{ maxHeight: window.innerHeight - 70 + "px" }}
-                      className="autoSignScroll"
-                    >
-                      {signedSigners.length > 0 && (
-                        <>
-                          <div
-                            style={{ background: themeColor }}
-                            className="signedStyle"
-                          >
-                            Signed by
-                          </div>
-                          <div style={{ marginTop: "2px" }}>
-                            {signedSigners.map((obj, ind) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    padding: "10px 0",
-                                    background: checkSignerBackColor(obj)
-                                  }}
-                                  key={ind}
-                                >
-                                  <div
-                                    className="signerStyle"
-                                    style={{
-                                      background: "#abd1d0",
-                                      width: 30,
-                                      height: 30,
-                                      display: "flex",
-                                      borderRadius: 30 / 2,
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      margin: "0 10px 0 5px"
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        textAlign: "center",
-                                        fontWeight: "bold",
-                                        color: "black",
-                                        textTransform: "uppercase"
-                                      }}
-                                    >
-                                      {getFirstLetter(obj.Name)}
-                                    </span>
-                                  </div>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column"
-                                    }}
-                                  >
-                                    <span className="userName">{obj.Name}</span>
-                                    <span className="useEmail">
-                                      {obj.Email}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-
-                      {unsignedSigners.length > 0 && (
-                        <>
-                          <div
-                            style={{
-                              background: themeColor,
-                              color: "white",
-                              padding: "5px",
-                              fontFamily: "sans-serif",
-                              marginTop: signedSigners.length > 0 && "20px"
-                            }}
-                          >
-                            Yet to sign
-                          </div>
-                          <div style={{ marginTop: "5px" }}>
-                            {unsignedSigners.map((obj, ind) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    padding: "10px 0",
-                                    background: checkSignerBackColor(obj)
-                                  }}
-                                  key={ind}
-                                >
-                                  <div
-                                    className="signerStyle"
-                                    style={{
-                                      background: "#abd1d0",
-                                      width: 30,
-                                      height: 30,
-                                      display: "flex",
-                                      borderRadius: 30 / 2,
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      margin: "0 10px 0 5px"
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        textAlign: "center",
-                                        fontWeight: "bold",
-                                        color: "black",
-                                        textTransform: "uppercase"
-                                      }}
-                                    >
-                                      {getFirstLetter(obj.Name)}
-                                    </span>
-                                  </div>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column"
-                                    }}
-                                  >
-                                    <span className="userName">{obj.Name}</span>
-                                    <span className="useEmail">
-                                      {obj.Email}
-                                    </span>
-                                  </div>
-                                  <hr />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                      {defaultSignImg && !alreadySign && (
-                        <DefaultSignature
-                          defaultSignImg={defaultSignImg}
-                          setDefaultSignImg={setDefaultSignImg}
-                          userObjectId={signerObjectId}
-                          setIsLoading={setIsLoading}
-                          xyPostion={signerPos}
-                          setDefaultSignAlert={setDefaultSignAlert}
-                        />
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

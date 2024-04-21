@@ -19,27 +19,16 @@ function DefaultSignature({ defaultSignImg, xyPostion, setDefaultSignAlert }) {
   return (
     <div>
       <div
+        className="text-[#FFFFFF] p-[5px] mt-[5px] text-[1.3vw]"
         style={{
-          background: themeColor,
-          color: "white",
-          padding: "5px",
-          fontFamily: "sans-serif",
-          marginTop: "5px"
+          background: themeColor
         }}
       >
         Signature
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          marginTop: "10px",
-          fontWeight: "600"
-        }}
-      >
+      <div className="flex flex-col items-center mt-[10px] font-medium">
         <>
-          <p>Your Signature</p>
+          <p className="text-[1.2vw]">Your Signature</p>
           <div className="defaultSignBox">
             <img
               alt="default img"
@@ -60,7 +49,9 @@ function DefaultSignature({ defaultSignImg, xyPostion, setDefaultSignAlert }) {
               marginBottom: "10px"
             }}
             type="button"
-            className="finishBtn finishnHover"
+            className="shadow py-[3px] px-[30px] text-[#FFFFFF] text-[1.3vw] border-none ml-[10px]
+            rounded-1
+            finishnHover"
             onClick={() => confirmToaddDefaultSign()}
           >
             Auto Sign All

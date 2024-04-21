@@ -137,8 +137,8 @@ export const getDrive = async (documentId, skip = 0, limit = 100) => {
 
 // `pdfNewWidthFun` function is used to calculate pdf width to render in middle container
 export const pdfNewWidthFun = (divRef) => {
-  const clientWidth = divRef.current.offsetWidth;
-  const pdfWidth = clientWidth - 160 - 200;
+  const pdfWidth = divRef.current.offsetWidth;
+  // const pdfWidth = clientWidth - 160 - 200;
   //160 is width of left side, 200 is width of right side component
   return pdfWidth;
 };
@@ -357,11 +357,12 @@ export const addWidgetOptions = (type) => {
       return {};
   }
 };
-export const getWidgetType = (item, marginLeft) => {
+export const getWidgetType = (item, marginLeft, isHeader) => {
   return (
     <>
       <div
-        className="signatureBtn widgets"
+        className="border-[1.5px] border-[#47a3ad] rounded-[3px] flex p-0 justify-between bg-[#FFFFFF]
+        cursor-move w-auto h-[30px] 2xl:h-[70px] widgets"
         style={{
           boxShadow:
             "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.18)",
@@ -371,11 +372,19 @@ export const getWidgetType = (item, marginLeft) => {
         <div className="flex items-center mr-1">
           {!isMobile && (
             <i
-              className="fa-sharp fa-solid fa-grip-vertical"
-              style={{ color: "#908d8d", fontSize: "13px", marginLeft: 4 }}
+              className={
+                "fa-sharp fa-solid fa-grip-vertical text-[13px] 2xl:text-[30px] ml-[4px] "
+              }
+              style={{ color: "#908d8d" }}
             ></i>
           )}
-          <span className=" font-[400] text-[15px] text-black ml-[5px]">
+          <span
+            className={
+              isHeader
+                ? " font-[400] text-[15px] 2xl:text-[30px] text-black ml-[5px] md:hidden lg:block"
+                : " font-[400] text-[15px] 2xl:text-[33px] text-black ml-[5px] "
+            }
+          >
             {item.type}
           </span>
         </div>
@@ -388,8 +397,8 @@ export const getWidgetType = (item, marginLeft) => {
           }}
         >
           <i
-            style={{ color: "white", fontSize: item.iconSize }}
-            className={item.icon}
+            style={{ fontSize: item.iconSize }}
+            className={`${item.icon}      text-[#FFFFFF] `}
           ></i>
         </div>
       </div>

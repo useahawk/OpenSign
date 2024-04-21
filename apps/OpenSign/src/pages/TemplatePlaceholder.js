@@ -36,8 +36,10 @@ import AddRoleModal from "../components/pdf/AddRoleModal";
 import PlaceholderCopy from "../components/pdf/PlaceholderCopy";
 import TourContentWithBtn from "../primitives/TourContentWithBtn";
 import DropdownWidgetOption from "../components/pdf/DropdownWidgetOption";
+import { useSelector } from "react-redux";
 const TemplatePlaceholder = () => {
   const navigate = useNavigate();
+  const isHeader = useSelector((state) => state.showHeader);
   const { templateId } = useParams();
   const [pdfDetails, setPdfDetails] = useState([]);
   const [isMailSend, setIsMailSend] = useState(false);
@@ -170,7 +172,7 @@ const TemplatePlaceholder = () => {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
+  }, [divRef.current, isHeader]);
   async function checkIsSubscribed() {
     const res = await fetchSubscription();
     const freeplan = res.plan;
@@ -1215,7 +1217,7 @@ const TemplatePlaceholder = () => {
         ) : handleError ? (
           <HandleError handleError={handleError} />
         ) : (
-          <div className="signatureContainer" ref={divRef}>
+          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
             {/* this component used for UI interaction and show their functionality */}
             {!checkTourStatus && (
               //this tour component used in your html component where you want to put
@@ -1250,12 +1252,7 @@ const TemplatePlaceholder = () => {
             />
 
             {/* pdf render view */}
-            <div
-              style={{
-                marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-              }}
-            >
+            <div className="min-h-screen w-full md:w-[57%]">
               {/* this modal is used show alert set placeholder for all signers before send mail */}
               <ModalUi
                 headerColor={"#dc3545"}
@@ -1417,7 +1414,11 @@ const TemplatePlaceholder = () => {
                 setIsEditTemplate={handleEditTemplateModal}
                 dataTut4="reactourFour"
               />
-              <div data-tut="reactourThird">
+              <div
+                ref={divRef}
+                data-tut="reactourThird"
+                className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+              >
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
@@ -1502,51 +1503,46 @@ const TemplatePlaceholder = () => {
                 />
               </div>
             ) : (
-              <div>
-                <div className="signerComponent">
-                  <div
-                    style={{ maxHeight: window.innerHeight - 70 + "px" }}
-                    className="autoSignScroll"
-                  >
-                    <SignerListPlace
-                      isMailSend={isMailSend}
-                      signerPos={signerPos}
-                      signersdata={signersdata}
-                      isSelectListId={isSelectListId}
-                      setSignerObjId={setSignerObjId}
-                      setRoleName={setRoleName}
-                      setIsSelectId={setIsSelectId}
-                      setContractName={setContractName}
-                      handleAddSigner={handleAddSigner}
-                      setUniqueId={setUniqueId}
-                      handleDeleteUser={handleDeleteUser}
-                      handleRoleChange={handleRoleChange}
-                      handleOnBlur={handleOnBlur}
-                      title={"Roles"}
-                      sendInOrder={pdfDetails[0]?.SendinOrder}
-                      setSignersData={setSignersData}
-                      blockColor={blockColor}
-                      setBlockColor={setBlockColor}
-                    />
-                    <div data-tut="reactourSecond">
-                      <WidgetComponent
-                        isMailSend={isMailSend}
-                        dragSignature={dragSignature}
-                        signRef={signRef}
-                        handleDivClick={handleDivClick}
-                        handleMouseLeave={handleMouseLeave}
-                        isDragSign={isDragSign}
-                        dragStamp={dragStamp}
-                        dragRef={dragRef}
-                        isDragStamp={isDragStamp}
-                        isSignYourself={false}
-                        addPositionOfSignature={addPositionOfSignature}
-                        title={"Roles"}
-                        initial={true}
-                        isTemplateFlow={true}
-                      />
-                    </div>
-                  </div>
+              <div
+                className={`h-100vh  w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
+              >
+                <SignerListPlace
+                  isMailSend={isMailSend}
+                  signerPos={signerPos}
+                  signersdata={signersdata}
+                  isSelectListId={isSelectListId}
+                  setSignerObjId={setSignerObjId}
+                  setRoleName={setRoleName}
+                  setIsSelectId={setIsSelectId}
+                  setContractName={setContractName}
+                  handleAddSigner={handleAddSigner}
+                  setUniqueId={setUniqueId}
+                  handleDeleteUser={handleDeleteUser}
+                  handleRoleChange={handleRoleChange}
+                  handleOnBlur={handleOnBlur}
+                  title={"Roles"}
+                  sendInOrder={pdfDetails[0]?.SendinOrder}
+                  setSignersData={setSignersData}
+                  blockColor={blockColor}
+                  setBlockColor={setBlockColor}
+                />
+                <div data-tut="reactourSecond">
+                  <WidgetComponent
+                    isMailSend={isMailSend}
+                    dragSignature={dragSignature}
+                    signRef={signRef}
+                    handleDivClick={handleDivClick}
+                    handleMouseLeave={handleMouseLeave}
+                    isDragSign={isDragSign}
+                    dragStamp={dragStamp}
+                    dragRef={dragRef}
+                    isDragStamp={isDragStamp}
+                    isSignYourself={false}
+                    addPositionOfSignature={addPositionOfSignature}
+                    title={"Roles"}
+                    initial={true}
+                    isTemplateFlow={true}
+                  />
                 </div>
               </div>
             )}

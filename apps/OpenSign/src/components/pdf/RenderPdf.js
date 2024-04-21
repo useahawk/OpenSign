@@ -1,5 +1,4 @@
 import React from "react";
-import RSC from "react-scrollbars-custom";
 import { Document, Page } from "react-pdf";
 import {
   defaultWidthHeight,
@@ -12,7 +11,6 @@ import Alert from "../../primitives/Alert";
 function RenderPdf({
   pageNumber,
   pdfOriginalWidth,
-  pdfNewWidth,
   drop,
   signerPos,
   successEmail,
@@ -328,7 +326,7 @@ function RenderPdf({
       );
     }
   };
-
+  console.log("window.innerHeight/2", window.innerHeight / 2);
   return (
     <>
       {successEmail && <Alert type={"success"}>Email sent successfully!</Alert>}
@@ -505,151 +503,158 @@ function RenderPdf({
           </div>
         </div>
       ) : (
-        <RSC
+        // <RSC
+        //   style={{
+        //     position: "relative",
+        //     boxShadow: "rgba(17, 12, 46, 0.15) 0px 48px 100px 0px",
+        //     width:
+        //       pdfOriginalWidth > pdfNewWidth ? pdfNewWidth : pdfOriginalWidth,
+        //     height: window.innerHeight - 110 + "px"
+        //   }}
+        //   noScrollY={false}
+        //   noScrollX={pdfNewWidth < pdfOriginalWidth ? false : true}
+        // >
+        <div
+          className={`  autoSignScroll border-[0.1px] border-[#ebe8e8] max-h-[100vh] `}
           style={{
-            position: "relative",
-            boxShadow: "rgba(17, 12, 46, 0.15) 0px 48px 100px 0px",
-            width:
-              pdfOriginalWidth > pdfNewWidth ? pdfNewWidth : pdfOriginalWidth,
-            height: window.innerHeight - 110 + "px"
+            marginTop: isGuestSigner && "30px"
           }}
-          noScrollY={false}
-          noScrollX={pdfNewWidth < pdfOriginalWidth ? false : true}
+          ref={drop}
+          id="container"
         >
-          <div
-            style={{
-              border: "0.1px solid #ebe8e8",
-              width: pdfOriginalWidth
-            }}
-            ref={drop}
-            id="container"
-          >
-            {pdfLoadFail.status &&
-              (pdfRequest
-                ? signerPos.map((data, key) => {
+          {pdfLoadFail.status &&
+            (pdfRequest
+              ? signerPos.map((data, key) => {
+                  return (
+                    <React.Fragment key={key}>
+                      {checkSignedSignes(data)}
+                    </React.Fragment>
+                  );
+                })
+              : placeholder
+                ? signerPos.map((data, ind) => {
                     return (
-                      <React.Fragment key={key}>
-                        {checkSignedSignes(data)}
+                      <React.Fragment key={ind}>
+                        {data.placeHolder.map((placeData, index) => {
+                          return (
+                            <React.Fragment key={index}>
+                              {placeData.pageNumber === pageNumber &&
+                                placeData.pos.map((pos) => {
+                                  return (
+                                    <React.Fragment key={pos.key}>
+                                      <Placeholder
+                                        pos={pos}
+                                        setIsPageCopy={setIsPageCopy}
+                                        setSignKey={setSignKey}
+                                        handleDeleteSign={handleDeleteSign}
+                                        setIsStamp={setIsStamp}
+                                        handleTabDrag={handleTabDrag}
+                                        handleStop={handleStop}
+                                        handleSignYourselfImageResize={
+                                          handleImageResize
+                                        }
+                                        index={pageNumber}
+                                        xyPostion={signerPos}
+                                        setXyPostion={setSignerPos}
+                                        setSignerObjId={setSignerObjId}
+                                        data={data}
+                                        setIsResize={setIsResize}
+                                        setShowDropdown={setShowDropdown}
+                                        isShowBorder={true}
+                                        isPlaceholder={true}
+                                        setUniqueId={setUniqueId}
+                                        handleLinkUser={handleLinkUser}
+                                        handleUserName={handleUserName}
+                                        isSignYourself={false}
+                                        xPos={xPos}
+                                        yPos={yPos}
+                                        posWidth={posWidth}
+                                        posHeight={posHeight}
+                                        isDragging={isDragging}
+                                        setIsValidate={setIsValidate}
+                                        setWidgetType={setWidgetType}
+                                        setIsRadio={setIsRadio}
+                                        setIsCheckbox={setIsCheckbox}
+                                        setCurrWidgetsDetails={
+                                          setCurrWidgetsDetails
+                                        }
+                                        setSelectWidgetId={setSelectWidgetId}
+                                        selectWidgetId={selectWidgetId}
+                                        handleNameModal={handleNameModal}
+                                        setTempSignerId={setTempSignerId}
+                                        uniqueId={uniqueId}
+                                      />
+                                    </React.Fragment>
+                                  );
+                                })}
+                            </React.Fragment>
+                          );
+                        })}
                       </React.Fragment>
                     );
                   })
-                : placeholder
-                  ? signerPos.map((data, ind) => {
-                      return (
-                        <React.Fragment key={ind}>
-                          {data.placeHolder.map((placeData, index) => {
+                : xyPostion.map((data, ind) => {
+                    return (
+                      <React.Fragment key={ind}>
+                        {data.pageNumber === pageNumber &&
+                          data.pos.map((pos) => {
                             return (
-                              <React.Fragment key={index}>
-                                {placeData.pageNumber === pageNumber &&
-                                  placeData.pos.map((pos) => {
-                                    return (
-                                      <React.Fragment key={pos.key}>
-                                        <Placeholder
-                                          pos={pos}
-                                          setIsPageCopy={setIsPageCopy}
-                                          setSignKey={setSignKey}
-                                          handleDeleteSign={handleDeleteSign}
-                                          setIsStamp={setIsStamp}
-                                          handleTabDrag={handleTabDrag}
-                                          handleStop={handleStop}
-                                          handleSignYourselfImageResize={
-                                            handleImageResize
-                                          }
-                                          index={pageNumber}
-                                          xyPostion={signerPos}
-                                          setXyPostion={setSignerPos}
-                                          setSignerObjId={setSignerObjId}
-                                          data={data}
-                                          setIsResize={setIsResize}
-                                          setShowDropdown={setShowDropdown}
-                                          isShowBorder={true}
-                                          isPlaceholder={true}
-                                          setUniqueId={setUniqueId}
-                                          handleLinkUser={handleLinkUser}
-                                          handleUserName={handleUserName}
-                                          isSignYourself={false}
-                                          xPos={xPos}
-                                          yPos={yPos}
-                                          posWidth={posWidth}
-                                          posHeight={posHeight}
-                                          isDragging={isDragging}
-                                          setIsValidate={setIsValidate}
-                                          setWidgetType={setWidgetType}
-                                          setIsRadio={setIsRadio}
-                                          setIsCheckbox={setIsCheckbox}
-                                          setCurrWidgetsDetails={
-                                            setCurrWidgetsDetails
-                                          }
-                                          setSelectWidgetId={setSelectWidgetId}
-                                          selectWidgetId={selectWidgetId}
-                                          handleNameModal={handleNameModal}
-                                          setTempSignerId={setTempSignerId}
-                                          uniqueId={uniqueId}
-                                        />
-                                      </React.Fragment>
-                                    );
-                                  })}
-                              </React.Fragment>
+                              pos && (
+                                <React.Fragment key={pos.key}>
+                                  <Placeholder
+                                    pos={pos}
+                                    setIsPageCopy={setIsPageCopy}
+                                    setSignKey={setSignKey}
+                                    handleDeleteSign={handleDeleteSign}
+                                    setIsStamp={setIsStamp}
+                                    handleTabDrag={handleTabDrag}
+                                    handleStop={(event, dragElement) =>
+                                      handleStop(event, dragElement, pos.type)
+                                    }
+                                    handleSignYourselfImageResize={
+                                      handleSignYourselfImageResize
+                                    }
+                                    index={index}
+                                    xyPostion={xyPostion}
+                                    setXyPostion={setXyPostion}
+                                    pdfOriginalWidth={pdfOriginalWidth}
+                                    containerWH={containerWH}
+                                    setIsSignPad={setIsSignPad}
+                                    isShowBorder={true}
+                                    isSignYourself={true}
+                                    xPos={xPos}
+                                    yPos={yPos}
+                                    posWidth={posWidth}
+                                    posHeight={posHeight}
+                                    pdfDetails={pdfDetails[0]}
+                                    isDragging={isDragging}
+                                    setIsInitial={setIsInitial}
+                                    setWidgetType={setWidgetType}
+                                    setSelectWidgetId={setSelectWidgetId}
+                                    selectWidgetId={selectWidgetId}
+                                    handleUserName={handleUserName}
+                                    setIsCheckbox={setIsCheckbox}
+                                    setValidateAlert={setValidateAlert}
+                                    setCurrWidgetsDetails={
+                                      setCurrWidgetsDetails
+                                    }
+                                  />
+                                </React.Fragment>
+                              )
                             );
                           })}
-                        </React.Fragment>
-                      );
-                    })
-                  : xyPostion.map((data, ind) => {
-                      return (
-                        <React.Fragment key={ind}>
-                          {data.pageNumber === pageNumber &&
-                            data.pos.map((pos) => {
-                              return (
-                                pos && (
-                                  <React.Fragment key={pos.key}>
-                                    <Placeholder
-                                      pos={pos}
-                                      setIsPageCopy={setIsPageCopy}
-                                      setSignKey={setSignKey}
-                                      handleDeleteSign={handleDeleteSign}
-                                      setIsStamp={setIsStamp}
-                                      handleTabDrag={handleTabDrag}
-                                      handleStop={(event, dragElement) =>
-                                        handleStop(event, dragElement, pos.type)
-                                      }
-                                      handleSignYourselfImageResize={
-                                        handleSignYourselfImageResize
-                                      }
-                                      index={index}
-                                      xyPostion={xyPostion}
-                                      setXyPostion={setXyPostion}
-                                      pdfOriginalWidth={pdfOriginalWidth}
-                                      containerWH={containerWH}
-                                      setIsSignPad={setIsSignPad}
-                                      isShowBorder={true}
-                                      isSignYourself={true}
-                                      xPos={xPos}
-                                      yPos={yPos}
-                                      posWidth={posWidth}
-                                      posHeight={posHeight}
-                                      pdfDetails={pdfDetails[0]}
-                                      isDragging={isDragging}
-                                      setIsInitial={setIsInitial}
-                                      setWidgetType={setWidgetType}
-                                      setSelectWidgetId={setSelectWidgetId}
-                                      selectWidgetId={selectWidgetId}
-                                      handleUserName={handleUserName}
-                                      setIsCheckbox={setIsCheckbox}
-                                      setValidateAlert={setValidateAlert}
-                                      setCurrWidgetsDetails={
-                                        setCurrWidgetsDetails
-                                      }
-                                    />
-                                  </React.Fragment>
-                                )
-                              );
-                            })}
-                        </React.Fragment>
-                      );
-                    }))}
+                      </React.Fragment>
+                    );
+                  }))}
 
-            {/* this component for render pdf document is in middle of the component */}
+          {/* this component for render pdf document is in middle of the component */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
             <Document
               onLoadError={() => {
                 const load = {
@@ -677,6 +682,8 @@ function RenderPdf({
               {Array.from(new Array(numPages), (el, index) => (
                 <Page
                   key={index}
+                  width={containerWH.width}
+                  height={containerWH.height}
                   pageNumber={pageNumber}
                   renderAnnotationLayer={false}
                   renderTextLayer={false}
@@ -687,7 +694,8 @@ function RenderPdf({
               ))}
             </Document>
           </div>
-        </RSC>
+        </div>
+        // </RSC>
       )}
     </>
   );

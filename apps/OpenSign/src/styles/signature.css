@@ -163,7 +163,7 @@
   background: white;
   transition-duration: 0.4s;
   cursor: all-scroll;
-  width: 150px;
+  width: 'auto';
   height: 30px;
   color: black;
 }
@@ -452,7 +452,11 @@
   overflow: hidden !important;
   text-overflow: ellipsis;
 }
-
+.user{
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+}
 .disabled {
   opacity: 0.5;
   /* Example: reduce opacity to visually indicate disabled state */
@@ -513,16 +517,16 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background-color: #ebebeb;
+  /* background-color: #ebebeb; */
   position: "relative";
 }
 
 
 .signerComponent {
   /* box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px; */
-  width: 180px;
+  /* width: 180px; */
   background-color: white;
-  height: 100%;
+ 
 }
 
 .modalBody {
@@ -531,9 +535,10 @@
 }
 
 .signLayoutContainer1 {
-  padding: 30px;
+  padding: 15px;
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
+  /* justify-content: start; */
   align-items: center;
 }
 
@@ -840,9 +845,9 @@ option {
     flex-direction: column;
   }
 
-  .signerComponent {
+  /* .signerComponent {
     display: none;
-  }
+  } */
 
   .preBtn1 {
     display: none;

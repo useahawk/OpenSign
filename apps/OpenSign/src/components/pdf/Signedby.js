@@ -10,13 +10,9 @@ function Signedby({ pdfDetails }) {
   return (
     <div className="signerComponent">
       <div
-        style={{
-          background: themeColor,
-          color: "white"
-        }}
-        className="signedStyle"
+        className={`bg-[${themeColor}] p-[5px] text-[15px] text-white  2xl:text-[30px]`}
       >
-        Signed By
+        <span>Signed By</span>
       </div>
       <div style={{ marginTop: "2px", background: "white" }}>
         <div
@@ -28,32 +24,22 @@ function Signedby({ pdfDetails }) {
           }}
         >
           <div
-            className="signerStyle"
-            style={{
-              background: "#abd1d0",
-              width: 20,
-              height: 20,
-              display: "flex",
-              borderRadius: 30 / 2,
-              justifyContent: "center",
-              alignItems: "center",
-              marginRight: "20px",
-              marginTop: "5px"
-            }}
+            className="  bg-[#abd1d0] w-[10px] h-[10px] 2xl:w-[30px] 2xl:h-[30px] flex rounded-full ring-[1px] ring-offset-2 justify-center items-center
+            mr-[0px] mt-[7px] 2xl:mt-[12px]
+            "
           >
-            <span
-              style={{
-                fontSize: "8px",
-                textAlign: "center",
-                fontWeight: "bold"
-              }}
-            >
+            <span className="text-[8px] text-center font-medium 2xl:text-[20px]">
               {getFirstLetter(pdfDetails.ExtUserPtr.Name)}
             </span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span className="userName">{pdfDetails.ExtUserPtr.Name}</span>
-            <span className="useEmail">{pdfDetails.ExtUserPtr.Email}</span>
+
+          <div className="flex flex-col ">
+            <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[90%]  2xl:text-[28px]">
+              {pdfDetails.ExtUserPtr.Name}
+            </span>
+            <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px]  text-[#424242] w-[90%]  2xl:text-[20px]">
+              {pdfDetails.ExtUserPtr.Email}{" "}
+            </span>
           </div>
         </div>
       </div>
