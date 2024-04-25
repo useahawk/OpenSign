@@ -803,7 +803,6 @@ option {
 }
 
 .labelTextArea {
-  font-size: 12px;
   border: 1px solid #007bff;
   outline: none;
   z-index: 999;

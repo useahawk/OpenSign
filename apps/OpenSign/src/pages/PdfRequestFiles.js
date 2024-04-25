@@ -64,7 +64,7 @@ function PdfRequestFiles() {
   const [defaultSignImg, setDefaultSignImg] = useState();
   const [isDocId, setIsDocId] = useState(false);
   const [pdfNewWidth, setPdfNewWidth] = useState();
-  const [pdfOriginalWidth, setPdfOriginalWidth] = useState();
+  const [pdfOriginalWH, setPdfOriginalWH] = useState();
   const [signerPos, setSignerPos] = useState([]);
   const [signerObjectId, setSignerObjectId] = useState();
   const [isUiLoading, setIsUiLoading] = useState(false);
@@ -73,6 +73,7 @@ function PdfRequestFiles() {
   const [isAlert, setIsAlert] = useState({ isShow: false, alertMessage: "" });
   const [unSignedWidgetId, setUnSignedWidgetId] = useState("");
   const [expiredDate, setExpiredDate] = useState("");
+  const [isResize, setIsResize] = useState(false);
   const [defaultSignAlert, setDefaultSignAlert] = useState({
     isShow: false,
     alertMessage: ""
@@ -100,6 +101,7 @@ function PdfRequestFiles() {
   const [isSubscriptionExpired, setIsSubscriptionExpired] = useState(false);
   const [extUserId, setExtUserId] = useState("");
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState("");
+  const [pdfRenderHeight, setPdfRenderHeight] = useState();
   const isHeader = useSelector((state) => state.showHeader);
   const divRef = useRef(null);
   const rowLevel =
@@ -129,11 +131,17 @@ function PdfRequestFiles() {
   }, []);
   useEffect(() => {
     if (divRef.current) {
+      setIsLoading({
+        isLoad: true
+      });
       const pdfWidth = pdfNewWidthFun(divRef);
       setPdfNewWidth(pdfWidth);
       setContainerWH({
         width: divRef.current.offsetWidth,
         height: divRef.current.offsetHeight
+      });
+      setIsLoading({
+        isLoad: false
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -422,6 +430,7 @@ function PdfRequestFiles() {
   //     return true;
   //   }
   // };
+
   //function for embed signature or image url in pdf
   async function embedWidgetsData() {
     // const validateSigning = checkSendInOrder();
@@ -572,10 +581,11 @@ function PdfRequestFiles() {
         const pdfBytes = await multiSignEmbed(
           pngUrl,
           pdfDoc,
-          pdfOriginalWidth,
+          pdfOriginalWH,
           isSignYourSelfFlow,
           containerWH
         );
+        //console.log("pdf", pdfBytes);
         //get ExistUserPtr object id of user class to get tenantDetails
         const objectId = pdfDetails?.[0]?.ExtUserPtr?.UserId?.objectId;
         //function for call to embed signature in pdf and get digital signature pdf
@@ -765,17 +775,17 @@ function PdfRequestFiles() {
 
   //function for get pdf page details
   const pageDetails = async (pdf) => {
-    const load = {
-      status: true
-    };
-    setPdfLoadFail(load);
     pdf.getPage(1).then((pdfPage) => {
       const pageWidth = pdfPage.view[2];
+      const pageHeight = pdfPage.view[3];
+      setPdfOriginalWH({ width: pageWidth, height: pageHeight });
 
-      setPdfOriginalWidth(pageWidth);
+      const load = {
+        status: true
+      };
+      setPdfLoadFail(load);
     });
   };
-
   //function for change page
   function changePage(offset) {
     setPageNumber((prevPageNumber) => prevPageNumber + offset);
@@ -895,7 +905,9 @@ function PdfRequestFiles() {
   };
 
   const checkSignerBackColor = (obj) => {
-    const data = signerPos.filter((data) => data.signerObjId === obj.objectId);
+    const data = signerPos?.filter(
+      (data) => data?.signerObjId === obj.objectId
+    );
     return data && data.length > 0 && data[0].blockColor;
   };
 
@@ -1286,7 +1298,7 @@ function PdfRequestFiles() {
                     {containerWH && (
                       <RenderPdf
                         pageNumber={pageNumber}
-                        pdfOriginalWidth={pdfOriginalWidth}
+                        pdfOriginalWH={pdfOriginalWH}
                         pdfNewWidth={pdfNewWidth}
                         setIsSignPad={setIsSignPad}
                         setIsStamp={setIsStamp}
@@ -1311,6 +1323,11 @@ function PdfRequestFiles() {
                         setSelectWidgetId={setSelectWidgetId}
                         selectWidgetId={selectWidgetId}
                         setCurrWidgetsDetails={setCurrWidgetsDetails}
+                        divRef={divRef}
+                        setPdfRenderHeight={setPdfRenderHeight}
+                        pdfRenderHeight={pdfRenderHeight}
+                        setIsResize={setIsResize}
+                        isResize={isResize}
                       />
                     )}
                   </div>
@@ -1318,119 +1335,120 @@ function PdfRequestFiles() {
 
                 {/* <div className="signerComponent"> */}
                 <div
-                  className={`h-100vh  w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
+                  className={`w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}
                 >
-                  {signedSigners.length > 0 && (
-                    <>
-                      <div
-                        style={{ backgroundColor: themeColor }}
-                        className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
-                      >
-                        <span> Signed by</span>
-                      </div>
-                      <div style={{ marginTop: "2px" }}>
-                        {signedSigners.map((obj, ind) => {
-                          return (
-                            <div
-                              className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
-                              style={{
-                                background: checkSignerBackColor(obj)
-                              }}
-                              key={ind}
-                            >
-                              <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
-                                <span className="text-[1.5vw]">
-                                  {getFirstLetter(obj.Name)}
-                                </span>
-                              </div>
+                  <div className={`max-h-screen`}>
+                    {signedSigners.length > 0 && (
+                      <>
+                        <div
+                          style={{ backgroundColor: themeColor }}
+                          className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+                        >
+                          <span> Signed by</span>
+                        </div>
+                        <div style={{ marginTop: "2px" }}>
+                          {signedSigners.map((obj, ind) => {
+                            return (
                               <div
+                                className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
                                 style={{
-                                  display: "flex",
-                                  flexDirection: "column"
+                                  background: checkSignerBackColor(obj)
                                 }}
+                                key={ind}
                               >
-                                <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
-                                  {obj.Name}
-                                </span>
-                                <span
-                                  className={
-                                    isHeader
-                                      ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
-                                      : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
-                                  }
+                                <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
+                                  <span className="text-[1.5vw] uppercase">
+                                    {getFirstLetter(obj.Name)}
+                                  </span>
+                                </div>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column"
+                                  }}
                                 >
-                                  {obj.Email}
-                                </span>
+                                  <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
+                                    {obj.Name}
+                                  </span>
+                                  <span
+                                    className={
+                                      isHeader
+                                        ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
+                                        : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
+                                    }
+                                  >
+                                    {obj.Email}
+                                  </span>
+                                </div>
+                                <hr />
                               </div>
-                              <hr />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
 
-                  {unsignedSigners.length > 0 && (
-                    <>
-                      <div
-                        style={{
-                          background: themeColor
-                        }}
-                        className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
-                      >
-                        <span>Yet to sign</span>
-                      </div>
-                      <div style={{ marginTop: "5px" }}>
-                        {unsignedSigners.map((obj, ind) => {
-                          return (
-                            <div
-                              className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
-                              style={{
-                                background: checkSignerBackColor(obj)
-                              }}
-                              key={ind}
-                            >
-                              <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
-                                <span className="text-[1.5vw]">
-                                  {getFirstLetter(obj.Name)}
-                                </span>
-                              </div>
+                    {unsignedSigners.length > 0 && (
+                      <>
+                        <div
+                          style={{
+                            background: themeColor
+                          }}
+                          className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+                        >
+                          <span>Yet to sign</span>
+                        </div>
+                        <div style={{ marginTop: "5px" }}>
+                          {unsignedSigners.map((obj, ind) => {
+                            return (
                               <div
+                                className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
                                 style={{
-                                  display: "flex",
-                                  flexDirection: "column"
+                                  background: checkSignerBackColor(obj)
                                 }}
+                                key={ind}
                               >
-                                <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
-                                  {obj.Name}
-                                </span>
-                                <span
-                                  className={
-                                    isHeader
-                                      ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
-                                      : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
-                                  }
+                                <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
+                                  <span className="text-[1.5vw] uppercase">
+                                    {getFirstLetter(obj.Name)}
+                                  </span>
+                                </div>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column"
+                                  }}
                                 >
-                                  {obj.Email}
-                                </span>
+                                  <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
+                                    {obj.Name}
+                                  </span>
+                                  <span
+                                    className={
+                                      isHeader
+                                        ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
+                                        : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
+                                    }
+                                  >
+                                    {obj.Email}
+                                  </span>
+                                </div>
+                                <hr />
                               </div>
-                              <hr />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                  {defaultSignImg && !alreadySign && (
-                    <DefaultSignature
-                      defaultSignImg={defaultSignImg}
-                      setDefaultSignImg={setDefaultSignImg}
-                      userObjectId={signerObjectId}
-                      setIsLoading={setIsLoading}
-                      xyPostion={signerPos}
-                      setDefaultSignAlert={setDefaultSignAlert}
-                    />
-                  )}
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                    {defaultSignImg && !alreadySign && (
+                      <DefaultSignature
+                        defaultSignImg={defaultSignImg}
+                        setDefaultSignImg={setDefaultSignImg}
+                        userObjectId={signerObjectId}
+                        xyPostion={signerPos}
+                        setDefaultSignAlert={setDefaultSignAlert}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

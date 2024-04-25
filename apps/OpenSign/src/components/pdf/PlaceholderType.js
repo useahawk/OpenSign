@@ -429,7 +429,7 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
           cols="50"
         />
       ) : (
@@ -532,7 +532,7 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
           cols="50"
         />
       ) : (
@@ -571,7 +571,7 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
           cols="50"
         />
       ) : (
@@ -610,7 +610,7 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
           cols="50"
         />
       ) : (
@@ -732,7 +732,7 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap" }}
+          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
           cols="50"
         />
       ) : (
@@ -804,7 +804,14 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap", overflow: "hidden" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            overflow: "hidden",
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            color: props.pos.options?.fontColor || "black"
+          }}
           cols="50"
         />
       );

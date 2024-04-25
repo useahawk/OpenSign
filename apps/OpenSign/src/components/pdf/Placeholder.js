@@ -293,12 +293,18 @@ function Placeholder(props) {
       props?.setShowDropdown(true);
     } else if (props.pos.type === "checkbox") {
       props?.setIsCheckbox(true);
+    } else if (props.pos.type === textWidget) {
+      props.handleTextSettingModal(true);
     } else {
-      props?.handleNameModal(true);
+      props?.handleNameModal && props?.handleNameModal(true);
     }
 
-    if (props.isPlaceholder && props.type !== textWidget) {
-      props.setUniqueId(props.data.Id);
+    if (props.data && props?.pos?.type !== textWidget) {
+      props.setSignerObjId(props?.data?.signerObjId);
+      props.setUniqueId(props?.data?.Id);
+    } else if (props.data && props.pos.type === textWidget) {
+      props.setTempSignerId(props.uniqueId);
+      props.setUniqueId(props?.data?.Id);
     }
     props.setSignKey(props.pos.key);
     props.setWidgetType(props.pos.type);
@@ -375,7 +381,9 @@ function Placeholder(props) {
         <>
           {(props.isPlaceholder || props.isSignYourself) && (
             <>
-              {props.pos.type === "checkbox" && props.isSignYourself ? (
+              {(props.pos.type === "checkbox" ||
+                props.pos.type === textWidget) &&
+              props.isSignYourself ? (
                 <i
                   onClick={(e) => {
                     e.stopPropagation();
@@ -395,9 +403,7 @@ function Placeholder(props) {
               ) : (
                 ((!props?.pos?.type && props.pos.isStamp) ||
                   (props?.pos?.type &&
-                    !["date", textWidget, "signature"].includes(
-                      props.pos.type
-                    ) &&
+                    !["date", "signature"].includes(props.pos.type) &&
                     !props.isSignYourself)) && (
                   <i
                     onClick={(e) => {
@@ -409,7 +415,11 @@ function Placeholder(props) {
                       handleOnClickSettingIcon();
                     }}
                     className="fa-solid fa-gear settingIcon"
-                    style={{ color: "#188ae2", right: "47px", top: "-19px" }}
+                    style={{
+                      color: "#188ae2",
+                      right: props?.pos?.type === textWidget ? "32px" : "47px",
+                      top: "-19px"
+                    }}
                   ></i>
                 )
               )}
@@ -647,7 +657,7 @@ function Placeholder(props) {
             props.setXyPostion,
             props.index,
             props.data && props.data.Id,
-            false
+            props.isResize
           );
       }}
       onClick={() => handleOnClickPlaceholder()}

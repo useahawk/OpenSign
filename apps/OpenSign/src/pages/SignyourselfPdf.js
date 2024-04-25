@@ -29,7 +29,9 @@ import {
   textWidget,
   getTenantDetails,
   checkIsSubscribed,
-  convertPdfArrayBuffer
+  convertPdfArrayBuffer,
+  fontsizeArr,
+  fontColorArr
 } from "../constant/Utils";
 import { useParams } from "react-router-dom";
 import Tour from "reactour";
@@ -64,11 +66,13 @@ function SignYourSelf() {
   const signRef = useRef(null);
   const dragRef = useRef(null);
   const [dragKey, setDragKey] = useState();
+  const [fontSize, setFontSize] = useState(11);
+  const [fontColor, setFontColor] = useState("black");
   const [signKey, setSignKey] = useState();
   const [imgWH, setImgWH] = useState({});
   const [isCeleb, setIsCeleb] = useState(false);
   const [pdfNewWidth, setPdfNewWidth] = useState();
-  const [pdfOriginalWidth, setPdfOriginalWidth] = useState();
+  const [pdfOriginalWH, setPdfOriginalWH] = useState();
   const [successEmail, setSuccessEmail] = useState(false);
   const imageRef = useRef(null);
   const [myInitial, setMyInitial] = useState("");
@@ -93,6 +97,7 @@ function SignYourSelf() {
   const [showAlreadySignDoc, setShowAlreadySignDoc] = useState({
     status: false
   });
+  const [isTextSetting, setIsTextSetting] = useState(false);
   const [currWidgetsDetails, setCurrWidgetsDetails] = useState({});
   const [isCheckbox, setIsCheckbox] = useState(false);
   const [widgetType, setWidgetType] = useState("");
@@ -115,10 +120,7 @@ function SignYourSelf() {
       isOver: !!monitor.isOver()
     })
   });
-  const isMobile = window.innerWidth < 767;
-
   const pdfRef = useRef();
-
   const [{ isDragSign }, dragSignature] = useDrag({
     type: "BOX",
     item: {
@@ -587,7 +589,7 @@ function SignYourSelf() {
       const pdfBytes = await multiSignEmbed(
         xyPostion,
         pdfDoc,
-        pdfOriginalWidth,
+        pdfOriginalWH,
         isSignYourSelfFlow,
         containerWH
       );
@@ -701,8 +703,8 @@ function SignYourSelf() {
     setPdfLoadFail(load);
     pdf.getPage(1).then((pdfPage) => {
       const pageWidth = pdfPage.view[2];
-
-      setPdfOriginalWidth(pageWidth);
+      const pageHeight = pdfPage.view[3];
+      setPdfOriginalWH({ width: pageWidth, height: pageHeight });
     });
   };
 
@@ -953,6 +955,40 @@ function SignYourSelf() {
     setCurrWidgetsDetails({});
     setIsCheckbox(false);
   };
+  const handleTextSettingModal = (value) => {
+    setIsTextSetting(value);
+  };
+  const handleSaveFontSize = () => {
+    const getPageNumer = xyPostion.filter(
+      (data) => data.pageNumber === pageNumber
+    );
+
+    if (getPageNumer.length > 0) {
+      const getXYdata = getPageNumer[0].pos;
+      const getPosData = getXYdata;
+      const addSignPos = getPosData.map((position) => {
+        if (position.key === signKey) {
+          return {
+            ...position,
+            options: {
+              ...position.options,
+              fontSize: fontSize,
+              fontColor: fontColor
+            }
+          };
+        }
+        return position;
+      });
+      const updateXYposition = xyPostion.map((obj, ind) => {
+        if (ind === index) {
+          return { ...obj, pos: addSignPos };
+        }
+        return obj;
+      });
+      setXyPostion(updateXYposition);
+      handleTextSettingModal(false);
+    }
+  };
   return (
     <DndProvider backend={HTML5Backend}>
       <Title title={"Self Sign"} />
@@ -1154,7 +1190,7 @@ function SignYourSelf() {
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
-                    pdfOriginalWidth={pdfOriginalWidth}
+                    pdfOriginalWH={pdfOriginalWH}
                     pdfNewWidth={pdfNewWidth}
                     drop={drop}
                     successEmail={successEmail}
@@ -1186,39 +1222,40 @@ function SignYourSelf() {
                     setIsCheckbox={setIsCheckbox}
                     setCurrWidgetsDetails={setCurrWidgetsDetails}
                     setValidateAlert={setValidateAlert}
+                    handleTextSettingModal={handleTextSettingModal}
                   />
                 )}
               </div>
             </div>
-            <div
-              className={`h-100vh  w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
-            >
-              {!isCompleted ? (
-                <div>
-                  <WidgetComponent
-                    dataTut="reactourFirst"
-                    pdfUrl={pdfUrl}
-                    dragSignature={dragSignature}
-                    signRef={signRef}
-                    handleDivClick={handleDivClick}
-                    handleMouseLeave={handleMouseLeave}
-                    isDragSign={isDragSign}
-                    themeColor={themeColor}
-                    dragStamp={dragStamp}
-                    dragRef={dragRef}
-                    isDragStamp={isDragStamp}
-                    handleAllDelete={handleAllDelete}
-                    xyPostion={xyPostion}
-                    isSignYourself={true}
-                    addPositionOfSignature={addPositionOfSignature}
-                    isMailSend={false}
-                  />
-                </div>
-              ) : (
-                <div>
-                  <Signedby pdfDetails={pdfDetails[0]} />
-                </div>
-              )}
+            <div className={`w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}>
+              <div className={`max-h-screen`}>
+                {!isCompleted ? (
+                  <div>
+                    <WidgetComponent
+                      dataTut="reactourFirst"
+                      pdfUrl={pdfUrl}
+                      dragSignature={dragSignature}
+                      signRef={signRef}
+                      handleDivClick={handleDivClick}
+                      handleMouseLeave={handleMouseLeave}
+                      isDragSign={isDragSign}
+                      themeColor={themeColor}
+                      dragStamp={dragStamp}
+                      dragRef={dragRef}
+                      isDragStamp={isDragStamp}
+                      handleAllDelete={handleAllDelete}
+                      xyPostion={xyPostion}
+                      isSignYourself={true}
+                      addPositionOfSignature={addPositionOfSignature}
+                      isMailSend={false}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <Signedby pdfDetails={pdfDetails[0]} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1251,6 +1288,57 @@ function SignYourSelf() {
             className="finishBtn cancelBtn"
           >
             Close
+          </button>
+        </div>
+      </ModalUi>
+      <ModalUi
+        headerColor={"#dc3545"}
+        isOpen={isTextSetting}
+        title={"Text field"}
+        handleClose={() => {
+          setIsTextSetting(false);
+        }}
+      >
+        <div style={{ height: "100%", padding: 20 }}>
+          <div className="flex items-center gap-4">
+            <span>Font size: </span>
+            <select
+              className="border-[1px] border-gray-300 px-[5px]"
+              value={fontSize}
+              onChange={(e) => setFontSize(e.target.value)}
+            >
+              {fontsizeArr.map((size, ind) => {
+                return (
+                  <option style={{ fontSize: "13px" }} value={size} key={ind}>
+                    {size}
+                  </option>
+                );
+              })}
+            </select>
+            <span>color: </span>
+            <select
+              value={fontColor}
+              onChange={(e) => setFontColor(e.target.value)}
+              className="border-[1px] border-gray-300 px-[2px] "
+            >
+              {fontColorArr.map((color, ind) => {
+                return (
+                  <option value={color} key={ind}>
+                    {color}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div className="h-[1px] bg-[#9f9f9f] w-full mt-[15px] mb-[15px]"></div>
+          <button
+            onClick={() => handleSaveFontSize()}
+            style={{ background: themeColor }}
+            type="button"
+            className="finishBtn "
+          >
+            save
           </button>
         </div>
       </ModalUi>

@@ -84,6 +84,7 @@ const TemplatePlaceholder = () => {
   const [blockColor, setBlockColor] = useState("");
   const [selectWidgetId, setSelectWidgetId] = useState("");
   const [isNameModal, setIsNameModal] = useState(false);
+  const [pdfRenderHeight, setPdfRenderHeight] = useState();
   const [pdfLoadFail, setPdfLoadFail] = useState({
     status: false,
     type: "load"
@@ -351,8 +352,9 @@ const TemplatePlaceholder = () => {
       if (signer) {
         const posZIndex = zIndex + 1;
         setZIndex(posZIndex);
-        const newWidth = containerWH.width;
-        const scale = pdfOriginalWidth / newWidth;
+        // const newWidth = containerWH.width;
+        // const scale = pdfOriginalWidth / newWidth;
+        const pdfRenderWidth = containerWH.width;
         const key = randomId();
         // let filterSignerPos = signerPos.filter(
         //   (data) => data.signerObjId === signerObjId
@@ -369,11 +371,13 @@ const TemplatePlaceholder = () => {
             isStamp:
               (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
             key: key,
-            scale: scale,
-            isMobile: isMobile,
+            // scale: scale,
+            // isMobile: isMobile,
             zIndex: posZIndex,
             type: dragTypeValue,
-            options: addWidgetOptions(dragTypeValue)
+            options: addWidgetOptions(dragTypeValue),
+            pdfRenderHeight: pdfRenderHeight,
+            pdfRenderWidth: pdfRenderWidth
           };
           dropData.push(dropObj);
           placeHolder = {
@@ -394,11 +398,13 @@ const TemplatePlaceholder = () => {
             isStamp:
               (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
             key: key,
-            scale: scale,
-            isMobile: isMobile,
+            // scale: scale,
+            // isMobile: isMobile,
             zIndex: posZIndex,
             type: item.text,
-            options: addWidgetOptions(dragTypeValue)
+            options: addWidgetOptions(dragTypeValue),
+            pdfRenderHeight: pdfRenderHeight,
+            pdfRenderWidth: pdfRenderWidth
           };
 
           dropData.push(dropObj);
@@ -1455,6 +1461,8 @@ const TemplatePlaceholder = () => {
                     selectWidgetId={selectWidgetId}
                     setIsCheckbox={setIsCheckbox}
                     handleNameModal={setIsNameModal}
+                    setPdfRenderHeight={setPdfRenderHeight}
+                    pdfRenderHeight={pdfRenderHeight}
                   />
                 )}
               </div>
@@ -1504,45 +1512,47 @@ const TemplatePlaceholder = () => {
               </div>
             ) : (
               <div
-                className={`h-100vh  w-[23%] bg-[#FFFFFF]  autoSignScroll max-h-[100vh]  `}
+                className={`w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}
               >
-                <SignerListPlace
-                  isMailSend={isMailSend}
-                  signerPos={signerPos}
-                  signersdata={signersdata}
-                  isSelectListId={isSelectListId}
-                  setSignerObjId={setSignerObjId}
-                  setRoleName={setRoleName}
-                  setIsSelectId={setIsSelectId}
-                  setContractName={setContractName}
-                  handleAddSigner={handleAddSigner}
-                  setUniqueId={setUniqueId}
-                  handleDeleteUser={handleDeleteUser}
-                  handleRoleChange={handleRoleChange}
-                  handleOnBlur={handleOnBlur}
-                  title={"Roles"}
-                  sendInOrder={pdfDetails[0]?.SendinOrder}
-                  setSignersData={setSignersData}
-                  blockColor={blockColor}
-                  setBlockColor={setBlockColor}
-                />
-                <div data-tut="reactourSecond">
-                  <WidgetComponent
+                <div className={`max-h-screen`}>
+                  <SignerListPlace
                     isMailSend={isMailSend}
-                    dragSignature={dragSignature}
-                    signRef={signRef}
-                    handleDivClick={handleDivClick}
-                    handleMouseLeave={handleMouseLeave}
-                    isDragSign={isDragSign}
-                    dragStamp={dragStamp}
-                    dragRef={dragRef}
-                    isDragStamp={isDragStamp}
-                    isSignYourself={false}
-                    addPositionOfSignature={addPositionOfSignature}
+                    signerPos={signerPos}
+                    signersdata={signersdata}
+                    isSelectListId={isSelectListId}
+                    setSignerObjId={setSignerObjId}
+                    setRoleName={setRoleName}
+                    setIsSelectId={setIsSelectId}
+                    setContractName={setContractName}
+                    handleAddSigner={handleAddSigner}
+                    setUniqueId={setUniqueId}
+                    handleDeleteUser={handleDeleteUser}
+                    handleRoleChange={handleRoleChange}
+                    handleOnBlur={handleOnBlur}
                     title={"Roles"}
-                    initial={true}
-                    isTemplateFlow={true}
+                    sendInOrder={pdfDetails[0]?.SendinOrder}
+                    setSignersData={setSignersData}
+                    blockColor={blockColor}
+                    setBlockColor={setBlockColor}
                   />
+                  <div data-tut="reactourSecond">
+                    <WidgetComponent
+                      isMailSend={isMailSend}
+                      dragSignature={dragSignature}
+                      signRef={signRef}
+                      handleDivClick={handleDivClick}
+                      handleMouseLeave={handleMouseLeave}
+                      isDragSign={isDragSign}
+                      dragStamp={dragStamp}
+                      dragRef={dragRef}
+                      isDragStamp={isDragStamp}
+                      isSignYourself={false}
+                      addPositionOfSignature={addPositionOfSignature}
+                      title={"Roles"}
+                      initial={true}
+                      isTemplateFlow={true}
+                    />
+                  </div>
                 </div>
               </div>
             )}

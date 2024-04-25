@@ -143,11 +143,9 @@ const RecipientList = (props) => {
             >
               <div className="flex flex-row items-center w-[100%]">
                 <div
-                  className={
-                    props.isHeader
-                      ? "w-[30px] h-[30px] 2xl:w-[50px] rounded-[15px]  2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px] md:hidden lg:block"
-                      : "w-[30px] h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]"
-                  }
+                  className={`${
+                    props.isHeader ? "md:hidden lg:block" : ""
+                  } w-[30px] h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center `}
                   style={{
                     background: obj?.blockColor
                       ? darkenColor(obj?.blockColor, 0.4)
@@ -173,23 +171,14 @@ const RecipientList = (props) => {
                   </span>
                 </div>
                 <div
-                  className={
-                    obj.Name
-                      ? "flex items-center flex-col"
-                      : "flex items-center flex-row"
-                  }
-                  style={{
-                    display: "flex",
-                    flexDirection: obj.Name ? "column" : "row",
-                    alignItems: "center"
-                  }}
+                  className={`${
+                    obj.Name ? "flex-col" : "flex-row"
+                  } flex items-center ml-[12px]`}
                 >
                   {obj.Name ? (
                     <span
                       className={
-                        props.isHeader
-                          ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
-                          : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
+                        "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
                       }
                     >
                       {obj.Name}

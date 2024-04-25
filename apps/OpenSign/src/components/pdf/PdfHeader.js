@@ -151,7 +151,6 @@ function Header({
       </PDFDownloadLink>
     );
   };
-  console.log("mobile", isMobile, isShowHeader);
   return (
     <div style={{ padding: "5px 0px 5px 0px" }} className="mobileHead">
       {isMobile && isShowHeader ? (

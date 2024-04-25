@@ -5,6 +5,8 @@ import React from "react";
 import { rgb } from "pdf-lib";
 import Parse from "parse";
 
+export const fontsizeArr = [7, 8, 9, 10, 11, 12, 13, 14, 15, 18];
+export const fontColorArr = ["red", "black", "blue"];
 export const isMobile = window.innerWidth < 767;
 export const textInputWidget = "text input";
 export const textWidget = "text";
@@ -183,10 +185,6 @@ export const handleImageResize = (
   signerId,
   showResize
 ) => {
-  // const filterSignerPos = signerPos.filter(
-  //   (data) => data.signerObjId === signerId
-  // );
-
   const filterSignerPos = signerPos.filter((data) => data.Id === signerId);
 
   if (filterSignerPos.length > 0) {
@@ -357,11 +355,11 @@ export const addWidgetOptions = (type) => {
       return {};
   }
 };
-export const getWidgetType = (item, marginLeft, isHeader) => {
+export const getWidgetType = (item, marginLeft) => {
   return (
     <>
-      <div
-        className="border-[1.5px] border-[#47a3ad] rounded-[3px] flex p-0 justify-between bg-[#FFFFFF]
+      {/* <div
+        className="border-[1.5px] border-[#47a3ad] rounded-[3px] flex flex-row p-0 justify-between items-center bg-[#FFFFFF]
         cursor-move w-auto h-[30px] 2xl:h-[70px] widgets"
         style={{
           boxShadow:
@@ -381,7 +379,7 @@ export const getWidgetType = (item, marginLeft, isHeader) => {
           <span
             className={
               isHeader
-                ? " font-[400] text-[15px] 2xl:text-[30px] text-black ml-[5px] md:hidden lg:block"
+                ? " font-[400] text-[15px] 2xl:text-[33px] text-black ml-[5px] md:hidden lg:block"
                 : " font-[400] text-[15px] 2xl:text-[33px] text-black ml-[5px] "
             }
           >
@@ -389,17 +387,45 @@ export const getWidgetType = (item, marginLeft, isHeader) => {
           </span>
         </div>
         <div
+        className={`flex w-[25px] 2xl:w-[50px] h-full  items-center justify-center `}
           style={{
             backgroundColor: themeColor,
-            padding: "0 5px",
-            display: "flex",
-            alignItems: "center"
+            // padding: "0 5px",
+            // display: "flex",
+            // alignItems: "center"
           }}
         >
           <i
-            style={{ fontSize: item.iconSize }}
-            className={`${item.icon}      text-[#FFFFFF] `}
+            //  style={{ fontSize: item.iconSize }}
+            className={`${item.icon}  text-sm 2xl:text-3xl text-[#FFFFFF] `}
           ></i>
+        </div>
+      </div> */}
+      <div
+        style={{ marginLeft: marginLeft && `${marginLeft}px` }}
+        className="flex h-[30px] w-full items-center justify-between rounded shadow border-[1.5px] border-[#47a3ad] 2xl:h-[70px] overflow-hidden"
+      >
+        <div className="flex items-center justify-center gap-1 lg:gap-2 ml-1 lg:ml-3">
+          <span className="text-[15px] 2xl:text-[30px] hidden md:inline-block">
+            <i
+              className={"fa-sharp fa-solid fa-grip-vertical "}
+              style={{ color: "#908d8d" }}
+            ></i>
+          </span>
+          <span className="text-[15px] 2xl:text-[35px] font-[400] text-black capitalize">
+            {item.type}
+          </span>
+        </div>
+        <div
+          style={{ backgroundColor: themeColor }}
+          className="flex h-full w-[25px] items-center justify-center 2xl:w-[50px]"
+        >
+          <span className="text-sm text-white 2xl:text-3xl">
+            <i
+              //  style={{ fontSize: item.iconSize }}
+              className={`${item.icon}   text-[#FFFFFF] `}
+            ></i>
+          </span>
         </div>
       </div>
     </>
@@ -1148,11 +1174,29 @@ export const onImageSelect = (event, setImgWH, setImage) => {
   };
 };
 
+export const calculateResolutionWidth = (
+  posWidth,
+  pdfRenderWidth,
+  containerWidth
+) => {
+  const calculatePercentageY = (posWidth / pdfRenderWidth) * 100;
+  let pixelWidth = (calculatePercentageY * containerWidth) / 100;
+  return pixelWidth;
+};
+export const calculateResolutionHeight = (
+  posHeight,
+  pdfRenderHeight,
+  pdfTotalHeight
+) => {
+  const calculatePercentageH = (posHeight / pdfRenderHeight) * 100;
+  let pixelHeight = (calculatePercentageH * pdfTotalHeight) / 100;
+  return pixelHeight;
+};
 //function for embed multiple signature using pdf-lib
 export const multiSignEmbed = async (
   pngUrl,
   pdfDoc,
-  pdfOriginalWidth,
+  pdfOriginalWH,
   signyourself,
   containerWH
 ) => {
@@ -1171,7 +1215,8 @@ export const multiSignEmbed = async (
       updateItem = item.pos;
     }
     const newWidth = containerWH.width;
-    const scale = isMobile ? pdfOriginalWidth / newWidth : 1;
+    const scale = pdfOriginalWH.width / newWidth;
+    // isMobile ? pdfOriginalWidth / newWidth : 1;
     const pageNo = item.pageNumber;
     const imgUrlList = updateItem;
     const pages = pdfDoc.getPages();
@@ -1218,21 +1263,30 @@ export const multiSignEmbed = async (
         }
       }
       let scaleWidth, scaleHeight;
-      scaleWidth = placeholderWidth(position, scale, signyourself);
-      scaleHeight = placeholderHeight(position, scale, signyourself);
-
+      scaleWidth = placeholderWidth(
+        position,
+        scale,
+        signyourself,
+        pdfOriginalWH
+      );
+      scaleHeight = placeholderHeight(
+        position,
+        scale,
+        signyourself,
+        pdfOriginalWH.height
+      );
       const xPos = (pos) => {
         const resizePos = pos.xPosition;
-
+        let pixelX;
+        if (!pos.scale) {
+          const calculatePercentageX = (resizePos / pos.pdfRenderWidth) * 100;
+          pixelX = (calculatePercentageX * pdfOriginalWH.width) / 100;
+        }
         if (signyourself) {
-          if (isMobile) {
-            return resizePos * scale;
-          } else {
-            return resizePos;
-          }
+          return resizePos * scale;
         } else {
           //checking both condition mobile and desktop view
-          if (isMobile) {
+          if (isMobile && pos.scale) {
             //if pos.isMobile false -- placeholder saved from desktop view then handle position in mobile view divided by scale
             if (pos.isMobile) {
               const x = resizePos * (pos.scale / scale);
@@ -1243,11 +1297,13 @@ export const multiSignEmbed = async (
             }
           } else {
             //else if pos.isMobile true -- placeholder saved from mobile or tablet view then handle position in desktop view divide by scale
-            if (pos.isMobile) {
+            if (pos.isMobile && pos.scale) {
               const x = resizePos * pos.scale;
               return x;
-            } else {
+            } else if (pos.scale) {
               return resizePos;
+            } else {
+              return pixelX;
             }
           }
         }
@@ -1255,6 +1311,12 @@ export const multiSignEmbed = async (
 
       const yPos = (pos, ind, labelDefaultHeight) => {
         const resizePos = pos.yPosition;
+        let pixelY;
+        if (!pos.scale) {
+          const calculatePercentageY = (resizePos / pos.pdfRenderHeight) * 100;
+          pixelY = (calculatePercentageY * pdfOriginalWH.height) / 100;
+        }
+
         let newUpdateHeight = labelDefaultHeight
           ? labelDefaultHeight
           : scaleHeight;
@@ -1278,23 +1340,23 @@ export const multiSignEmbed = async (
             // return page.getHeight() - resizePos * scale - scaleHeight;
           } else {
             if (ind && ind > 0 && position.type === "checkbox") {
-              return page.getHeight() - resizePos - newHeight;
+              return page.getHeight() - resizePos * scale - newHeight;
             } else if (!ind && position.type === "checkbox") {
-              return page.getHeight() - resizePos - 10;
+              return page.getHeight() - resizePos * scale - 10;
             } else {
-              return page.getHeight() - resizePos - newHeight;
+              return page.getHeight() - resizePos * scale - newHeight;
             }
             // return page.getHeight() - resizePos - scaleHeight;
           }
         } else {
           //checking both condition mobile and desktop view
           const y = resizePos / scale;
-          if (isMobile) {
+          if (isMobile && pos.scale) {
             //if pos.isMobile false -- placeholder saved from desktop view then handle position in mobile view divided by scale
-            if (pos.isMobile) {
+            if (pos.isMobile && pos.scale) {
               const y = resizePos * (pos.scale / scale);
               return page.getHeight() - y * scale - newUpdateHeight;
-            } else {
+            } else if (pos.scale) {
               if (pos.IsResize) {
                 return page.getHeight() - y * scale - newUpdateHeight;
               } else {
@@ -1303,7 +1365,7 @@ export const multiSignEmbed = async (
             }
           } else {
             //else if pos.isMobile true -- placeholder saved from mobile or tablet view then handle position in desktop view divide by scale
-            if (pos.isMobile) {
+            if (pos.isMobile && pos.scale) {
               if (pos.IsResize) {
                 const y = resizePos * pos.scale;
                 return page.getHeight() - y - newUpdateHeight;
@@ -1311,13 +1373,21 @@ export const multiSignEmbed = async (
                 const y = resizePos * pos.scale;
                 return page.getHeight() - y - newUpdateHeight;
               }
-            } else {
+            } else if (pos.scale) {
               if (ind && ind > 0 && position.type === "checkbox") {
                 return page.getHeight() - resizePos - newHeight;
               } else if (position.type === "checkbox") {
                 return page.getHeight() - resizePos - 10;
               } else {
                 return page.getHeight() - resizePos - newHeight;
+              }
+            } else {
+              if (ind && ind > 0 && position.type === "checkbox") {
+                return page.getHeight() - pixelY - newHeight;
+              } else if (position.type === "checkbox") {
+                return page.getHeight() - pixelY - 10;
+              } else {
+                return page.getHeight() - pixelY - newHeight;
               }
             }
           }
@@ -1382,7 +1452,19 @@ export const multiSignEmbed = async (
         }
       } else if (widgetTypeExist) {
         const font = await pdfDoc.embedFont("Helvetica");
-        const fontSize = 12;
+        const fontSize = parseInt(position?.options?.fontSize) || 12;
+        console.log("fontsize", fontSize);
+        const color = position?.options?.fontColor;
+        let updateColorInRgb;
+        if (color === "red") {
+          updateColorInRgb = rgb(1, 0, 0);
+        } else if (color === "black") {
+          updateColorInRgb = rgb(0, 0, 0);
+        } else if (color === "blue") {
+          updateColorInRgb = rgb(0, 0, 1);
+        } else {
+          updateColorInRgb = rgb(0, 0, 0);
+        }
         let textContent;
         if (position?.options?.response) {
           textContent = position.options?.response;
@@ -1444,7 +1526,7 @@ export const multiSignEmbed = async (
         // Set initial y-coordinate for the first line
         const labelDefaultHeight = defaultWidthHeight(position.type).height;
 
-        let y = yPos(position, null, labelDefaultHeight) + 10;
+        let y = yPos(position, null, labelDefaultHeight);
         let x = xPos(position);
         //xPos(position)
         // Embed each line on the page
@@ -1453,7 +1535,7 @@ export const multiSignEmbed = async (
             x: x,
             y,
             font,
-            color: rgb(0, 0, 0),
+            color: updateColorInRgb,
             size: fontSize
           });
           y -= 18; // Adjust the line height as needed
@@ -1539,19 +1621,22 @@ export function urlValidator(url) {
   }
 }
 
-export const placeholderWidth = (pos, scale, signyourself) => {
+export const placeholderWidth = (pos, scale, signyourself, containerWH) => {
   let width;
   const defaultWidth = defaultWidthHeight(pos.type).width;
-  const posWidth = pos.Width ? pos.Width : defaultWidth;
-
+  const posWidth = pos.Width || defaultWidth;
+  let pixelWidth;
+  if (!pos.scale && !signyourself) {
+    pixelWidth = calculateResolutionWidth(
+      posWidth,
+      pos.pdfRenderWidth,
+      containerWH.width
+    );
+  }
   if (signyourself) {
-    if (isMobile) {
-      return posWidth * scale;
-    } else {
-      return posWidth;
-    }
+    return posWidth * scale;
   } else {
-    if (isMobile) {
+    if (isMobile && pos.scale) {
       if (pos.isMobile) {
         width = posWidth ? posWidth * scale : defaultWidth * scale;
         return width;
@@ -1565,7 +1650,7 @@ export const placeholderWidth = (pos, scale, signyourself) => {
         }
       }
     } else {
-      if (pos.isMobile) {
+      if (pos.isMobile && pos.scale) {
         if (pos.IsResize) {
           width = posWidth ? posWidth : defaultWidth;
           return width;
@@ -1574,25 +1659,41 @@ export const placeholderWidth = (pos, scale, signyourself) => {
 
           return width;
         }
-      } else {
-        width = posWidth ? posWidth : defaultWidth;
+      } else if (pos.scale) {
+        width = posWidth;
         return width;
+      } else {
+        return pixelWidth;
       }
     }
   }
 };
-export const placeholderHeight = (pos, scale, signyourself) => {
+export const placeholderHeight = (
+  pos,
+  scale,
+  signyourself,
+  pdfRenderHeight
+) => {
   let height;
   const posHeight = pos.Height;
   const defaultHeight = defaultWidthHeight(pos.type).height;
+  const posUpdateHeight = posHeight || defaultHeight;
+  let pixelHeight;
+  if (!pos.scale && !signyourself) {
+    pixelHeight = calculateResolutionHeight(
+      posUpdateHeight,
+      pos.pdfRenderHeight,
+      pdfRenderHeight
+    );
+  }
   if (signyourself) {
-    if (isMobile) {
-      return posHeight ? posHeight * scale : defaultHeight * scale;
-    } else {
-      return posHeight ? posHeight : defaultHeight;
-    }
+    // if (isMobile) {
+    return posUpdateHeight * scale;
+    // } else {
+    //   return posHeight ? posHeight : defaultHeight;
+    // }
   } else {
-    if (isMobile) {
+    if (isMobile && pos.scale) {
       if (pos.isMobile) {
         height = posHeight ? posHeight * scale : defaultHeight * scale;
         return height;
@@ -1607,7 +1708,7 @@ export const placeholderHeight = (pos, scale, signyourself) => {
         }
       }
     } else {
-      if (pos.isMobile) {
+      if (pos.isMobile && pos.scale) {
         if (pos.IsResize) {
           height = posHeight ? posHeight : defaultHeight;
           return height;
@@ -1617,9 +1718,11 @@ export const placeholderHeight = (pos, scale, signyourself) => {
             : defaultHeight * pos.scale;
           return height;
         }
-      } else {
+      } else if (pos.scale) {
         height = posHeight ? posHeight : defaultHeight;
         return height;
+      } else {
+        return pixelHeight;
       }
     }
   }
