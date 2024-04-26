@@ -355,7 +355,7 @@ export const addWidgetOptions = (type) => {
       return {};
   }
 };
-export const getWidgetType = (item, marginLeft) => {
+export const getWidgetType = (item, marginLeft, isHeader) => {
   return (
     <>
       {/* <div
@@ -406,13 +406,21 @@ export const getWidgetType = (item, marginLeft) => {
         className="flex h-[30px] w-full items-center justify-between rounded shadow border-[1.5px] border-[#47a3ad] 2xl:h-[70px] overflow-hidden"
       >
         <div className="flex items-center justify-center gap-1 lg:gap-2 ml-1 lg:ml-3">
-          <span className="text-[15px] 2xl:text-[30px] hidden md:inline-block">
+          <span
+            className={`${
+              isHeader && "md:hidden lg:inline-block"
+            }text-[15px] 2xl:text-[30px] hidden md:inline-block`}
+          >
             <i
               className={"fa-sharp fa-solid fa-grip-vertical "}
               style={{ color: "#908d8d" }}
             ></i>
           </span>
-          <span className="text-[15px] 2xl:text-[35px] font-[400] text-black capitalize">
+          <span
+            className={`${
+              isHeader && "md:text-[10px] lg:text-[15px] 2xl:text-[35px] "
+            } text-[15px] 2xl:text-[35px] font-[400] text-black capitalize`}
+          >
             {item.type}
           </span>
         </div>

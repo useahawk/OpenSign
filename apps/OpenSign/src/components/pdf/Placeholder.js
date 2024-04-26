@@ -5,7 +5,6 @@ import { Rnd } from "react-rnd";
 import {
   defaultWidthHeight,
   handleCopyNextToWidget,
-  isMobile,
   onChangeInput,
   radioButtonWidget,
   textInputWidget,
@@ -275,6 +274,7 @@ function Placeholder(props) {
     }
   };
   const handleOnClickPlaceholder = () => {
+    console.log("onclick widgets");
     props.setCurrWidgetsDetails && props.setCurrWidgetsDetails(props.pos);
     if (!props.isNeedSign) {
       props.setWidgetType(props.pos.type);
@@ -689,79 +689,78 @@ function Placeholder(props) {
           getCheckboxRenderWidth={getCheckboxRenderWidth}
         />
       )}
-      {isMobile ? (
-        <div
-          style={{
-            left: props.xPos(props.pos, props.isSignYourself),
-            top: props.yPos(props.pos, props.isSignYourself),
-            width:
-              props.pos.type === radioButtonWidget ||
-              props.pos.type === "checkbox"
-                ? "auto"
-                : props.posWidth(props.pos, props.isSignYourself),
-            //  "auto", //props.posWidth(props.pos, props.isSignYourself),
-            // height: props.posHeight(props.pos, props.isSignYourself),
-            height:
-              props.pos.type === radioButtonWidget ||
-              props.pos.type === "checkbox"
-                ? "auto"
-                : props.posHeight(props.pos, props.isSignYourself),
-            zIndex: "10"
-          }}
-          onTouchEnd={() => handleOnClickPlaceholder()}
-        >
-          {props.pos.key === props.selectWidgetId && <PlaceholderIcon />}
+      <div
+        className="lg:hidden sm:inline-block md:inline-block"
+        style={{
+          left: props.xPos(props.pos, props.isSignYourself),
+          top: props.yPos(props.pos, props.isSignYourself),
+          width:
+            props.pos.type === radioButtonWidget ||
+            props.pos.type === "checkbox"
+              ? "auto"
+              : props.posWidth(props.pos, props.isSignYourself),
+          //  "auto", //props.posWidth(props.pos, props.isSignYourself),
+          // height: props.posHeight(props.pos, props.isSignYourself),
+          height:
+            props.pos.type === radioButtonWidget ||
+            props.pos.type === "checkbox"
+              ? "auto"
+              : props.posHeight(props.pos, props.isSignYourself),
+          zIndex: "10"
+        }}
+        onTouchEnd={() => handleOnClickPlaceholder()}
+      >
+        {props.pos.key === props.selectWidgetId && <PlaceholderIcon />}
 
-          <PlaceholderType
-            pos={props.pos}
-            xyPostion={props.xyPostion}
-            index={props.index}
-            setXyPostion={props.setXyPostion}
-            data={props.data}
-            setSignKey={props.setSignKey}
-            isShowDropdown={props?.isShowDropdown}
-            isPlaceholder={props.isPlaceholder}
-            isSignYourself={props.isSignYourself}
-            signerObjId={props.signerObjId}
-            handleUserName={props.handleUserName}
-            setDraggingEnabled={setDraggingEnabled}
-            pdfDetails={props?.pdfDetails && props?.pdfDetails[0]}
-            isNeedSign={props.isNeedSign}
-            setSelectDate={setSelectDate}
-            selectDate={selectDate}
-            setValidateAlert={props.setValidateAlert}
-            setStartDate={setStartDate}
-            startDate={startDate}
-            handleSaveDate={handleSaveDate}
-          />
-        </div>
-      ) : (
-        <>
-          {props.pos.key === props.selectWidgetId && <PlaceholderIcon />}
-          <PlaceholderType
-            pos={props.pos}
-            xyPostion={props.xyPostion}
-            index={props.index}
-            setXyPostion={props.setXyPostion}
-            data={props.data}
-            setSignKey={props.setSignKey}
-            isShowDropdown={props?.isShowDropdown}
-            isPlaceholder={props.isPlaceholder}
-            isSignYourself={props.isSignYourself}
-            signerObjId={props.signerObjId}
-            handleUserName={props.handleUserName}
-            setDraggingEnabled={setDraggingEnabled}
-            pdfDetails={props?.pdfDetails && props?.pdfDetails[0]}
-            isNeedSign={props.isNeedSign}
-            setSelectDate={setSelectDate}
-            selectDate={selectDate}
-            setValidateAlert={props.setValidateAlert}
-            setStartDate={setStartDate}
-            startDate={startDate}
-            handleSaveDate={handleSaveDate}
-          />
-        </>
-      )}
+        <PlaceholderType
+          pos={props.pos}
+          xyPostion={props.xyPostion}
+          index={props.index}
+          setXyPostion={props.setXyPostion}
+          data={props.data}
+          setSignKey={props.setSignKey}
+          isShowDropdown={props?.isShowDropdown}
+          isPlaceholder={props.isPlaceholder}
+          isSignYourself={props.isSignYourself}
+          signerObjId={props.signerObjId}
+          handleUserName={props.handleUserName}
+          setDraggingEnabled={setDraggingEnabled}
+          pdfDetails={props?.pdfDetails && props?.pdfDetails[0]}
+          isNeedSign={props.isNeedSign}
+          setSelectDate={setSelectDate}
+          selectDate={selectDate}
+          setValidateAlert={props.setValidateAlert}
+          setStartDate={setStartDate}
+          startDate={startDate}
+          handleSaveDate={handleSaveDate}
+        />
+      </div>
+
+      <div className="hidden lg:inline-block">
+        {props.pos.key === props.selectWidgetId && <PlaceholderIcon />}
+        <PlaceholderType
+          pos={props.pos}
+          xyPostion={props.xyPostion}
+          index={props.index}
+          setXyPostion={props.setXyPostion}
+          data={props.data}
+          setSignKey={props.setSignKey}
+          isShowDropdown={props?.isShowDropdown}
+          isPlaceholder={props.isPlaceholder}
+          isSignYourself={props.isSignYourself}
+          signerObjId={props.signerObjId}
+          handleUserName={props.handleUserName}
+          setDraggingEnabled={setDraggingEnabled}
+          pdfDetails={props?.pdfDetails && props?.pdfDetails[0]}
+          isNeedSign={props.isNeedSign}
+          setSelectDate={setSelectDate}
+          selectDate={selectDate}
+          setValidateAlert={props.setValidateAlert}
+          setStartDate={setStartDate}
+          startDate={startDate}
+          handleSaveDate={handleSaveDate}
+        />
+      </div>
     </Rnd>
   );
 }

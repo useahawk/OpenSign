@@ -35,6 +35,7 @@ import Title from "../components/Title";
 import DefaultSignature from "../components/pdf/DefaultSignature";
 import ModalUi from "../primitives/ModalUi";
 import { useSelector } from "react-redux";
+import SignerListComponent from "../components/pdf/SignerListComponent";
 
 function PdfRequestFiles() {
   const { docId } = useParams();
@@ -790,11 +791,6 @@ function PdfRequestFiles() {
   function changePage(offset) {
     setPageNumber((prevPageNumber) => prevPageNumber + offset);
   }
-
-  const getFirstLetter = (name) => {
-    const firstLetter = name.charAt(0);
-    return firstLetter;
-  };
   //function for image upload or update
   const onImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -1349,38 +1345,13 @@ function PdfRequestFiles() {
                         <div style={{ marginTop: "2px" }}>
                           {signedSigners.map((obj, ind) => {
                             return (
-                              <div
-                                className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
-                                style={{
-                                  background: checkSignerBackColor(obj)
-                                }}
-                                key={ind}
-                              >
-                                <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
-                                  <span className="text-[1.5vw] uppercase">
-                                    {getFirstLetter(obj.Name)}
-                                  </span>
-                                </div>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column"
-                                  }}
-                                >
-                                  <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
-                                    {obj.Name}
-                                  </span>
-                                  <span
-                                    className={
-                                      isHeader
-                                        ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
-                                        : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
-                                    }
-                                  >
-                                    {obj.Email}
-                                  </span>
-                                </div>
-                                <hr />
+                              <div key={ind}>
+                                <SignerListComponent
+                                  ind={ind}
+                                  obj={obj}
+                                  checkSignerBackColor={checkSignerBackColor}
+                                  isMenu={isHeader}
+                                />
                               </div>
                             );
                           })}
@@ -1401,38 +1372,13 @@ function PdfRequestFiles() {
                         <div style={{ marginTop: "5px" }}>
                           {unsignedSigners.map((obj, ind) => {
                             return (
-                              <div
-                                className="flex flex-row items-center py-[10px] 2xl:py-[20px] "
-                                style={{
-                                  background: checkSignerBackColor(obj)
-                                }}
-                                key={ind}
-                              >
-                                <div className="w-[30px] bg-[#abd1d0]  h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center mr-[12px]">
-                                  <span className="text-[1.5vw] uppercase">
-                                    {getFirstLetter(obj.Name)}
-                                  </span>
-                                </div>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column"
-                                  }}
-                                >
-                                  <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[5vw] lg:w-[10vw] 2xl:w-[250px]  2xl:text-[25px]">
-                                    {obj.Name}
-                                  </span>
-                                  <span
-                                    className={
-                                      isHeader
-                                        ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px] md:hidden lg:block"
-                                        : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
-                                    }
-                                  >
-                                    {obj.Email}
-                                  </span>
-                                </div>
-                                <hr />
+                              <div key={ind}>
+                                <SignerListComponent
+                                  ind={ind}
+                                  obj={obj}
+                                  checkSignerBackColor={checkSignerBackColor}
+                                  isMenu={isHeader}
+                                />
                               </div>
                             );
                           })}

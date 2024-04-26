@@ -1186,7 +1186,7 @@ function SignYourSelf() {
                 isCompleted={isCompleted}
               />
 
-              <div ref={divRef} data-tut="reactourSecond" className="h-[95%]">
+              <div ref={divRef} data-tut="reactourSecond" className="h-[95%] ">
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
@@ -1227,7 +1227,9 @@ function SignYourSelf() {
                 )}
               </div>
             </div>
-            <div className={`w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}>
+            <div
+              className={` md:w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}
+            >
               <div className={`max-h-screen`}>
                 {!isCompleted ? (
                   <div>
