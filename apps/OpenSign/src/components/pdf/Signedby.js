@@ -10,7 +10,8 @@ function Signedby({ pdfDetails }) {
   return (
     <div className="signerComponent">
       <div
-        className={`bg-[${themeColor}] p-[5px] text-[15px] text-white  2xl:text-[30px]`}
+        style={{ background: themeColor }}
+        className={` p-[5px] text-[15px] text-white  2xl:text-[30px]`}
       >
         <span>Signed By</span>
       </div>
@@ -24,16 +25,16 @@ function Signedby({ pdfDetails }) {
           }}
         >
           <div
-            className="  bg-[#abd1d0] w-[10px] h-[10px] 2xl:w-[30px] 2xl:h-[30px] flex rounded-full ring-[1px] ring-offset-2 justify-center items-center
+            className="  bg-[#abd1d0] w-[15px] h-[15px] 2xl:w-[30px] 2xl:h-[30px] flex rounded-full ring-[1px] ring-offset-1 justify-center items-center
             mr-[0px] mt-[7px] 2xl:mt-[12px]
             "
           >
-            <span className="text-[8px] text-center font-medium 2xl:text-[20px]">
+            <span className="text-[10px] text-center font-medium 2xl:text-[20px] uppercase">
               {getFirstLetter(pdfDetails.ExtUserPtr.Name)}
             </span>
           </div>
 
-          <div className="flex flex-col ">
+          <div className="flex flex-col ml-[10px]">
             <span className="whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[90%]  2xl:text-[28px]">
               {pdfDetails.ExtUserPtr.Name}
             </span>
