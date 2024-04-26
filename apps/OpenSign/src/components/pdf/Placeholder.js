@@ -293,7 +293,16 @@ function Placeholder(props) {
       props?.setShowDropdown(true);
     } else if (props.pos.type === "checkbox") {
       props?.setIsCheckbox(true);
-    } else if (props.pos.type === textWidget) {
+    } else if (
+      [
+        textInputWidget,
+        textWidget,
+        "name",
+        "company",
+        "job title",
+        "email"
+      ].includes(props.pos.type)
+    ) {
       props.handleTextSettingModal(true);
     } else {
       props?.handleNameModal && props?.handleNameModal(true);
@@ -381,9 +390,15 @@ function Placeholder(props) {
         <>
           {(props.isPlaceholder || props.isSignYourself) && (
             <>
-              {(props.pos.type === "checkbox" ||
-                props.pos.type === textWidget) &&
-              props.isSignYourself ? (
+              {[
+                "checkbox",
+                textInputWidget,
+                textWidget,
+                "name",
+                "company",
+                "job title",
+                "email"
+              ].includes(props.pos.type) && props.isSignYourself ? (
                 <i
                   onClick={(e) => {
                     e.stopPropagation();

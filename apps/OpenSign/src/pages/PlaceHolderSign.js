@@ -34,9 +34,7 @@ import {
   replaceMailVaribles,
   copytoData,
   fetchSubscription,
-  convertPdfArrayBuffer,
-  fontsizeArr,
-  fontColorArr
+  convertPdfArrayBuffer
 } from "../constant/Utils";
 import RenderPdf from "../components/pdf/RenderPdf";
 import { useNavigate } from "react-router-dom";
@@ -52,6 +50,7 @@ import { EmailBody } from "../components/pdf/EmailBody";
 import Upgrade from "../primitives/Upgrade";
 import Alert from "../primitives/Alert";
 import { useSelector } from "react-redux";
+import TextFontSetting from "../components/pdf/TextFontSetting";
 
 function PlaceHolderSign() {
   const editorRef = useRef();
@@ -73,8 +72,8 @@ function PlaceHolderSign() {
   const [isSend, setIsSend] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAddSigner, setIsAddSigner] = useState(false);
-  const [fontSize, setFontSize] = useState(11);
-  const [fontColor, setFontColor] = useState("black");
+  const [fontSize, setFontSize] = useState();
+  const [fontColor, setFontColor] = useState();
   const [isLoading, setIsLoading] = useState({
     isLoad: true,
     message: "This might take some time"
@@ -617,6 +616,18 @@ function PlaceHolderSign() {
           setShowDropdown(true);
         } else if (dragTypeValue === "checkbox") {
           setIsCheckbox(true);
+        } else if (
+          [
+            textInputWidget,
+            textWidget,
+            "name",
+            "company",
+            "job title",
+            "email"
+          ].includes(dragTypeValue)
+        ) {
+          setFontSize(12);
+          setFontColor("black");
         } else if (dragTypeValue === radioButtonWidget) {
           setIsRadio(true);
         }
@@ -1649,8 +1660,13 @@ function PlaceHolderSign() {
         setSignerPos(newUpdateSigner);
       }
     }
-    setUniqueId(tempSignerId);
-    setTempSignerId("");
+    setFontSize();
+    setFontColor();
+    if (currWidgetsDetails.type === textWidget) {
+      setUniqueId(tempSignerId);
+      setTempSignerId("");
+    }
+
     handleTextSettingModal(false);
   };
   const handleTextSettingModal = (value) => {
@@ -2180,57 +2196,16 @@ function PlaceHolderSign() {
             </button>
           </div>
         </ModalUi>
-        <ModalUi
-          headerColor={"#dc3545"}
-          isOpen={isTextSetting}
-          title={"Text field"}
-          handleClose={() => {
-            setIsTextSetting(false);
-          }}
-        >
-          <div style={{ height: "100%", padding: 20 }}>
-            <div className="flex items-center gap-4">
-              <span>Font size: </span>
-              <select
-                className="border-[1px] border-gray-300 px-[5px]"
-                value={fontSize}
-                onChange={(e) => setFontSize(e.target.value)}
-              >
-                {fontsizeArr.map((size, ind) => {
-                  return (
-                    <option style={{ fontSize: "13px" }} value={size} key={ind}>
-                      {size}
-                    </option>
-                  );
-                })}
-              </select>
-              <span>color: </span>
-              <select
-                value={fontColor}
-                onChange={(e) => setFontColor(e.target.value)}
-                className="border-[1px] border-gray-300 px-[2px] "
-              >
-                {fontColorArr.map((color, ind) => {
-                  return (
-                    <option value={color} key={ind}>
-                      {color}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div className="h-[1px] bg-[#9f9f9f] w-full mt-[15px] mb-[15px]"></div>
-            <button
-              onClick={() => handleSaveFontSize()}
-              style={{ background: themeColor }}
-              type="button"
-              className="finishBtn "
-            >
-              save
-            </button>
-          </div>
-        </ModalUi>
+        <TextFontSetting
+          isTextSetting={isTextSetting}
+          setIsTextSetting={setIsTextSetting}
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          fontColor={fontColor}
+          setFontColor={setFontColor}
+          handleSaveFontSize={handleSaveFontSize}
+          currWidgetsDetails={currWidgetsDetails}
+        />
 
         <LinkUserModal
           handleAddUser={handleAddUser}

@@ -30,8 +30,7 @@ import {
   getTenantDetails,
   checkIsSubscribed,
   convertPdfArrayBuffer,
-  fontsizeArr,
-  fontColorArr
+  textInputWidget
 } from "../constant/Utils";
 import { useParams } from "react-router-dom";
 import Tour from "reactour";
@@ -45,6 +44,7 @@ import Title from "../components/Title";
 import ModalUi from "../primitives/ModalUi";
 import DropdownWidgetOption from "../components/pdf/DropdownWidgetOption";
 import { useSelector } from "react-redux";
+import TextFontSetting from "../components/pdf/TextFontSetting";
 
 //For signYourself inProgress section signer can add sign and complete doc sign.
 function SignYourSelf() {
@@ -148,7 +148,6 @@ function SignYourSelf() {
     return object.pageNumber === pageNumber;
   });
   //   rowlevel={JSON.parse(localStorage.getItem("rowlevel"))}
-
   const rowLevel =
     localStorage.getItem("rowlevel") &&
     JSON.parse(localStorage.getItem("rowlevel"));
@@ -523,6 +522,18 @@ function SignYourSelf() {
       setIsInitial(true);
     } else if (dragTypeValue === "checkbox") {
       setIsCheckbox(true);
+    } else if (
+      [
+        textInputWidget,
+        textWidget,
+        "name",
+        "company",
+        "job title",
+        "email"
+      ].includes(dragTypeValue)
+    ) {
+      setFontSize(12);
+      setFontColor("black");
     }
     setWidgetType(dragTypeValue);
     setSelectWidgetId(key);
@@ -593,7 +604,7 @@ function SignYourSelf() {
         isSignYourSelfFlow,
         containerWH
       );
-      // console.log("pdf", pdfBytes);
+      //console.log("pdf", pdfBytes);
       //function for call to embed signature in pdf and get digital signature pdf
       await signPdfFun(pdfBytes, documentId);
     }
@@ -972,8 +983,8 @@ function SignYourSelf() {
             ...position,
             options: {
               ...position.options,
-              fontSize: fontSize,
-              fontColor: fontColor
+              fontSize: fontSize || currWidgetsDetails?.options?.fontSize,
+              fontColor: fontColor || currWidgetsDetails?.options?.fontColor
             }
           };
         }
@@ -986,6 +997,8 @@ function SignYourSelf() {
         return obj;
       });
       setXyPostion(updateXYposition);
+      setFontSize();
+      setFontColor();
       handleTextSettingModal(false);
     }
   };
@@ -1293,57 +1306,16 @@ function SignYourSelf() {
           </button>
         </div>
       </ModalUi>
-      <ModalUi
-        headerColor={"#dc3545"}
-        isOpen={isTextSetting}
-        title={"Text field"}
-        handleClose={() => {
-          setIsTextSetting(false);
-        }}
-      >
-        <div style={{ height: "100%", padding: 20 }}>
-          <div className="flex items-center gap-4">
-            <span>Font size: </span>
-            <select
-              className="border-[1px] border-gray-300 px-[5px]"
-              value={fontSize}
-              onChange={(e) => setFontSize(e.target.value)}
-            >
-              {fontsizeArr.map((size, ind) => {
-                return (
-                  <option style={{ fontSize: "13px" }} value={size} key={ind}>
-                    {size}
-                  </option>
-                );
-              })}
-            </select>
-            <span>color: </span>
-            <select
-              value={fontColor}
-              onChange={(e) => setFontColor(e.target.value)}
-              className="border-[1px] border-gray-300 px-[2px] "
-            >
-              {fontColorArr.map((color, ind) => {
-                return (
-                  <option value={color} key={ind}>
-                    {color}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div className="h-[1px] bg-[#9f9f9f] w-full mt-[15px] mb-[15px]"></div>
-          <button
-            onClick={() => handleSaveFontSize()}
-            style={{ background: themeColor }}
-            type="button"
-            className="finishBtn "
-          >
-            save
-          </button>
-        </div>
-      </ModalUi>
+      <TextFontSetting
+        isTextSetting={isTextSetting}
+        setIsTextSetting={setIsTextSetting}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        fontColor={fontColor}
+        setFontColor={setFontColor}
+        handleSaveFontSize={handleSaveFontSize}
+        currWidgetsDetails={currWidgetsDetails}
+      />
     </DndProvider>
   );
 }

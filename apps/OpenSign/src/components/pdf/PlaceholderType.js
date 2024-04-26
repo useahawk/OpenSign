@@ -429,14 +429,23 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            color: props.pos.options?.fontColor || "black"
+          }}
           cols="50"
         />
       ) : (
         <div
           style={{
             color: "black",
-            fontSize: calculateFontSize()
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            textAlign: "center"
           }}
         >
           <span>{type}</span>
@@ -532,14 +541,23 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            color: props.pos.options?.fontColor || "black"
+          }}
           cols="50"
         />
       ) : (
         <div
           style={{
             color: "black",
-            fontSize: calculateFontSize()
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            textAlign: "center"
           }}
         >
           <span>{type}</span>
@@ -571,14 +589,23 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            color: props.pos.options?.fontColor || "black"
+          }}
           cols="50"
         />
       ) : (
         <div
           style={{
             color: "black",
-            fontSize: calculateFontSize()
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            textAlign: "center"
           }}
         >
           <span>{type}</span>
@@ -610,14 +637,23 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            color: props.pos.options?.fontColor || "black"
+          }}
           cols="50"
         />
       ) : (
         <div
           style={{
             color: "black",
-            fontSize: calculateFontSize()
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            textAlign: "center"
           }}
         >
           <span>{type}</span>
@@ -732,14 +768,23 @@ function PlaceholderType(props) {
               ? "labelTextArea labelWidthMobile"
               : "labelTextArea labelWidthDesktop"
           }
-          style={{ whiteSpace: "pre-wrap", fontSize: "12px" }}
+          style={{
+            whiteSpace: "pre-wrap",
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            color: props.pos.options?.fontColor || "black"
+          }}
           cols="50"
         />
       ) : (
         <div
           style={{
             color: "black",
-            fontSize: calculateFontSize()
+            fontSize: props.pos.options?.fontSize
+              ? props.pos.options?.fontSize + "px"
+              : "12px",
+            textAlign: "center"
           }}
         >
           <span>{type}</span>

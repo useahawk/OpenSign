@@ -37,6 +37,7 @@ import PlaceholderCopy from "../components/pdf/PlaceholderCopy";
 import TourContentWithBtn from "../primitives/TourContentWithBtn";
 import DropdownWidgetOption from "../components/pdf/DropdownWidgetOption";
 import { useSelector } from "react-redux";
+import TextFontSetting from "../components/pdf/TextFontSetting";
 const TemplatePlaceholder = () => {
   const navigate = useNavigate();
   const isHeader = useSelector((state) => state.showHeader);
@@ -85,6 +86,7 @@ const TemplatePlaceholder = () => {
   const [selectWidgetId, setSelectWidgetId] = useState("");
   const [isNameModal, setIsNameModal] = useState(false);
   const [pdfRenderHeight, setPdfRenderHeight] = useState();
+  const [isTextSetting, setIsTextSetting] = useState(false);
   const [pdfLoadFail, setPdfLoadFail] = useState({
     status: false,
     type: "load"
@@ -149,6 +151,8 @@ const TemplatePlaceholder = () => {
   const [isCheckbox, setIsCheckbox] = useState(false);
   const [widgetName, setWidgetName] = useState(false);
   const [isAddRole, setIsAddRole] = useState(false);
+  const [fontSize, setFontSize] = useState();
+  const [fontColor, setFontColor] = useState();
   const senderUser =
     localStorage.getItem(
       `Parse/${localStorage.getItem("parseAppId")}/currentUser`
@@ -478,6 +482,13 @@ const TemplatePlaceholder = () => {
           setShowDropdown(true);
         } else if (dragTypeValue === "checkbox") {
           setIsCheckbox(true);
+        } else if (
+          [textInputWidget, "name", "company", "job title", "email"].includes(
+            dragTypeValue
+          )
+        ) {
+          setFontSize(12);
+          setFontColor("black");
         } else if (dragTypeValue === radioButtonWidget) {
           setIsRadio(true);
         }
@@ -1214,6 +1225,55 @@ const TemplatePlaceholder = () => {
     setIsCheckbox(false);
   };
 
+  const handleSaveFontSize = () => {
+    const filterSignerPos = signerPos.filter((data) => data.Id === uniqueId);
+    if (filterSignerPos.length > 0) {
+      const getPlaceHolder = filterSignerPos[0].placeHolder;
+
+      const getPageNumer = getPlaceHolder.filter(
+        (data) => data.pageNumber === pageNumber
+      );
+
+      if (getPageNumer.length > 0) {
+        const getXYdata = getPageNumer[0].pos;
+        const getPosData = getXYdata;
+        const addSignPos = getPosData.map((position) => {
+          if (position.key === signKey) {
+            return {
+              ...position,
+              options: {
+                ...position.options,
+                fontSize: fontSize,
+                fontColor: fontColor
+              }
+            };
+          }
+          return position;
+        });
+
+        const newUpdateSignPos = getPlaceHolder.map((obj) => {
+          if (obj.pageNumber === pageNumber) {
+            return { ...obj, pos: addSignPos };
+          }
+          return obj;
+        });
+        const newUpdateSigner = signerPos.map((obj) => {
+          if (obj.Id === uniqueId) {
+            return { ...obj, placeHolder: newUpdateSignPos };
+          }
+          return obj;
+        });
+        setSignerPos(newUpdateSigner);
+      }
+    }
+    setFontSize();
+    setFontColor();
+
+    handleTextSettingModal(false);
+  };
+  const handleTextSettingModal = (value) => {
+    setIsTextSetting(value);
+  };
   return (
     <div>
       <Title title={"Template"} />
@@ -1463,6 +1523,7 @@ const TemplatePlaceholder = () => {
                     handleNameModal={setIsNameModal}
                     setPdfRenderHeight={setPdfRenderHeight}
                     pdfRenderHeight={pdfRenderHeight}
+                    handleTextSettingModal={handleTextSettingModal}
                   />
                 )}
               </div>
@@ -1595,6 +1656,16 @@ const TemplatePlaceholder = () => {
         handleClose={handleNameModal}
         handleData={handleWidgetdefaultdata}
         isSubscribe={isSubscribe}
+      />
+      <TextFontSetting
+        isTextSetting={isTextSetting}
+        setIsTextSetting={setIsTextSetting}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        fontColor={fontColor}
+        setFontColor={setFontColor}
+        handleSaveFontSize={handleSaveFontSize}
+        currWidgetsDetails={currWidgetsDetails}
       />
     </div>
   );

@@ -6,7 +6,7 @@ import { rgb } from "pdf-lib";
 import Parse from "parse";
 
 export const fontsizeArr = [7, 8, 9, 10, 11, 12, 13, 14, 15, 18];
-export const fontColorArr = ["red", "black", "blue"];
+export const fontColorArr = ["red", "black", "blue", "yellow"];
 export const isMobile = window.innerWidth < 767;
 export const textInputWidget = "text input";
 export const textWidget = "text";
@@ -1470,6 +1470,8 @@ export const multiSignEmbed = async (
           updateColorInRgb = rgb(0, 0, 0);
         } else if (color === "blue") {
           updateColorInRgb = rgb(0, 0, 1);
+        } else if (color === "yellow") {
+          updateColorInRgb = rgb(0.9, 1, 0);
         } else {
           updateColorInRgb = rgb(0, 0, 0);
         }
