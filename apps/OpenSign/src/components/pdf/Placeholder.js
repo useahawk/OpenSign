@@ -754,21 +754,8 @@ function Placeholder(props) {
       <div
         className="hidden lg:inline-block"
         style={{
-          left: props.xPos(props.pos, props.isSignYourself),
-          top: props.yPos(props.pos, props.isSignYourself),
-          width:
-            props.pos.type === radioButtonWidget ||
-            props.pos.type === "checkbox"
-              ? "auto"
-              : props.posWidth(props.pos, props.isSignYourself),
-          //  "auto", //props.posWidth(props.pos, props.isSignYourself),
-          // height: props.posHeight(props.pos, props.isSignYourself),
-          height:
-            props.pos.type === radioButtonWidget ||
-            props.pos.type === "checkbox"
-              ? "auto"
-              : props.posHeight(props.pos, props.isSignYourself),
-          zIndex: "10"
+          width: "100%",
+          height: "100%"
         }}
       >
         {props.pos.key === props.selectWidgetId && <PlaceholderIcon />}
