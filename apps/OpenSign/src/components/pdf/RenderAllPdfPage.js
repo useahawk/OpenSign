@@ -32,7 +32,7 @@ function RenderAllPdfPage({
     >
       <div
         style={{ backgroundColor: themeColor }}
-        className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+        className={` p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
       >
         <span>Pages</span>
       </div>

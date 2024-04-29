@@ -374,7 +374,7 @@ function WidgetComponent({
           </div>
         )
       ) : (
-        <div data-tut={dataTut} className={isMailSend && "disabled  "}>
+        <div data-tut={dataTut} className={isMailSend ? "disabled" : "  "}>
           <div
             style={{
               background: themeColor,

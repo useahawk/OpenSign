@@ -114,9 +114,7 @@ const WidgetNameModal = (props) => {
         onSubmit={handleSubmit}
         className={`${
           props.defaultdata?.type === textInputWidget ||
-          props.widgetName === textInputWidget
-            ? "pt-0"
-            : ""
+          (props.widgetName === textInputWidget && "pt-0")
         } p-[20px]`}
       >
         <div className="form-section">

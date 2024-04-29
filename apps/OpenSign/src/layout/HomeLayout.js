@@ -50,6 +50,7 @@ const HomeLayout = () => {
       }
     })();
     saveCookies();
+    dispatch(showHeader(isOpen));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

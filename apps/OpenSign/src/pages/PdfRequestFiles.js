@@ -24,7 +24,8 @@ import {
   radioButtonWidget,
   replaceMailVaribles,
   fetchSubscription,
-  convertPdfArrayBuffer
+  convertPdfArrayBuffer,
+  addInitialData
 } from "../constant/Utils";
 import Loader from "../primitives/LoaderWithMsg";
 import HandleError from "../primitives/HandleError";
@@ -334,14 +335,32 @@ function PdfRequestFiles() {
           }
           setSignedSigners(signers);
           setUnSignedSigners(unSignedSigner);
-
-          setSignerPos(documentData[0].Placeholders);
         } else {
           let unsigned = [];
           for (let i = 0; i < documentData.length; i++) {
             unsigned.push(documentData[i].Signers);
           }
           setUnSignedSigners(unsigned[0]);
+        }
+        //get current signers placeholder details from placeholders array
+        const getCurrentSigner = documentData[0].Placeholders.filter(
+          (data) => data.signerObjId === currUserId
+        );
+        //check current user exist in a placeholder if yes then save current user default data
+        //in placeholder array (name,email,job title, company)
+        if (getCurrentSigner && getCurrentSigner.length > 0) {
+          const senderUser = localStorage.getItem(`Extand_Class`);
+          const extUserData = JSON.parse(senderUser);
+          //addInitialData is a function which update placeholders array's data
+          const xyData = addInitialData(
+            documentData[0].Placeholders,
+            setSignerPos,
+            extUserData[0],
+            getCurrentSigner[0].Id
+          );
+
+          setSignerPos(xyData);
+        } else {
           setSignerPos(documentData[0].Placeholders);
         }
         setPdfDetails(documentData);

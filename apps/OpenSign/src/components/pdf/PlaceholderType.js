@@ -125,19 +125,19 @@ function PlaceholderType(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (
-      ["name", "email", "job title", "company"].includes(props.pos?.type) &&
-      props.isNeedSign &&
-      props.data?.signerObjId === props?.signerObjId
-    ) {
-      const defaultData = props.pos?.options?.defaultValue;
-      if (defaultData) {
-        setTextValue(defaultData);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.pos?.options?.defaultValue]);
+  // useEffect(() => {
+  //   if (
+  //     ["name", "email", "job title", "company"].includes(props.pos?.type) &&
+  //     props.isNeedSign &&
+  //     props.data?.signerObjId === props?.signerObjId
+  //   ) {
+  //     const defaultData = props.pos?.options?.defaultValue;
+  //     if (defaultData) {
+  //       setTextValue(defaultData);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [props.pos?.options?.defaultValue]);
 
   const ExampleCustomInput = forwardRef(({ value, onClick }, ref) => (
     <div
@@ -151,28 +151,6 @@ function PlaceholderType(props) {
     </div>
   ));
   ExampleCustomInput.displayName = "ExampleCustomInput";
-
-  useEffect(() => {
-    if (
-      ["name", "email", "job title", "company"].includes(type) &&
-      props.isNeedSign &&
-      props.data?.signerObjId === props.signerObjId
-    ) {
-      const isDefault = true;
-      const senderUser = localStorage.getItem(`Extand_Class`);
-      const jsonSender = JSON.parse(senderUser);
-      onChangeInput(
-        jsonSender && jsonSender[0],
-        null,
-        props.xyPostion,
-        null,
-        props.setXyPostion,
-        props.data.Id,
-        isDefault
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type]);
 
   const calculateFontSize = () => {
     const fontSize = 10 + Math.min(props.pos.Width, props.pos.Height) * 0.1;
@@ -229,9 +207,9 @@ function PlaceholderType(props) {
         checkedList = selectedCheckbox.filter((data) => data !== ind);
         setSelectedCheckbox(checkedList);
       }
-      if (props.isNeedSign) {
-        isDefaultValue = props.pos.options?.defaultValue;
-      }
+      // if (props.isNeedSign) {
+      //   isDefaultValue = props.pos.options?.defaultValue;
+      // }
       if (isDefaultValue && isDefaultValue.length > 0) {
         isDefaultEmpty = true;
       }
@@ -254,9 +232,9 @@ function PlaceholderType(props) {
     let isDefaultValue,
       isDefaultEmpty,
       isRadio = true;
-    if (props.isNeedSign) {
-      isDefaultValue = props.pos.options?.defaultValue;
-    }
+    // if (props.isNeedSign) {
+    //   isDefaultValue = props.pos.options?.defaultValue;
+    // }
     if (isDefaultValue) {
       isDefaultEmpty = true;
     }

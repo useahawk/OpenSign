@@ -274,7 +274,6 @@ function Placeholder(props) {
     }
   };
   const handleOnClickPlaceholder = () => {
-    console.log("onclick widgets");
     props.setCurrWidgetsDetails && props.setCurrWidgetsDetails(props.pos);
     if (!props.isNeedSign) {
       props.setWidgetType(props.pos.type);

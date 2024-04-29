@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Document, Page } from "react-pdf";
 import {
   calculateResolutionHeight,
@@ -64,14 +64,12 @@ function RenderPdf({
   isResize
 }) {
   const [isLoadPdf, setIsLoadPdf] = useState(false);
-
   const isMobile = window.innerWidth < 767;
   // const newWidth = containerWH.width;
   const scale = 1;
   //  isMobile ? pdfOriginalWH.width / newWidth : 1;
   //check isGuestSigner is present in local if yes than handle login flow header in mobile view
   const isGuestSigner = localStorage.getItem("isGuestSigner");
-
   // handle signature block width and height according to screen
   const posWidth = (pos, signYourself) => {
     const defaultWidth = defaultWidthHeight(pos.type).width;
@@ -261,14 +259,18 @@ function RenderPdf({
       }
     }
   };
+
   //function for render placeholder block over pdf document
-  const checkSignedSignes = (data) => {
+  const CheckSignedSignes = ({ data }) => {
     const checkSign = signedSigners.filter(
       (sign) => sign.objectId === data.signerObjId
     );
-    if (data.signerObjId === signerObjectId) {
-      setCurrentSigner(true);
-    }
+    useEffect(() => {
+      if (data.signerObjId === signerObjectId) {
+        setCurrentSigner(true);
+      }
+    }, [data.signerObjId]);
+
     const handleAllUserName = (Id, Role, type) => {
       return pdfDetails[0].Signers.map((signerData, key) => {
         return (
@@ -344,6 +346,8 @@ function RenderPdf({
     );
   };
 
+  //function for render placeholder block over pdf document
+
   const handleUserName = (Id, Role, type) => {
     if (Id) {
       const checkSign = signersdata.find((sign) => sign.Id === Id);
@@ -406,7 +410,7 @@ function RenderPdf({
               ? signerPos.map((data, key) => {
                   return (
                     <React.Fragment key={key}>
-                      {checkSignedSignes(data)}
+                      <CheckSignedSignes data={data} />
                     </React.Fragment>
                   );
                 })
@@ -596,7 +600,7 @@ function RenderPdf({
                 ? signerPos?.map((data, key) => {
                     return (
                       <React.Fragment key={key}>
-                        {checkSignedSignes(data)}
+                        <CheckSignedSignes data={data} />
                       </React.Fragment>
                     );
                   })
