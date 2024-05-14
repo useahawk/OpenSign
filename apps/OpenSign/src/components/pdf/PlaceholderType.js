@@ -293,13 +293,13 @@ function PlaceholderType(props) {
         />
       ) : (
         <div style={{ fontSize: 11, color: "black", justifyContent: "center" }}>
-          {/* {props?.handleUserName &&
+          {props?.handleUserName &&
             props?.handleUserName(
               props?.data?.Id,
               props?.data?.Role,
               props?.pos?.type
-            )} */}
-          {props.xPos(props.pos, props.isSignYourself)}
+            )}
+          {/* {props.xPos(props.pos, props.isSignYourself)} */}
         </div>
       );
     case "stamp":
