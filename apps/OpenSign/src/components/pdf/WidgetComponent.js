@@ -359,14 +359,7 @@ function WidgetComponent({
                 borderTop: `2px solid ${themeColor}`
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  overflowX: "scroll",
-                  whiteSpace: "nowrap",
-                  padding: "10px 5px 10px 1px"
-                }}
-              >
+              <div className="flex overflow-x-scroll py-[10px] px-[5px]">
                 <WidgetList
                   updateWidgets={updateWidgets}
                   handleDivClick={handleDivClick}
@@ -381,22 +374,19 @@ function WidgetComponent({
           </div>
         )
       ) : (
-        <div
-          data-tut={dataTut}
-          className={
-            isMailSend ? "disabled signerComponent " : "signerComponent"
-          }
-        >
+        <div data-tut={dataTut} className={isMailSend ? "disabled" : "  "}>
           <div
             style={{
               background: themeColor,
               padding: "5px"
             }}
           >
-            <span className="signedStyle">Fields</span>
+            <span className="text-[#FFFFFF] p-[5px] 2xl:p-[15px] text-[15px] 2xl:text-[37px]">
+              Fields
+            </span>
           </div>
 
-          <div className="signLayoutContainer1">
+          <div className="p-[15px] flex flex-col pt-4 2xl:m-5">
             <WidgetList
               updateWidgets={updateWidgets}
               handleDivClick={handleDivClick}

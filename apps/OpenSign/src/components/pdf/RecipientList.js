@@ -17,7 +17,7 @@ const RecipientList = (props) => {
   const onHoverStyle = (ind, blockColor) => {
     const style = {
       background: blockColor ? blockColor : color[ind % color.length],
-      padding: "10px",
+
       marginTop: "2px",
       display: "flex",
       flexDirection: "row",
@@ -29,7 +29,6 @@ const RecipientList = (props) => {
   //function for onhover signer name remove background color
   const nonHoverStyle = () => {
     const style = {
-      padding: "10px",
       marginTop: "2px",
       display: "flex",
       flexDirection: "row",
@@ -94,7 +93,6 @@ const RecipientList = (props) => {
     props.setRoleName(remainingItems[index]?.Role);
     props.setBlockColor(remainingItems[index]?.blockColor);
   };
-
   return (
     <>
       {props.signersdata.length > 0 &&
@@ -119,9 +117,11 @@ const RecipientList = (props) => {
               className={
                 props.sendInOrder
                   ? props.isMailSend
-                    ? "disabled"
-                    : "dragCursor"
-                  : props.isMailSend && "disabled"
+                    ? "disabled p-[10px] 2xl:p-[30px]"
+                    : "dragCursor p-[10px] 2xl:p-[30px]"
+                  : props.isMailSend
+                    ? "disabled p-[10px] 2xl:p-[30px]"
+                    : "2xl:p-[30px]"
               }
               style={
                 (!isMobile && isHover === ind) || props.isSelectListId === ind
@@ -141,40 +141,26 @@ const RecipientList = (props) => {
                 }
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  width: "100%"
-                }}
-              >
+              <div className="flex flex-row items-center w-[100%]">
                 <div
+                  className={`${
+                    props.isHeader ? "md:hidden lg:block" : ""
+                  } w-[30px] h-[30px] 2xl:w-[50px] rounded-[15px] 2xl:rounded-[25px] 2xl:h-[50px] flex justify-center items-center `}
                   style={{
                     background: obj?.blockColor
                       ? darkenColor(obj?.blockColor, 0.4)
-                      : nameColor[ind % nameColor.length],
-                    width: 30,
-                    height: 30,
-                    display: "flex",
-                    borderRadius: 30 / 2,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginRight: "12px"
+                      : nameColor[ind % nameColor.length]
                   }}
                 >
                   <span
-                    className={props.sendInOrder && "dragCursor"}
-                    style={{
-                      fontSize: "12px",
-                      textAlign: "center",
-                      fontWeight: "bold",
-                      color: "white",
-                      textTransform: "uppercase"
-                    }}
+                    className={
+                      props.sendInOrder
+                        ? "dragCursor text-[1.2vw] flex justify-center items-center h-[100%] text-center font-medium text-[#FFFFFF] uppercase  "
+                        : "text-[1.2vw] flex justify-center items-center text-center h-[100%] font-medium text-[#FFFFFF] uppercase"
+                    }
                   >
                     {isWidgetExist(obj.Id) ? (
-                      <i className="fa-solid fa-check"></i>
+                      <i className="fa-solid fa-check text-center"></i>
                     ) : (
                       <>
                         {obj.Name
@@ -185,18 +171,24 @@ const RecipientList = (props) => {
                   </span>
                 </div>
                 <div
-                  style={{
-                    display: "flex",
-                    flexDirection: obj.Name ? "column" : "row",
-                    alignItems: "center"
-                  }}
+                  className={`${
+                    obj.Name ? "flex-col" : "flex-row"
+                  } flex items-center ml-[12px]`}
                 >
                   {obj.Name ? (
-                    <span className={"userName"}>{obj.Name}</span>
+                    <span
+                      className={
+                        "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] w-[10vw] 2xl:w-[250px]  2xl:text-[25px]"
+                      }
+                    >
+                      {obj.Name}
+                    </span>
                   ) : (
                     <>
                       <span
-                        className="userName"
+                        className={
+                          "whitespace-nowrap overflow-hidden text-ellipsis text-[12px] font-medium text-[#424242] md:w-[6vw] lg:w-[5vw] 2xl:w-[250px]  2xl:text-[25px]"
+                        }
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           setIsEdit({ [obj.Id]: true });
@@ -225,13 +217,21 @@ const RecipientList = (props) => {
                             }}
                           />
                         ) : (
-                          <span style={{ padding: "3px" }}>{obj.Role}</span>
+                          <span className="text-[13px] 2xl:text-[25px]">
+                            {obj.Role}
+                          </span>
                         )}
                       </span>
                     </>
                   )}
                   {obj.Name && (
-                    <span className={"useEmail"}>
+                    <span
+                      className={
+                        props.isHeader
+                          ? "whitespace-nowrap overflow-hidden text-ellipsis text-[12px]  w-[10vw]  2xl:w-[260px]  text-[#424242]   2xl:text-[20px] md:hidden  "
+                          : "whitespace-nowrap overflow-hidden text-ellipsis text-[12px]  w-[10vw]  2xl:w-[260px]  text-[#424242]   2xl:text-[20px]"
+                      }
+                    >
                       {obj?.Role || obj?.Email}
                     </span>
                   )}
@@ -281,7 +281,7 @@ const RecipientList = (props) => {
                   }}
                   style={{ cursor: "pointer", marginLeft: "5px" }}
                 >
-                  <i className="fa-regular fa-trash-can"></i>
+                  <i className="fa-regular fa-trash-can 2xl:text-[30px]"></i>
                 </div>
               )}
               <hr />

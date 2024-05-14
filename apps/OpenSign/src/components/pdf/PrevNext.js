@@ -15,7 +15,7 @@ function PrevNext({ pageNumber, allPages, changePage }) {
     <div>
       <div className="preBtn1">
         <button
-          className="py-[3px] px-[10px] text-xs bg-[#d3edeb] font-[600] mr-[5px]"
+          className="py-[3px] px-[10px] 2xl:py-[6px] 2xl:[15px] text-xs bg-[#d3edeb] font-[600] mr-[5px]"
           disabled={pageNumber <= 1}
           onClick={previousPage}
         >
@@ -26,13 +26,13 @@ function PrevNext({ pageNumber, allPages, changePage }) {
               style={{ color: themeColor, cursor: "pointer" }}
             ></i>
           </span>
-          <span className="lg:block hidden">Prev</span>
+          <span className="lg:block hidden 2xl:text-[30px]">Prev</span>
         </button>
-        <span className="text-xs font-[500]">
+        <span className="text-xs font-[500] 2xl:text-[30px]">
           {pageNumber || (allPages ? 1 : "--")} of {allPages || "--"}
         </span>
         <button
-          className="py-[3px] px-[10px] text-xs bg-[#d3edeb] font-[600] ml-[5px]"
+          className="py-[3px] px-[10px] 2xl:py-[6px] 2xl:[15px] text-xs bg-[#d3edeb] font-[600] ml-[5px]"
           disabled={pageNumber >= allPages}
           onClick={nextPage}
         >
@@ -43,7 +43,7 @@ function PrevNext({ pageNumber, allPages, changePage }) {
               style={{ color: themeColor, cursor: "pointer" }}
             ></i>
           </span>
-          <span className="lg:block hidden">Next</span>
+          <span className="lg:block hidden 2xl:text-[30px]">Next</span>
         </button>
       </div>
     </div>

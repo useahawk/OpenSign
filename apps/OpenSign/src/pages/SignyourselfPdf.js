@@ -31,6 +31,7 @@ import {
   getTenantDetails,
   checkIsSubscribed,
   convertPdfArrayBuffer,
+  textInputWidget,
   fetchImageBase64,
   changeImageWH,
   handleSendOTP
@@ -46,6 +47,8 @@ import TourContentWithBtn from "../primitives/TourContentWithBtn";
 import Title from "../components/Title";
 import ModalUi from "../primitives/ModalUi";
 import DropdownWidgetOption from "../components/pdf/DropdownWidgetOption";
+import { useSelector } from "react-redux";
+import TextFontSetting from "../components/pdf/TextFontSetting";
 import VerifyEmail from "../components/pdf/VerifyEmail";
 
 //For signYourself inProgress section signer can add sign and complete doc sign.
@@ -68,17 +71,20 @@ function SignYourSelf() {
   const signRef = useRef(null);
   const dragRef = useRef(null);
   const [dragKey, setDragKey] = useState();
+  const [fontSize, setFontSize] = useState(11);
+  const [fontColor, setFontColor] = useState("black");
   const [signKey, setSignKey] = useState();
   const [imgWH, setImgWH] = useState({});
   const [isCeleb, setIsCeleb] = useState(false);
   const [pdfNewWidth, setPdfNewWidth] = useState();
-  const [pdfOriginalWidth, setPdfOriginalWidth] = useState();
+  const [pdfOriginalWH, setPdfOriginalWH] = useState();
   const [successEmail, setSuccessEmail] = useState(false);
   const imageRef = useRef(null);
   const [myInitial, setMyInitial] = useState("");
   const [isInitial, setIsInitial] = useState(false);
   const [isUiLoading, setIsUiLoading] = useState(false);
   const [validateAlert, setValidateAlert] = useState(false);
+
   const [isLoading, setIsLoading] = useState({
     isLoad: true,
     message: "This might take some time"
@@ -98,6 +104,7 @@ function SignYourSelf() {
   const [showAlreadySignDoc, setShowAlreadySignDoc] = useState({
     status: false
   });
+  const [isTextSetting, setIsTextSetting] = useState(false);
   const [currWidgetsDetails, setCurrWidgetsDetails] = useState({});
   const [isCheckbox, setIsCheckbox] = useState(false);
   const [widgetType, setWidgetType] = useState("");
@@ -114,6 +121,11 @@ function SignYourSelf() {
   const [isEmailVerified, setIsEmailVerified] = useState(true);
   const [isVerifyModal, setIsVerifyModal] = useState(false);
   const [otp, setOtp] = useState("");
+  const [pdfRenderHeight, setPdfRenderHeight] = useState();
+  const [zoomPercent, setZoomPercent] = useState(0);
+  const [totalZoomPercent, setTotalZoomPercent] = useState();
+  const isHeader = useSelector((state) => state.showHeader);
+  const [scale, setScale] = useState(1);
   const divRef = useRef(null);
   const nodeRef = useRef(null);
   const [, drop] = useDrop({
@@ -123,10 +135,7 @@ function SignYourSelf() {
       isOver: !!monitor.isOver()
     })
   });
-  const isMobile = window.innerWidth < 767;
-
   const pdfRef = useRef();
-
   const [{ isDragSign }, dragSignature] = useDrag({
     type: "BOX",
     item: {
@@ -154,7 +163,6 @@ function SignYourSelf() {
     return object.pageNumber === pageNumber;
   });
   //   rowlevel={JSON.parse(localStorage.getItem("rowlevel"))}
-
   const rowLevel =
     localStorage.getItem("rowlevel") &&
     JSON.parse(localStorage.getItem("rowlevel"));
@@ -183,15 +191,21 @@ function SignYourSelf() {
 
   useEffect(() => {
     if (divRef.current) {
+      setIsLoading({
+        isLoad: true
+      });
       const pdfWidth = pdfNewWidthFun(divRef);
       setPdfNewWidth(pdfWidth);
       setContainerWH({
         width: divRef.current.offsetWidth,
         height: divRef.current.offsetHeight
       });
+      setIsLoading({
+        isLoad: false
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
+  }, [divRef.current, isHeader]);
 
   //function for get document details for perticular signer with signer'object id
   const getDocumentDetails = async (showComplete) => {
@@ -214,7 +228,6 @@ function SignYourSelf() {
       } else {
         setHandleError("Error: Something went wrong!");
       }
-
       isCompleted = documentData[0].IsCompleted && documentData[0].IsCompleted;
       if (isCompleted) {
         setIsCompleted(true);
@@ -433,6 +446,7 @@ function SignYourSelf() {
     const key = randomId();
     let dropData = [];
     let dropObj = {};
+    const pdfRenderWidth = containerWH.width;
     let filterDropPos = xyPostion.filter(
       (data) => data.pageNumber === pageNumber
     );
@@ -443,6 +457,12 @@ function SignYourSelf() {
     const widgetTypeExist = ["name", "company", "job title", "email"].includes(
       dragTypeValue
     );
+    // const scale = pdfOriginalWH.width / containerWH.width;
+    const scale = containerWH.width / pdfOriginalWH.width;
+    // console.log("pdfOriginalWH.width", pdfOriginalWH.width);
+    // console.log("containerWH.width", containerWH.width);
+    console.log("scale", scale);
+
     if (item === "onclick") {
       dropObj = {
         xPosition: containerWH.width / 2 - widgetWidth / 2,
@@ -453,7 +473,7 @@ function SignYourSelf() {
         key: key,
         type: dragTypeValue,
         yBottom: window.innerHeight / 2 - 60,
-
+        scale: scale,
         Width: widgetTypeExist
           ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getWidth
           : dragTypeValue === "initials"
@@ -464,7 +484,9 @@ function SignYourSelf() {
           : dragTypeValue === "initials"
             ? defaultWidthHeight(dragTypeValue).height
             : "",
-        options: addWidgetOptions(dragTypeValue)
+        options: addWidgetOptions(dragTypeValue),
+        pdfRenderHeight: pdfRenderHeight,
+        pdfRenderWidth: pdfRenderWidth
       };
 
       dropData.push(dropObj);
@@ -477,10 +499,13 @@ function SignYourSelf() {
 
       const x = offset.x - containerRect.left;
       const y = offset.y - containerRect.top;
-
+      const getXPosition = signBtnPosition[0] ? x - signBtnPosition[0].xPos : x;
+      const getYPosition = signBtnPosition[0] ? y - signBtnPosition[0].yPos : y;
+      console.log("x", getXPosition, scale);
+      // console.log("y", getYPosition);
       dropObj = {
-        xPosition: signBtnPosition[0] ? x - signBtnPosition[0].xPos : x,
-        yPosition: signBtnPosition[0] ? y - signBtnPosition[0].yPos : y,
+        xPosition: getXPosition / scale,
+        yPosition: getYPosition / scale,
         // isDrag: false,
         isStamp:
           (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
@@ -492,7 +517,10 @@ function SignYourSelf() {
         Height: widgetTypeExist
           ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getHeight
           : defaultWidthHeight(dragTypeValue).height,
-        options: addWidgetOptions(dragTypeValue)
+        options: addWidgetOptions(dragTypeValue),
+        pdfRenderHeight: pdfRenderHeight,
+        pdfRenderWidth: pdfRenderWidth,
+        scale: scale
       };
 
       dropData.push(dropObj);
@@ -535,12 +563,23 @@ function SignYourSelf() {
       setIsInitial(true);
     } else if (dragTypeValue === "checkbox") {
       setIsCheckbox(true);
+    } else if (
+      [
+        textInputWidget,
+        textWidget,
+        "name",
+        "company",
+        "job title",
+        "email"
+      ].includes(dragTypeValue)
+    ) {
+      setFontSize(12);
+      setFontColor("black");
     }
     setWidgetType(dragTypeValue);
     setSelectWidgetId(key);
     setSignKey(key);
   };
-
   //`handleResend` function is used to resend otp for email verification
   const handleResend = async (e) => {
     e.preventDefault();
@@ -669,9 +708,10 @@ function SignYourSelf() {
             const pdfBytes = await multiSignEmbed(
               xyPostion,
               pdfDoc,
-              pdfOriginalWidth,
+              pdfOriginalWH,
               isSignYourSelfFlow,
-              containerWH
+              containerWH,
+              scale
             );
             // console.log("pdf", pdfBytes);
             //function for call to embed signature in pdf and get digital signature pdf
@@ -786,17 +826,11 @@ function SignYourSelf() {
   const handleStop = (event, dragElement) => {
     if (isDragging && dragElement) {
       event.preventDefault();
-      const containerRect = document
-        .getElementById("container")
-        .getBoundingClientRect();
-
-      const ybottom = containerRect.height - dragElement.y;
-
+      const scale = containerWH.width / pdfOriginalWH.width;
       if (dragKey >= 0) {
         const filterDropPos = xyPostion.filter(
           (data) => data.pageNumber === pageNumber
         );
-
         if (filterDropPos.length > 0) {
           const getXYdata = xyPostion[index].pos;
           const getPosData = getXYdata;
@@ -804,10 +838,8 @@ function SignYourSelf() {
             if (url.key === dragKey) {
               return {
                 ...url,
-                xPosition: dragElement.x,
-                yPosition: dragElement.y,
-                isDrag: true,
-                yBottom: ybottom
+                xPosition: dragElement.x / scale,
+                yPosition: dragElement.y / scale
               };
             }
             return url;
@@ -836,8 +868,8 @@ function SignYourSelf() {
     setPdfLoadFail(load);
     pdf.getPage(1).then((pdfPage) => {
       const pageWidth = pdfPage.view[2];
-
-      setPdfOriginalWidth(pageWidth);
+      const pageHeight = pdfPage.view[3];
+      setPdfOriginalWH({ width: pageWidth, height: pageHeight });
     });
   };
 
@@ -1083,11 +1115,47 @@ function SignYourSelf() {
       }
     }
   };
-
   const handleCloseModal = () => {
     setCurrWidgetsDetails({});
     setIsCheckbox(false);
   };
+  const handleTextSettingModal = (value) => {
+    setIsTextSetting(value);
+  };
+  const handleSaveFontSize = () => {
+    const getPageNumer = xyPostion.filter(
+      (data) => data.pageNumber === pageNumber
+    );
+
+    if (getPageNumer.length > 0) {
+      const getXYdata = getPageNumer[0].pos;
+      const getPosData = getXYdata;
+      const addSignPos = getPosData.map((position) => {
+        if (position.key === signKey) {
+          return {
+            ...position,
+            options: {
+              ...position.options,
+              fontSize: fontSize || currWidgetsDetails?.options?.fontSize,
+              fontColor: fontColor || currWidgetsDetails?.options?.fontColor
+            }
+          };
+        }
+        return position;
+      });
+      const updateXYposition = xyPostion.map((obj, ind) => {
+        if (ind === index) {
+          return { ...obj, pos: addSignPos };
+        }
+        return obj;
+      });
+      setXyPostion(updateXYposition);
+      setFontSize();
+      setFontColor();
+      handleTextSettingModal(false);
+    }
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       <Title title={"Self Sign"} />
@@ -1122,8 +1190,7 @@ function SignYourSelf() {
               </span>
             </div>
           )}
-
-          <div className="signatureContainer" ref={divRef}>
+          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
             {!isEmailVerified && (
               <VerifyEmail
                 isVerifyModal={isVerifyModal}
@@ -1158,15 +1225,9 @@ function SignYourSelf() {
               setPageNumber={setPageNumber}
               setSignBtnPosition={setSignBtnPosition}
               pageNumber={pageNumber}
+              containerWH={containerWH}
             />
-
-            {/* pdf render view */}
-            <div
-              style={{
-                marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-              }}
-            >
+            <div className="min-h-screen w-full md:w-[57%]">
               <ModalUi
                 headerColor={"#dc3545"}
                 isOpen={isAlert.isShow}
@@ -1281,13 +1342,21 @@ function SignYourSelf() {
                 isSignYourself={true}
                 setIsEmail={setIsEmail}
                 isCompleted={isCompleted}
+                totalZoomPercent={totalZoomPercent}
+                setTotalZoomPercent={setTotalZoomPercent}
+                setScale={setScale}
+                scale={scale}
+                pdfOriginalWH={pdfOriginalWH}
+                containerWH={containerWH}
+                setZoomPercent={setZoomPercent}
+                zoomPercent={zoomPercent}
               />
 
-              <div data-tut="reactourSecond">
+              <div ref={divRef} data-tut="reactourSecond" className="h-[95%] ">
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
-                    pdfOriginalWidth={pdfOriginalWidth}
+                    pdfOriginalWH={pdfOriginalWH}
                     pdfNewWidth={pdfNewWidth}
                     drop={drop}
                     successEmail={successEmail}
@@ -1319,46 +1388,47 @@ function SignYourSelf() {
                     setIsCheckbox={setIsCheckbox}
                     setCurrWidgetsDetails={setCurrWidgetsDetails}
                     setValidateAlert={setValidateAlert}
+                    handleTextSettingModal={handleTextSettingModal}
+                    pdfRenderHeight={pdfRenderHeight}
+                    setPdfRenderHeight={setPdfRenderHeight}
+                    setTotalZoomPercent={setTotalZoomPercent}
+                    setScale={setScale}
+                    scale={scale}
                   />
                 )}
               </div>
             </div>
-
-            {/*if document is not completed then render signature and stamp button in the right side */}
-            {/*else document is  completed then render signed by signer name in the right side */}
             <div
-              style={{
-                maxHeight: window.innerHeight - 70 + "px",
-                backgroundColor: "white"
-              }}
-              className="autoSignScroll"
+              className={` md:w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}
             >
-              {!isCompleted ? (
-                <div>
-                  <WidgetComponent
-                    dataTut="reactourFirst"
-                    pdfUrl={pdfUrl}
-                    dragSignature={dragSignature}
-                    signRef={signRef}
-                    handleDivClick={handleDivClick}
-                    handleMouseLeave={handleMouseLeave}
-                    isDragSign={isDragSign}
-                    themeColor={themeColor}
-                    dragStamp={dragStamp}
-                    dragRef={dragRef}
-                    isDragStamp={isDragStamp}
-                    handleAllDelete={handleAllDelete}
-                    xyPostion={xyPostion}
-                    isSignYourself={true}
-                    addPositionOfSignature={addPositionOfSignature}
-                    isMailSend={false}
-                  />
-                </div>
-              ) : (
-                <div>
-                  <Signedby pdfDetails={pdfDetails[0]} />
-                </div>
-              )}
+              <div className={`max-h-screen`}>
+                {!isCompleted ? (
+                  <div>
+                    <WidgetComponent
+                      dataTut="reactourFirst"
+                      pdfUrl={pdfUrl}
+                      dragSignature={dragSignature}
+                      signRef={signRef}
+                      handleDivClick={handleDivClick}
+                      handleMouseLeave={handleMouseLeave}
+                      isDragSign={isDragSign}
+                      themeColor={themeColor}
+                      dragStamp={dragStamp}
+                      dragRef={dragRef}
+                      isDragStamp={isDragStamp}
+                      handleAllDelete={handleAllDelete}
+                      xyPostion={xyPostion}
+                      isSignYourself={true}
+                      addPositionOfSignature={addPositionOfSignature}
+                      isMailSend={false}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <Signedby pdfDetails={pdfDetails[0]} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1394,6 +1464,16 @@ function SignYourSelf() {
           </button>
         </div>
       </ModalUi>
+      <TextFontSetting
+        isTextSetting={isTextSetting}
+        setIsTextSetting={setIsTextSetting}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        fontColor={fontColor}
+        setFontColor={setFontColor}
+        handleSaveFontSize={handleSaveFontSize}
+        currWidgetsDetails={currWidgetsDetails}
+      />
     </DndProvider>
   );
 }

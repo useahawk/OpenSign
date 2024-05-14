@@ -49,6 +49,8 @@ import { SaveFileSize } from "../constant/saveFileSize";
 import { EmailBody } from "../components/pdf/EmailBody";
 import Upgrade from "../primitives/Upgrade";
 import Alert from "../primitives/Alert";
+import { useSelector } from "react-redux";
+import TextFontSetting from "../components/pdf/TextFontSetting";
 
 function PlaceHolderSign() {
   const editorRef = useRef();
@@ -70,6 +72,8 @@ function PlaceHolderSign() {
   const [isSend, setIsSend] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAddSigner, setIsAddSigner] = useState(false);
+  const [fontSize, setFontSize] = useState();
+  const [fontColor, setFontColor] = useState();
   const [isLoading, setIsLoading] = useState({
     isLoad: true,
     message: "This might take some time"
@@ -81,7 +85,7 @@ function PlaceHolderSign() {
   const [checkTourStatus, setCheckTourStatus] = useState(false);
   const [tourStatus, setTourStatus] = useState([]);
   const [signerUserId, setSignerUserId] = useState();
-  const [pdfOriginalWidth, setPdfOriginalWidth] = useState();
+  const [pdfOriginalWH, setPdfOriginalWH] = useState();
   const [contractName, setContractName] = useState("");
   const [containerWH, setContainerWH] = useState();
   const { docId } = useParams();
@@ -97,6 +101,7 @@ function PlaceHolderSign() {
   const [blockColor, setBlockColor] = useState("");
   const [defaultBody, setDefaultBody] = useState("");
   const [defaultSubject, setDefaultSubject] = useState("");
+  const [isTextSetting, setIsTextSetting] = useState(false);
   const [pdfLoadFail, setPdfLoadFail] = useState({
     status: false,
     type: "load"
@@ -123,6 +128,8 @@ function PlaceHolderSign() {
   const [requestSubject, setRequestSubject] = useState("");
   const [requestBody, setRequestBody] = useState("");
   const [pdfArrayBuffer, setPdfArrayBuffer] = useState("");
+  const isHeader = useSelector((state) => state.showHeader);
+  const [pdfRenderHeight, setPdfRenderHeight] = useState();
   const [activeMailAdapter, setActiveMailAdapter] = useState("");
   const [isAlreadyPlace, setIsAlreadyPlace] = useState({
     status: false,
@@ -201,16 +208,16 @@ function PlaceHolderSign() {
 
             setDefaultBody(defaultRequestBody);
             setDefaultSubject(
-              `{{sender_name}} has requested you to sign "{{document_title}}"`
+              `{{sender_name}} has requested you to sign {{document_title}}`
             );
           } else {
             setRequestBody(defaultRequestBody);
             setRequestSubject(
-              `{{sender_name}} has requested you to sign "{{document_title}}"`
+              `{{sender_name}} has requested you to sign {{document_title}}`
             );
             setDefaultBody(defaultRequestBody);
             setDefaultSubject(
-              `{{sender_name}}has requested you to sign "{{document_title}}"`
+              `{{sender_name}}has requested you to sign {{document_title}}`
             );
           }
         }
@@ -232,7 +239,7 @@ function PlaceHolderSign() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
+  }, [divRef.current, isHeader]);
 
   async function checkIsSubscribed() {
     const res = await fetchSubscription();
@@ -446,9 +453,12 @@ function PlaceHolderSign() {
       const posZIndex = zIndex + 1;
       setZIndex(posZIndex);
       const signer = signersdata.find((x) => x.Id === uniqueId);
-      const newWidth = containerWH.width;
-      const scale = pdfOriginalWidth / newWidth;
+      const pdfRenderWidth = containerWH.width;
       const key = randomId();
+      // const scale = pdfOriginalWH.width / containerWH.width;
+      const scale = containerWH.width / pdfOriginalWH.width;
+      console.log("original width", pdfOriginalWH.width);
+      console.log("containerwidth", containerWH.width);
       let dropData = [];
       let placeHolder;
       const dragTypeValue = item?.text ? item.text : monitor.type;
@@ -457,15 +467,18 @@ function PlaceHolderSign() {
           //onclick put placeholder center on pdf
           xPosition: window.innerWidth / 2 - 150,
           yPosition: window.innerHeight / 2 - 60,
+
           isStamp:
             (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
           key: key,
           isDrag: false,
           scale: scale,
-          isMobile: isMobile,
+          // isMobile: isMobile,
           zIndex: posZIndex,
           type: dragTypeValue,
-          options: addWidgetOptions(dragTypeValue)
+          options: addWidgetOptions(dragTypeValue),
+          pdfRenderHeight: pdfRenderHeight,
+          pdfRenderWidth: pdfRenderWidth
         };
         dropData.push(dropObj);
         placeHolder = {
@@ -474,23 +487,32 @@ function PlaceHolderSign() {
         };
       } else {
         const offset = monitor.getClientOffset();
+
         //adding and updating drop position in array when user drop signature button in div
         const containerRect = document
           .getElementById("container")
           .getBoundingClientRect();
         const x = offset.x - containerRect.left;
         const y = offset.y - containerRect.top;
+        const getXPosition = signBtnPosition[0]
+          ? x - signBtnPosition[0].xPos
+          : x;
+        const getYPosition = signBtnPosition[0]
+          ? y - signBtnPosition[0].yPos
+          : y;
         const dropObj = {
-          xPosition: signBtnPosition[0] ? x - signBtnPosition[0].xPos : x,
-          yPosition: signBtnPosition[0] ? y - signBtnPosition[0].yPos : y,
+          xPosition: getXPosition / scale,
+          yPosition: getYPosition / scale,
           isStamp:
             (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
           key: key,
           scale: scale,
-          isMobile: isMobile,
+          // isMobile: isMobile,
           zIndex: posZIndex,
           type: dragTypeValue,
           options: addWidgetOptions(dragTypeValue)
+          // pdfRenderHeight: pdfRenderHeight,
+          // pdfRenderWidth: pdfRenderWidth
         };
 
         dropData.push(dropObj);
@@ -600,6 +622,18 @@ function PlaceHolderSign() {
           setShowDropdown(true);
         } else if (dragTypeValue === "checkbox") {
           setIsCheckbox(true);
+        } else if (
+          [
+            textInputWidget,
+            textWidget,
+            "name",
+            "company",
+            "job title",
+            "email"
+          ].includes(dragTypeValue)
+        ) {
+          setFontSize(12);
+          setFontColor("black");
         } else if (dragTypeValue === radioButtonWidget) {
           setIsRadio(true);
         }
@@ -613,14 +647,14 @@ function PlaceHolderSign() {
 
   //function for get pdf page details
   const pageDetails = async (pdf) => {
-    const load = {
-      status: true
-    };
-    setPdfLoadFail(load);
     pdf.getPage(1).then((pdfPage) => {
       const pageWidth = pdfPage.view[2];
-
-      setPdfOriginalWidth(pageWidth);
+      const pageHeight = pdfPage.view[3];
+      setPdfOriginalWH({ width: pageWidth, height: pageHeight });
+      const load = {
+        status: true
+      };
+      setPdfLoadFail(load);
     });
   };
 
@@ -636,13 +670,8 @@ function PlaceHolderSign() {
       const dataNewPlace = addZIndex(signerPos, key, setZIndex);
       let updateSignPos = [...signerPos];
       updateSignPos.splice(0, updateSignPos.length, ...dataNewPlace);
-      // signerPos.splice(0, signerPos.length, ...dataNewPlace);
-      const containerRect = document
-        .getElementById("container")
-        .getBoundingClientRect();
       const signId = signerId ? signerId : uniqueId; //? signerId : signerObjId;
       const keyValue = key ? key : dragKey;
-      const ybottom = containerRect.height - dragElement.y;
 
       if (keyValue >= 0) {
         let filterSignerPos;
@@ -670,9 +699,7 @@ function PlaceHolderSign() {
                 return {
                   ...url,
                   xPosition: dragElement.x,
-                  yPosition: dragElement.y,
-                  isDrag: true,
-                  yBottom: ybottom
+                  yPosition: dragElement.y
                 };
               }
               return url;
@@ -806,13 +833,13 @@ function PlaceHolderSign() {
         ignoreEncryption: true
       });
 
-      const flag = false;
+      const isSignYourSelfFlow = false;
       try {
         const pdfBytes = await multiSignEmbed(
           placeholder,
           pdfDoc,
-          pdfOriginalWidth,
-          flag,
+          pdfOriginalWH,
+          isSignYourSelfFlow,
           containerWH
         );
 
@@ -837,7 +864,6 @@ function PlaceHolderSign() {
     const filterPrefill = signerPos?.filter((data) => data.Role !== "prefill");
     const getPrefill = signerPos?.filter((data) => data.Role === "prefill");
     let isLabel = false;
-    //condition is used to check text widget data is empty or have response
     if (getPrefill && getPrefill.length > 0) {
       const prefillPlaceholder = getPrefill[0].placeHolder;
       if (prefillPlaceholder) {
@@ -1387,7 +1413,6 @@ function PlaceHolderSign() {
       }
     }
   };
-
   const handleWidgetdefaultdata = (defaultdata) => {
     const options = ["email", "number", "text"];
     let inputype;
@@ -1620,6 +1645,60 @@ function PlaceHolderSign() {
     setSignerPos(updatePlaceholderUser);
     setIsMailSend(false);
   };
+
+  const handleSaveFontSize = () => {
+    const filterSignerPos = signerPos.filter((data) => data.Id === uniqueId);
+    if (filterSignerPos.length > 0) {
+      const getPlaceHolder = filterSignerPos[0].placeHolder;
+
+      const getPageNumer = getPlaceHolder.filter(
+        (data) => data.pageNumber === pageNumber
+      );
+
+      if (getPageNumer.length > 0) {
+        const getXYdata = getPageNumer[0].pos;
+        const getPosData = getXYdata;
+        const addSignPos = getPosData.map((position) => {
+          if (position.key === signKey) {
+            return {
+              ...position,
+              options: {
+                ...position.options,
+                fontSize: fontSize,
+                fontColor: fontColor
+              }
+            };
+          }
+          return position;
+        });
+
+        const newUpdateSignPos = getPlaceHolder.map((obj) => {
+          if (obj.pageNumber === pageNumber) {
+            return { ...obj, pos: addSignPos };
+          }
+          return obj;
+        });
+        const newUpdateSigner = signerPos.map((obj) => {
+          if (obj.Id === uniqueId) {
+            return { ...obj, placeHolder: newUpdateSignPos };
+          }
+          return obj;
+        });
+        setSignerPos(newUpdateSigner);
+      }
+    }
+    setFontSize();
+    setFontColor();
+    if (currWidgetsDetails.type === textWidget) {
+      setUniqueId(tempSignerId);
+      setTempSignerId("");
+    }
+
+    handleTextSettingModal(false);
+  };
+  const handleTextSettingModal = (value) => {
+    setIsTextSetting(value);
+  };
   return (
     <>
       <Title title={state?.title ? state.title : "New Document"} />
@@ -1629,7 +1708,7 @@ function PlaceHolderSign() {
         ) : handleError ? (
           <HandleError handleError={handleError} />
         ) : (
-          <div className="signatureContainer" ref={divRef}>
+          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
             {isUiLoading && (
               <div
                 style={{
@@ -1687,12 +1766,7 @@ function PlaceHolderSign() {
             />
 
             {/* pdf render view */}
-            <div
-              style={{
-                marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-              }}
-            >
+            <div className="min-h-screen w-full md:w-[57%]">
               {/* this modal is used show alert set placeholder for all signers before send mail */}
 
               <ModalUi
@@ -1983,11 +2057,14 @@ function PlaceHolderSign() {
                 currentSigner={true}
                 dataTut4="reactourFour"
               />
-              <div data-tut="reactourThird">
+              <div
+                ref={divRef}
+                data-tut="reactourSecond"
+                className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+              >
                 {containerWH && (
                   <RenderPdf
                     pageNumber={pageNumber}
-                    pdfOriginalWidth={pdfOriginalWidth}
                     pdfNewWidth={pdfNewWidth}
                     pdfDetails={pdfDetails}
                     signerPos={signerPos}
@@ -2022,98 +2099,99 @@ function PlaceHolderSign() {
                     handleNameModal={setIsNameModal}
                     setTempSignerId={setTempSignerId}
                     uniqueId={uniqueId}
+                    setPdfRenderHeight={setPdfRenderHeight}
+                    pdfRenderHeight={pdfRenderHeight}
+                    handleTextSettingModal={handleTextSettingModal}
+                    pdfOriginalWH={pdfOriginalWH}
                   />
                 )}
               </div>
             </div>
 
             {/* signature button */}
-            {isMobile ? (
-              <div>
-                <WidgetComponent
-                  dataTut="reactourFirst"
-                  dataTut2="reactourSecond"
-                  pdfUrl={isMailSend}
-                  dragSignature={dragSignature}
-                  signRef={signRef}
-                  handleDivClick={handleDivClick}
-                  handleMouseLeave={handleMouseLeave}
-                  isDragSign={isDragSign}
-                  dragStamp={dragStamp}
-                  dragRef={dragRef}
-                  isDragStamp={isDragStamp}
-                  isSignYourself={false}
-                  addPositionOfSignature={addPositionOfSignature}
-                  signerPos={signerPos}
-                  signersdata={signersdata}
-                  isSelectListId={isSelectListId}
-                  setSignerObjId={setSignerObjId}
-                  setIsSelectId={setIsSelectId}
-                  setContractName={setContractName}
-                  isSigners={true}
-                  setIsShowEmail={setIsShowEmail}
-                  isMailSend={isMailSend}
-                  setSelectedEmail={setSelectedEmail}
-                  selectedEmail={selectedEmail}
-                  setUniqueId={setUniqueId}
-                  setRoleName={setRoleName}
-                  initial={true}
-                  sendInOrder={pdfDetails[0].SendinOrder}
-                  setSignersData={setSignersData}
-                  blockColor={blockColor}
-                  setBlockColor={setBlockColor}
-                  setIsAddSigner={setIsAddSigner}
-                  handleDeleteUser={handleDeleteUser}
-                />
-              </div>
-            ) : (
-              <div>
-                <div className="signerComponent" aria-disabled>
-                  <div
-                    style={{
-                      maxHeight: window.innerHeight - 70 + "px"
-                    }}
-                    className="autoSignScroll"
-                  >
-                    <SignerListPlace
+            <div className={`w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}>
+              <div className={`max-h-screen`}>
+                {isMobile ? (
+                  <div>
+                    <WidgetComponent
+                      dataTut="reactourFirst"
+                      dataTut2="reactourSecond"
+                      pdfUrl={isMailSend}
+                      dragSignature={dragSignature}
+                      signRef={signRef}
+                      handleDivClick={handleDivClick}
+                      handleMouseLeave={handleMouseLeave}
+                      isDragSign={isDragSign}
+                      dragStamp={dragStamp}
+                      dragRef={dragRef}
+                      isDragStamp={isDragStamp}
+                      isSignYourself={false}
+                      addPositionOfSignature={addPositionOfSignature}
                       signerPos={signerPos}
                       signersdata={signersdata}
                       isSelectListId={isSelectListId}
                       setSignerObjId={setSignerObjId}
                       setIsSelectId={setIsSelectId}
                       setContractName={setContractName}
+                      isSigners={true}
+                      setIsShowEmail={setIsShowEmail}
+                      isMailSend={isMailSend}
+                      setSelectedEmail={setSelectedEmail}
+                      selectedEmail={selectedEmail}
                       setUniqueId={setUniqueId}
                       setRoleName={setRoleName}
+                      initial={true}
                       sendInOrder={pdfDetails[0].SendinOrder}
                       setSignersData={setSignersData}
                       blockColor={blockColor}
                       setBlockColor={setBlockColor}
-                      isMailSend={isMailSend}
                       setIsAddSigner={setIsAddSigner}
                       handleDeleteUser={handleDeleteUser}
-                      roleName={roleName}
-                      // handleAddSigner={handleAddSigner}
                     />
-                    <div data-tut="reactourSecond">
-                      <WidgetComponent
+                  </div>
+                ) : (
+                  <div>
+                    <div className="signerComponent" aria-disabled>
+                      <SignerListPlace
+                        signerPos={signerPos}
+                        signersdata={signersdata}
+                        isSelectListId={isSelectListId}
+                        setSignerObjId={setSignerObjId}
+                        setIsSelectId={setIsSelectId}
+                        setContractName={setContractName}
+                        setUniqueId={setUniqueId}
+                        setRoleName={setRoleName}
+                        sendInOrder={pdfDetails[0].SendinOrder}
+                        setSignersData={setSignersData}
+                        blockColor={blockColor}
+                        setBlockColor={setBlockColor}
                         isMailSend={isMailSend}
-                        dragSignature={dragSignature}
-                        signRef={signRef}
-                        handleDivClick={handleDivClick}
-                        handleMouseLeave={handleMouseLeave}
-                        isDragSign={isDragSign}
-                        dragStamp={dragStamp}
-                        dragRef={dragRef}
-                        isDragStamp={isDragStamp}
-                        isSignYourself={false}
-                        addPositionOfSignature={addPositionOfSignature}
-                        initial={true}
+                        setIsAddSigner={setIsAddSigner}
+                        handleDeleteUser={handleDeleteUser}
+                        roleName={roleName}
+                        // handleAddSigner={handleAddSigner}
                       />
+                      <div data-tut="reactourSecond">
+                        <WidgetComponent
+                          isMailSend={isMailSend}
+                          dragSignature={dragSignature}
+                          signRef={signRef}
+                          handleDivClick={handleDivClick}
+                          handleMouseLeave={handleMouseLeave}
+                          isDragSign={isDragSign}
+                          dragStamp={dragStamp}
+                          dragRef={dragRef}
+                          isDragStamp={isDragStamp}
+                          isSignYourself={false}
+                          addPositionOfSignature={addPositionOfSignature}
+                          initial={true}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
       </DndProvider>
@@ -2145,6 +2223,16 @@ function PlaceHolderSign() {
             </button>
           </div>
         </ModalUi>
+        <TextFontSetting
+          isTextSetting={isTextSetting}
+          setIsTextSetting={setIsTextSetting}
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          fontColor={fontColor}
+          setFontColor={setFontColor}
+          handleSaveFontSize={handleSaveFontSize}
+          currWidgetsDetails={currWidgetsDetails}
+        />
 
         <LinkUserModal
           handleAddUser={handleAddUser}

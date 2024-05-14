@@ -37,6 +37,8 @@ import PdfDeclineModal from "../primitives/PdfDeclineModal";
 import Title from "../components/Title";
 import DefaultSignature from "../components/pdf/DefaultSignature";
 import ModalUi from "../primitives/ModalUi";
+import { useSelector } from "react-redux";
+import SignerListComponent from "../components/pdf/SignerListComponent";
 import VerifyEmail from "../components/pdf/VerifyEmail";
 
 function PdfRequestFiles() {
@@ -65,11 +67,10 @@ function PdfRequestFiles() {
     isLoad: true,
     message: "This might take some time"
   });
-
   const [defaultSignImg, setDefaultSignImg] = useState();
   const [isDocId, setIsDocId] = useState(false);
   const [pdfNewWidth, setPdfNewWidth] = useState();
-  const [pdfOriginalWidth, setPdfOriginalWidth] = useState();
+  const [pdfOriginalWH, setPdfOriginalWH] = useState();
   const [signerPos, setSignerPos] = useState([]);
   const [signerObjectId, setSignerObjectId] = useState();
   const [isUiLoading, setIsUiLoading] = useState(false);
@@ -78,6 +79,7 @@ function PdfRequestFiles() {
   const [isAlert, setIsAlert] = useState({ isShow: false, alertMessage: "" });
   const [unSignedWidgetId, setUnSignedWidgetId] = useState("");
   const [expiredDate, setExpiredDate] = useState("");
+  const [isResize, setIsResize] = useState(false);
   const [defaultSignAlert, setDefaultSignAlert] = useState({
     isShow: false,
     alertMessage: ""
@@ -107,8 +109,9 @@ function PdfRequestFiles() {
   const [isEmailVerified, setIsEmailVerified] = useState(true);
   const [isVerifyModal, setIsVerifyModal] = useState(false);
   const [otp, setOtp] = useState("");
+  const [pdfRenderHeight, setPdfRenderHeight] = useState();
+  const isHeader = useSelector((state) => state.showHeader);
   const divRef = useRef(null);
-  const isMobile = window.innerWidth < 767;
   const rowLevel =
     localStorage.getItem("rowlevel") &&
     JSON.parse(localStorage.getItem("rowlevel"));
@@ -136,16 +139,22 @@ function PdfRequestFiles() {
   }, []);
   useEffect(() => {
     if (divRef.current) {
+      setIsLoading({
+        isLoad: true
+      });
       const pdfWidth = pdfNewWidthFun(divRef);
       setPdfNewWidth(pdfWidth);
       setContainerWH({
         width: divRef.current.offsetWidth,
         height: divRef.current.offsetHeight
       });
+      setIsLoading({
+        isLoad: false
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [divRef.current]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [divRef.current, isHeader, window.innerWidth]);
   //function to use resend otp for email verification
   const handleResend = async (e) => {
     e.preventDefault();
@@ -178,7 +187,6 @@ function PdfRequestFiles() {
       setOtpLoader(false);
     }
   };
-
   //`handleVerifyBtn` function is used to send otp on user mail
   const handleVerifyBtn = async () => {
     setIsVerifyModal(true);
@@ -272,7 +280,6 @@ function PdfRequestFiles() {
         setIsExpired(true);
         setExpiredDate(expireDateFormat);
       }
-
       const isGuestSign = location.pathname.includes("/load/");
       if (
         !isGuestSign &&
@@ -401,7 +408,6 @@ function PdfRequestFiles() {
           }
           setSignedSigners(signers);
           setUnSignedSigners(unSignedSigner);
-
           setSignerPos(documentData[0].Placeholders);
         } else {
           let unsigned = [];
@@ -471,6 +477,33 @@ function PdfRequestFiles() {
         setIsLoading(loadObj);
       });
   };
+
+  // const checkSendInOrder = () => {
+  //   if (sendInOrder) {
+  //     const index = pdfDetails?.[0].Signers.findIndex(
+  //       (x) => x.Email === jsonSender.email
+  //     );
+  //     const newIndex = index - 1;
+  //     if (newIndex !== -1) {
+  //       const user = pdfDetails?.[0].Signers[newIndex];
+  //       const isPrevUserSigned =
+  //         pdfDetails?.[0].AuditTrail &&
+  //         pdfDetails?.[0].AuditTrail.some(
+  //           (x) =>
+  //             x.UserPtr.objectId === user.objectId && x.Activity === "Signed"
+  //         );
+  //       if (isPrevUserSigned) {
+  //         return true;
+  //       } else {
+  //         return false;
+  //       }
+  //     } else {
+  //       return true;
+  //     }
+  //   } else {
+  //     return true;
+  //   }
+  // };
 
   //function for embed signature or image url in pdf
   async function embedWidgetsData() {
@@ -664,10 +697,11 @@ function PdfRequestFiles() {
             const pdfBytes = await multiSignEmbed(
               pngUrl,
               pdfDoc,
-              pdfOriginalWidth,
+              pdfOriginalWH,
               isSignYourSelfFlow,
               containerWH
             );
+            // console.log('pdfte',pdfBytes)
             //get ExistUserPtr object id of user class to get tenantDetails
             const objectId = pdfDetails?.[0]?.ExtUserPtr?.UserId?.objectId;
             //get ExistUserPtr email to get userDetails
@@ -894,26 +928,21 @@ function PdfRequestFiles() {
 
   //function for get pdf page details
   const pageDetails = async (pdf) => {
-    const load = {
-      status: true
-    };
-    setPdfLoadFail(load);
     pdf.getPage(1).then((pdfPage) => {
       const pageWidth = pdfPage.view[2];
+      const pageHeight = pdfPage.view[3];
+      setPdfOriginalWH({ width: pageWidth, height: pageHeight });
 
-      setPdfOriginalWidth(pageWidth);
+      const load = {
+        status: true
+      };
+      setPdfLoadFail(load);
     });
   };
-
   //function for change page
   function changePage(offset) {
     setPageNumber((prevPageNumber) => prevPageNumber + offset);
   }
-
-  const getFirstLetter = (name) => {
-    const firstLetter = name.charAt(0);
-    return firstLetter;
-  };
   //function for image upload or update
   const onImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -1024,7 +1053,9 @@ function PdfRequestFiles() {
   };
 
   const checkSignerBackColor = (obj) => {
-    const data = signerPos.filter((data) => data.signerObjId === obj.objectId);
+    const data = signerPos?.filter(
+      (data) => data?.signerObjId === obj.objectId
+    );
     return data && data.length > 0 && data[0].blockColor;
   };
 
@@ -1171,7 +1202,6 @@ function PdfRequestFiles() {
               )}
 
               <div
-                className="relative flex flex-col md:flex-row justify-between bg-[#ebebeb]"
                 style={{
                   pointerEvents:
                     isExpired ||
@@ -1179,7 +1209,7 @@ function PdfRequestFiles() {
                       ? "none"
                       : "auto"
                 }}
-                ref={divRef}
+                className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]"
               >
                 <ModalUi
                   headerColor={"#dc3545"}
@@ -1345,12 +1375,7 @@ function PdfRequestFiles() {
                 />
 
                 {/* pdf render view */}
-                <div
-                  style={{
-                    marginLeft: !isMobile && pdfOriginalWidth > 500 && "20px",
-                    marginRight: !isMobile && pdfOriginalWidth > 500 && "20px"
-                  }}
-                >
+                <div className="min-h-screen w-full md:w-[57%]">
                   {/* this modal is used show this document is already sign */}
                   <ModalUi
                     isOpen={isCompleted.isModal}
@@ -1430,187 +1455,115 @@ function PdfRequestFiles() {
                     pdfUrl={pdfUrl}
                     alreadySign={alreadySign}
                   />
-                  {containerWH && (
-                    <RenderPdf
-                      pageNumber={pageNumber}
-                      pdfOriginalWidth={pdfOriginalWidth}
-                      pdfNewWidth={pdfNewWidth}
-                      setIsSignPad={setIsSignPad}
-                      setIsStamp={setIsStamp}
-                      setSignKey={setSignKey}
-                      pdfDetails={pdfDetails}
-                      signerPos={signerPos}
-                      successEmail={false}
-                      pdfUrl={pdfUrl}
-                      numPages={numPages}
-                      pageDetails={pageDetails}
-                      pdfRequest={true}
-                      signerObjectId={signerObjectId}
-                      signedSigners={signedSigners}
-                      setCurrentSigner={setCurrentSigner}
-                      setPdfLoadFail={setPdfLoadFail}
-                      pdfLoadFail={pdfLoadFail}
-                      setSignerPos={setSignerPos}
-                      containerWH={containerWH}
-                      setIsInitial={setIsInitial}
-                      setValidateAlert={setValidateAlert}
-                      unSignedWidgetId={unSignedWidgetId}
-                      setSelectWidgetId={setSelectWidgetId}
-                      selectWidgetId={selectWidgetId}
-                      setCurrWidgetsDetails={setCurrWidgetsDetails}
-                    />
-                  )}
+                  <div
+                    ref={divRef}
+                    data-tut="reactourSecond"
+                    className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+                  >
+                    {containerWH && (
+                      <RenderPdf
+                        pageNumber={pageNumber}
+                        pdfOriginalWH={pdfOriginalWH}
+                        pdfNewWidth={pdfNewWidth}
+                        setIsSignPad={setIsSignPad}
+                        setIsStamp={setIsStamp}
+                        setSignKey={setSignKey}
+                        pdfDetails={pdfDetails}
+                        signerPos={signerPos}
+                        successEmail={false}
+                        pdfUrl={pdfUrl}
+                        numPages={numPages}
+                        pageDetails={pageDetails}
+                        pdfRequest={true}
+                        signerObjectId={signerObjectId}
+                        signedSigners={signedSigners}
+                        setCurrentSigner={setCurrentSigner}
+                        setPdfLoadFail={setPdfLoadFail}
+                        pdfLoadFail={pdfLoadFail}
+                        setSignerPos={setSignerPos}
+                        containerWH={containerWH}
+                        setIsInitial={setIsInitial}
+                        setValidateAlert={setValidateAlert}
+                        unSignedWidgetId={unSignedWidgetId}
+                        setSelectWidgetId={setSelectWidgetId}
+                        selectWidgetId={selectWidgetId}
+                        setCurrWidgetsDetails={setCurrWidgetsDetails}
+                        divRef={divRef}
+                        setPdfRenderHeight={setPdfRenderHeight}
+                        pdfRenderHeight={pdfRenderHeight}
+                        setIsResize={setIsResize}
+                        isResize={isResize}
+                      />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <div className="signerComponent">
-                    <div
-                      style={{ maxHeight: window.innerHeight - 70 + "px" }}
-                      className="autoSignScroll"
-                    >
-                      {signedSigners.length > 0 && (
-                        <>
-                          <div
-                            style={{ background: themeColor }}
-                            className="signedStyle"
-                          >
-                            Signed by
-                          </div>
-                          <div style={{ marginTop: "2px" }}>
-                            {signedSigners.map((obj, ind) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    padding: "10px 0",
-                                    background: checkSignerBackColor(obj)
-                                  }}
-                                  key={ind}
-                                >
-                                  <div
-                                    className="signerStyle"
-                                    style={{
-                                      background: "#abd1d0",
-                                      width: 30,
-                                      height: 30,
-                                      display: "flex",
-                                      borderRadius: 30 / 2,
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      margin: "0 10px 0 5px"
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        textAlign: "center",
-                                        fontWeight: "bold",
-                                        color: "black",
-                                        textTransform: "uppercase"
-                                      }}
-                                    >
-                                      {getFirstLetter(obj.Name)}
-                                    </span>
-                                  </div>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column"
-                                    }}
-                                  >
-                                    <span className="userName">{obj.Name}</span>
-                                    <span className="useEmail">
-                                      {obj.Email}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
 
-                      {unsignedSigners.length > 0 && (
-                        <>
-                          <div
-                            style={{
-                              background: themeColor,
-                              color: "white",
-                              padding: "5px",
-                              fontFamily: "sans-serif",
-                              marginTop: signedSigners.length > 0 && "20px"
-                            }}
-                          >
-                            Yet to sign
-                          </div>
-                          <div style={{ marginTop: "5px" }}>
-                            {unsignedSigners.map((obj, ind) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    padding: "10px 0",
-                                    background: checkSignerBackColor(obj)
-                                  }}
-                                  key={ind}
-                                >
-                                  <div
-                                    className="signerStyle"
-                                    style={{
-                                      background: "#abd1d0",
-                                      width: 30,
-                                      height: 30,
-                                      display: "flex",
-                                      borderRadius: 30 / 2,
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      margin: "0 10px 0 5px"
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        textAlign: "center",
-                                        fontWeight: "bold",
-                                        color: "black",
-                                        textTransform: "uppercase"
-                                      }}
-                                    >
-                                      {getFirstLetter(obj.Name)}
-                                    </span>
-                                  </div>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "column"
-                                    }}
-                                  >
-                                    <span className="userName">{obj.Name}</span>
-                                    <span className="useEmail">
-                                      {obj.Email}
-                                    </span>
-                                  </div>
-                                  <hr />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                      {defaultSignImg && !alreadySign && (
-                        <DefaultSignature
-                          defaultSignImg={defaultSignImg}
-                          setDefaultSignImg={setDefaultSignImg}
-                          userObjectId={signerObjectId}
-                          setIsLoading={setIsLoading}
-                          xyPostion={signerPos}
-                          setDefaultSignAlert={setDefaultSignAlert}
-                        />
-                      )}
-                    </div>
+                {/* <div className="signerComponent"> */}
+                <div
+                  className={`w-[23%] bg-[#FFFFFF] min-h-screen autoSignScroll`}
+                >
+                  <div className={`max-h-screen`}>
+                    {signedSigners.length > 0 && (
+                      <>
+                        <div
+                          style={{ backgroundColor: themeColor }}
+                          className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+                        >
+                          <span> Signed by</span>
+                        </div>
+                        <div style={{ marginTop: "2px" }}>
+                          {signedSigners.map((obj, ind) => {
+                            return (
+                              <div key={ind}>
+                                <SignerListComponent
+                                  ind={ind}
+                                  obj={obj}
+                                  checkSignerBackColor={checkSignerBackColor}
+                                  isMenu={isHeader}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+
+                    {unsignedSigners.length > 0 && (
+                      <>
+                        <div
+                          style={{
+                            background: themeColor
+                          }}
+                          className={`bg-[${themeColor}] p-[5px] 2xl:p-[15px] text-[15px] text-white  2xl:text-[35px]`}
+                        >
+                          <span>Yet to sign</span>
+                        </div>
+                        <div style={{ marginTop: "5px" }}>
+                          {unsignedSigners.map((obj, ind) => {
+                            return (
+                              <div key={ind}>
+                                <SignerListComponent
+                                  ind={ind}
+                                  obj={obj}
+                                  checkSignerBackColor={checkSignerBackColor}
+                                  isMenu={isHeader}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                    {defaultSignImg && !alreadySign && (
+                      <DefaultSignature
+                        defaultSignImg={defaultSignImg}
+                        setDefaultSignImg={setDefaultSignImg}
+                        userObjectId={signerObjectId}
+                        setIsLoading={setIsLoading}
+                        xyPostion={signerPos}
+                        setDefaultSignAlert={setDefaultSignAlert}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
