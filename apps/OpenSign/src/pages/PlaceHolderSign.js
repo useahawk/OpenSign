@@ -51,6 +51,7 @@ import Upgrade from "../primitives/Upgrade";
 import Alert from "../primitives/Alert";
 import { useSelector } from "react-redux";
 import TextFontSetting from "../components/pdf/TextFontSetting";
+import PdfZoom from "../components/pdf/PdfZoom";
 
 function PlaceHolderSign() {
   const editorRef = useRef();
@@ -137,6 +138,8 @@ function PlaceHolderSign() {
   });
   const [extUserId, setExtUserId] = useState("");
   const [isCustomize, setIsCustomize] = useState(false);
+  const [zoomPercent, setZoomPercent] = useState(0);
+  const [scale, setScale] = useState(1);
   const isMobile = window.innerWidth < 767;
   const [, drop] = useDrop({
     accept: "BOX",
@@ -455,10 +458,7 @@ function PlaceHolderSign() {
       const signer = signersdata.find((x) => x.Id === uniqueId);
       const pdfRenderWidth = containerWH.width;
       const key = randomId();
-      // const scale = pdfOriginalWH.width / containerWH.width;
-      const scale = containerWH.width / pdfOriginalWH.width;
-      console.log("original width", pdfOriginalWH.width);
-      console.log("containerwidth", containerWH.width);
+      const containerScale = containerWH.width / pdfOriginalWH.width;
       let dropData = [];
       let placeHolder;
       const dragTypeValue = item?.text ? item.text : monitor.type;
@@ -472,7 +472,7 @@ function PlaceHolderSign() {
             (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
           key: key,
           isDrag: false,
-          scale: scale,
+          scale: containerScale,
           // isMobile: isMobile,
           zIndex: posZIndex,
           type: dragTypeValue,
@@ -501,18 +501,16 @@ function PlaceHolderSign() {
           ? y - signBtnPosition[0].yPos
           : y;
         const dropObj = {
-          xPosition: getXPosition / scale,
-          yPosition: getYPosition / scale,
+          xPosition: getXPosition / (containerScale * scale),
+          yPosition: getYPosition / (containerScale * scale),
           isStamp:
             (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
           key: key,
-          scale: scale,
+          scale: containerScale,
           // isMobile: isMobile,
           zIndex: posZIndex,
           type: dragTypeValue,
           options: addWidgetOptions(dragTypeValue)
-          // pdfRenderHeight: pdfRenderHeight,
-          // pdfRenderWidth: pdfRenderWidth
         };
 
         dropData.push(dropObj);
@@ -1708,7 +1706,7 @@ function PlaceHolderSign() {
         ) : handleError ? (
           <HandleError handleError={handleError} />
         ) : (
-          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
+          <div className="flex min-h-screen flex-row justify-center bg-[#EBEBEB]">
             {isUiLoading && (
               <div
                 style={{
@@ -1764,348 +1762,363 @@ function PlaceHolderSign() {
               setSignBtnPosition={setSignBtnPosition}
               pageNumber={pageNumber}
             />
-
             {/* pdf render view */}
-            <div className="min-h-screen w-full md:w-[57%]">
-              {/* this modal is used show alert set placeholder for all signers before send mail */}
+            <div className="min-h-screen w-full md:w-[57%]  flex ml-4">
+              <div className="min-h-screen w-full md:w-[97%] ">
+                {/* this modal is used show alert set placeholder for all signers before send mail */}
 
-              <ModalUi
-                headerColor={
-                  isSendAlert.mssg === "sure" || isSendAlert.mssg === textWidget
-                    ? "#dc3545"
-                    : isSendAlert.mssg === "confirm" && themeColor
-                }
-                isOpen={isSendAlert.alert}
-                title={
-                  isSendAlert.mssg === "sure" || isSendAlert.mssg === textWidget
-                    ? "Fields required"
-                    : isSendAlert.mssg === "confirm" && "Send Mail"
-                }
-                handleClose={() => setIsSendAlert({})}
-                showHeaderMessage={isSendAlert.mssg === "confirm"}
-              >
-                <div
-                  className="max-h-96 overflow-y-scroll scroll-hide"
-                  style={{ padding: 20 }}
+                <ModalUi
+                  headerColor={
+                    isSendAlert.mssg === "sure" ||
+                    isSendAlert.mssg === textWidget
+                      ? "#dc3545"
+                      : isSendAlert.mssg === "confirm" && themeColor
+                  }
+                  isOpen={isSendAlert.alert}
+                  title={
+                    isSendAlert.mssg === "sure" ||
+                    isSendAlert.mssg === textWidget
+                      ? "Fields required"
+                      : isSendAlert.mssg === "confirm" && "Send Mail"
+                  }
+                  handleClose={() => setIsSendAlert({})}
+                  showHeaderMessage={isSendAlert.mssg === "confirm"}
                 >
-                  {isSendAlert.mssg === "sure" ? (
-                    <span>
-                      Please ensure there&apos;s at least one signature widget
-                      added for all recipients.
-                    </span>
-                  ) : isSendAlert.mssg === textWidget ? (
-                    <p>Please confirm that you have filled the text field.</p>
-                  ) : (
-                    isSendAlert.mssg === "confirm" && (
-                      <>
+                  <div
+                    className="max-h-96 overflow-y-scroll scroll-hide"
+                    style={{ padding: 20 }}
+                  >
+                    {isSendAlert.mssg === "sure" ? (
+                      <span>
+                        Please ensure there&apos;s at least one signature widget
+                        added for all recipients.
+                      </span>
+                    ) : isSendAlert.mssg === textWidget ? (
+                      <p>Please confirm that you have filled the text field.</p>
+                    ) : (
+                      isSendAlert.mssg === "confirm" && (
                         <>
-                          {!isCustomize && (
-                            <span>
-                              Are you sure you want to send out this document
-                              for signatures?
-                            </span>
-                          )}
-                          {isCustomize &&
-                            (!isEnableSubscription || isSubscribe) && (
-                              <>
-                                <EmailBody
-                                  editorRef={editorRef}
-                                  requestBody={requestBody}
-                                  requestSubject={requestSubject}
-                                  handleOnchangeRequest={handleOnchangeRequest}
-                                  setRequestSubject={setRequestSubject}
-                                />
-                                <div
-                                  className={
-                                    "flex justify-end  items-center gap-1 mt-2 underline text-blue-700 focus:outline-none cursor-pointer "
-                                  }
-                                  onClick={() => {
-                                    setRequestBody(defaultBody);
-                                    setRequestSubject(defaultSubject);
-                                  }}
-                                >
-                                  <span>Reset to default</span>
-                                </div>
-                              </>
+                          <>
+                            {!isCustomize && (
+                              <span>
+                                Are you sure you want to send out this document
+                                for signatures?
+                              </span>
                             )}
-                          <div
-                            className={
-                              "flex flex-row md:items-center gap-2 md:gap-6 mt-2 "
-                            }
-                          >
-                            <div className="flex flex-row gap-2">
-                              <button
-                                onClick={() => sendEmailToSigners()}
-                                className=" shadow rounded-[2px] py-[3px] px-[25px] font-[500] text-sm "
-                                style={{
-                                  background: themeColor,
-                                  color: "white"
-                                }}
-                              >
-                                Send
-                              </button>
-                              {isCustomize && (
+                            {isCustomize &&
+                              (!isEnableSubscription || isSubscribe) && (
+                                <>
+                                  <EmailBody
+                                    editorRef={editorRef}
+                                    requestBody={requestBody}
+                                    requestSubject={requestSubject}
+                                    handleOnchangeRequest={
+                                      handleOnchangeRequest
+                                    }
+                                    setRequestSubject={setRequestSubject}
+                                  />
+                                  <div
+                                    className={
+                                      "flex justify-end  items-center gap-1 mt-2 underline text-blue-700 focus:outline-none cursor-pointer "
+                                    }
+                                    onClick={() => {
+                                      setRequestBody(defaultBody);
+                                      setRequestSubject(defaultSubject);
+                                    }}
+                                  >
+                                    <span>Reset to default</span>
+                                  </div>
+                                </>
+                              )}
+                            <div
+                              className={
+                                "flex flex-row md:items-center gap-2 md:gap-6 mt-2 "
+                              }
+                            >
+                              <div className="flex flex-row gap-2">
                                 <button
-                                  onClick={() => {
-                                    setIsCustomize(false);
+                                  onClick={() => sendEmailToSigners()}
+                                  className=" shadow rounded-[2px] py-[3px] px-[25px] font-[500] text-sm "
+                                  style={{
+                                    background: themeColor,
+                                    color: "white"
                                   }}
-                                  className=" shadow rounded-[2px] py-[3px] px-[25px] font-[500] text-sm border-[0.1px] border-gray-300"
                                 >
-                                  Close
+                                  Send
                                 </button>
+                                {isCustomize && (
+                                  <button
+                                    onClick={() => {
+                                      setIsCustomize(false);
+                                    }}
+                                    className=" shadow rounded-[2px] py-[3px] px-[25px] font-[500] text-sm border-[0.1px] border-gray-300"
+                                  >
+                                    Close
+                                  </button>
+                                )}
+                              </div>
+
+                              {!isCustomize &&
+                                (isSubscribe || !isEnableSubscription) && (
+                                  <span
+                                    className={
+                                      "cursor-pointer underline text-blue-700 focus:outline-none"
+                                    }
+                                    onClick={() => {
+                                      setIsCustomize(!isCustomize);
+                                    }}
+                                  >
+                                    Cutomize Email
+                                  </span>
+                                )}
+
+                              {!isSubscribe && isEnableSubscription && (
+                                <div className="mt-2">
+                                  <Upgrade
+                                    message="Upgrade to customize Email"
+                                    newWindow={true}
+                                  />
+                                </div>
                               )}
                             </div>
-
-                            {!isCustomize &&
-                              (isSubscribe || !isEnableSubscription) && (
-                                <span
-                                  className={
-                                    "cursor-pointer underline text-blue-700 focus:outline-none"
-                                  }
-                                  onClick={() => {
-                                    setIsCustomize(!isCustomize);
-                                  }}
-                                >
-                                  Cutomize Email
-                                </span>
-                              )}
-
-                            {!isSubscribe && isEnableSubscription && (
-                              <div className="mt-2">
-                                <Upgrade
-                                  message="Upgrade to customize Email"
-                                  newWindow={true}
-                                />
-                              </div>
-                            )}
-                          </div>
+                          </>
                         </>
+                      )
+                    )}
+
+                    {isSendAlert.mssg === "confirm" && (
+                      <>
+                        <div className="flex justify-center items-center mt-3">
+                          <span
+                            style={{
+                              height: 1,
+                              width: "20%",
+                              backgroundColor: "#ccc"
+                            }}
+                          ></span>
+                          <span className="ml-[5px] mr-[5px]">or</span>
+                          <span
+                            style={{
+                              height: 1,
+                              width: "20%",
+                              backgroundColor: "#ccc"
+                            }}
+                          ></span>
+                        </div>
+                        <div className="mt-3 mb-3">{handleShareList()}</div>
                       </>
-                    )
-                  )}
+                    )}
+                  </div>
+                </ModalUi>
 
-                  {isSendAlert.mssg === "confirm" && (
-                    <>
-                      <div className="flex justify-center items-center mt-3">
-                        <span
-                          style={{
-                            height: 1,
-                            width: "20%",
-                            backgroundColor: "#ccc"
-                          }}
-                        ></span>
-                        <span className="ml-[5px] mr-[5px]">or</span>
-                        <span
-                          style={{
-                            height: 1,
-                            width: "20%",
-                            backgroundColor: "#ccc"
-                          }}
-                        ></span>
-                      </div>
-                      <div className="mt-3 mb-3">{handleShareList()}</div>
-                    </>
-                  )}
-                </div>
-              </ModalUi>
+                {/* this modal is used show send mail  message and after send mail success message */}
+                <ModalUi
+                  isOpen={isSend}
+                  title={"Mails Sent"}
+                  handleClose={() => {
+                    setIsSend(false);
+                    setSignerPos([]);
+                  }}
+                >
+                  <div style={{ height: "100%", padding: 20 }}>
+                    {mailStatus === "success" ? (
+                      <p>You have successfully sent mails to all recipients!</p>
+                    ) : (
+                      <p>Please setup mail adapter to send mail!</p>
+                    )}
+                    {isCurrUser && (
+                      <p>Do you want to sign documents right now ?</p>
+                    )}
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "#9f9f9f",
+                        width: "100%",
+                        marginTop: "15px",
+                        marginBottom: "15px"
+                      }}
+                    ></div>
+                    {isCurrUser && (
+                      <button
+                        onClick={() => {
+                          handleRecipientSign();
+                        }}
+                        style={{
+                          background: themeColor,
+                          color: "white"
+                        }}
+                        type="button"
+                        className="finishBtn"
+                      >
+                        Yes
+                      </button>
+                    )}
 
-              {/* this modal is used show send mail  message and after send mail success message */}
-              <ModalUi
-                isOpen={isSend}
-                title={"Mails Sent"}
-                handleClose={() => {
-                  setIsSend(false);
-                  setSignerPos([]);
-                }}
-              >
-                <div style={{ height: "100%", padding: 20 }}>
-                  {mailStatus === "success" ? (
-                    <p>You have successfully sent mails to all recipients!</p>
-                  ) : (
-                    <p>Please setup mail adapter to send mail!</p>
-                  )}
-                  {isCurrUser && (
-                    <p>Do you want to sign documents right now ?</p>
-                  )}
-                  <div
-                    style={{
-                      height: "1px",
-                      backgroundColor: "#9f9f9f",
-                      width: "100%",
-                      marginTop: "15px",
-                      marginBottom: "15px"
-                    }}
-                  ></div>
-                  {isCurrUser && (
                     <button
                       onClick={() => {
-                        handleRecipientSign();
-                      }}
-                      style={{
-                        background: themeColor,
-                        color: "white"
+                        setIsSend(false);
+                        setSignerPos([]);
                       }}
                       type="button"
-                      className="finishBtn"
+                      className="finishBtn cancelBtn"
                     >
-                      Yes
+                      {isCurrUser ? "No" : "Close"}
                     </button>
+                  </div>
+                </ModalUi>
+                <ModalUi
+                  headerColor={"#dc3545"}
+                  isOpen={isShowEmail}
+                  title={"signers alert"}
+                  handleClose={() => {
+                    setIsShowEmail(false);
+                  }}
+                >
+                  <div style={{ height: "100%", padding: 20 }}>
+                    <p>Please select signer for add placeholder!</p>
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "#9f9f9f",
+                        width: "100%",
+                        marginTop: "15px",
+                        marginBottom: "15px"
+                      }}
+                    ></div>
+                    <button
+                      onClick={() => {
+                        setIsShowEmail(false);
+                      }}
+                      type="button"
+                      className="finishBtn cancelBtn"
+                    >
+                      Ok
+                    </button>
+                  </div>
+                </ModalUi>
+                <PlaceholderCopy
+                  isPageCopy={isPageCopy}
+                  setIsPageCopy={setIsPageCopy}
+                  xyPostion={signerPos}
+                  setXyPostion={setSignerPos}
+                  allPages={allPages}
+                  pageNumber={pageNumber}
+                  signKey={signKey}
+                  Id={uniqueId}
+                  widgetType={widgetType}
+                  setUniqueId={setUniqueId}
+                  tempSignerId={tempSignerId}
+                  setTempSignerId={setTempSignerId}
+                />
+                <DropdownWidgetOption
+                  type={radioButtonWidget}
+                  title="Radio group"
+                  showDropdown={isRadio}
+                  setShowDropdown={setIsRadio}
+                  handleSaveWidgetsOptions={handleSaveWidgetsOptions}
+                  currWidgetsDetails={currWidgetsDetails}
+                  setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  handleClose={handleNameModal}
+                  isSubscribe={isSubscribe}
+                />
+                <DropdownWidgetOption
+                  type="checkbox"
+                  title="Checkbox"
+                  showDropdown={isCheckbox}
+                  setShowDropdown={setIsCheckbox}
+                  handleSaveWidgetsOptions={handleSaveWidgetsOptions}
+                  currWidgetsDetails={currWidgetsDetails}
+                  setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  handleClose={handleNameModal}
+                  isSubscribe={isSubscribe}
+                />
+                <DropdownWidgetOption
+                  type="dropdown"
+                  title="Dropdown options"
+                  showDropdown={showDropdown}
+                  setShowDropdown={setShowDropdown}
+                  handleSaveWidgetsOptions={handleSaveWidgetsOptions}
+                  currWidgetsDetails={currWidgetsDetails}
+                  setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  handleClose={handleNameModal}
+                  isSubscribe={isSubscribe}
+                />
+
+                {/* pdf header which contain funish back button */}
+                <Header
+                  isPlaceholder={true}
+                  pageNumber={pageNumber}
+                  allPages={allPages}
+                  changePage={changePage}
+                  pdfDetails={pdfDetails}
+                  signerPos={signerPos}
+                  signersdata={signersdata}
+                  isMailSend={isMailSend}
+                  alertSendEmail={alertSendEmail}
+                  isShowHeader={true}
+                  currentSigner={true}
+                  dataTut4="reactourFour"
+                />
+                <div
+                  ref={divRef}
+                  data-tut="reactourSecond"
+                  className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+                >
+                  {containerWH && (
+                    <RenderPdf
+                      pageNumber={pageNumber}
+                      pdfNewWidth={pdfNewWidth}
+                      pdfDetails={pdfDetails}
+                      signerPos={signerPos}
+                      successEmail={false}
+                      numPages={numPages}
+                      pageDetails={pageDetails}
+                      placeholder={true}
+                      drop={drop}
+                      handleDeleteSign={handleDeleteSign}
+                      handleTabDrag={handleTabDrag}
+                      handleStop={handleStop}
+                      setPdfLoadFail={setPdfLoadFail}
+                      pdfLoadFail={pdfLoadFail}
+                      setSignerPos={setSignerPos}
+                      containerWH={containerWH}
+                      setIsResize={setIsResize}
+                      setZIndex={setZIndex}
+                      setIsPageCopy={setIsPageCopy}
+                      signersdata={signersdata}
+                      setSignKey={setSignKey}
+                      setSignerObjId={setSignerObjId}
+                      handleLinkUser={handleLinkUser}
+                      setUniqueId={setUniqueId}
+                      isDragging={isDragging}
+                      setShowDropdown={setShowDropdown}
+                      setWidgetType={setWidgetType}
+                      setIsRadio={setIsRadio}
+                      setIsCheckbox={setIsCheckbox}
+                      setCurrWidgetsDetails={setCurrWidgetsDetails}
+                      setSelectWidgetId={setSelectWidgetId}
+                      selectWidgetId={selectWidgetId}
+                      handleNameModal={setIsNameModal}
+                      setTempSignerId={setTempSignerId}
+                      uniqueId={uniqueId}
+                      setPdfRenderHeight={setPdfRenderHeight}
+                      pdfRenderHeight={pdfRenderHeight}
+                      handleTextSettingModal={handleTextSettingModal}
+                      pdfOriginalWH={pdfOriginalWH}
+                      setScale={setScale}
+                      scale={scale}
+                    />
                   )}
-
-                  <button
-                    onClick={() => {
-                      setIsSend(false);
-                      setSignerPos([]);
-                    }}
-                    type="button"
-                    className="finishBtn cancelBtn"
-                  >
-                    {isCurrUser ? "No" : "Close"}
-                  </button>
                 </div>
-              </ModalUi>
-              <ModalUi
-                headerColor={"#dc3545"}
-                isOpen={isShowEmail}
-                title={"signers alert"}
-                handleClose={() => {
-                  setIsShowEmail(false);
-                }}
-              >
-                <div style={{ height: "100%", padding: 20 }}>
-                  <p>Please select signer for add placeholder!</p>
-                  <div
-                    style={{
-                      height: "1px",
-                      backgroundColor: "#9f9f9f",
-                      width: "100%",
-                      marginTop: "15px",
-                      marginBottom: "15px"
-                    }}
-                  ></div>
-                  <button
-                    onClick={() => {
-                      setIsShowEmail(false);
-                    }}
-                    type="button"
-                    className="finishBtn cancelBtn"
-                  >
-                    Ok
-                  </button>
-                </div>
-              </ModalUi>
-              <PlaceholderCopy
-                isPageCopy={isPageCopy}
-                setIsPageCopy={setIsPageCopy}
-                xyPostion={signerPos}
-                setXyPostion={setSignerPos}
-                allPages={allPages}
-                pageNumber={pageNumber}
-                signKey={signKey}
-                Id={uniqueId}
-                widgetType={widgetType}
-                setUniqueId={setUniqueId}
-                tempSignerId={tempSignerId}
-                setTempSignerId={setTempSignerId}
-              />
-              <DropdownWidgetOption
-                type={radioButtonWidget}
-                title="Radio group"
-                showDropdown={isRadio}
-                setShowDropdown={setIsRadio}
-                handleSaveWidgetsOptions={handleSaveWidgetsOptions}
-                currWidgetsDetails={currWidgetsDetails}
-                setCurrWidgetsDetails={setCurrWidgetsDetails}
-                handleClose={handleNameModal}
-                isSubscribe={isSubscribe}
-              />
-              <DropdownWidgetOption
-                type="checkbox"
-                title="Checkbox"
-                showDropdown={isCheckbox}
-                setShowDropdown={setIsCheckbox}
-                handleSaveWidgetsOptions={handleSaveWidgetsOptions}
-                currWidgetsDetails={currWidgetsDetails}
-                setCurrWidgetsDetails={setCurrWidgetsDetails}
-                handleClose={handleNameModal}
-                isSubscribe={isSubscribe}
-              />
-              <DropdownWidgetOption
-                type="dropdown"
-                title="Dropdown options"
-                showDropdown={showDropdown}
-                setShowDropdown={setShowDropdown}
-                handleSaveWidgetsOptions={handleSaveWidgetsOptions}
-                currWidgetsDetails={currWidgetsDetails}
-                setCurrWidgetsDetails={setCurrWidgetsDetails}
-                handleClose={handleNameModal}
-                isSubscribe={isSubscribe}
-              />
-
-              {/* pdf header which contain funish back button */}
-              <Header
-                isPlaceholder={true}
-                pageNumber={pageNumber}
-                allPages={allPages}
-                changePage={changePage}
-                pdfDetails={pdfDetails}
-                signerPos={signerPos}
-                signersdata={signersdata}
-                isMailSend={isMailSend}
-                alertSendEmail={alertSendEmail}
-                isShowHeader={true}
-                currentSigner={true}
-                dataTut4="reactourFour"
-              />
-              <div
-                ref={divRef}
-                data-tut="reactourSecond"
-                className="h-[95%] 2xl:mt-[6px] mt-[3px]"
-              >
-                {containerWH && (
-                  <RenderPdf
-                    pageNumber={pageNumber}
-                    pdfNewWidth={pdfNewWidth}
-                    pdfDetails={pdfDetails}
-                    signerPos={signerPos}
-                    successEmail={false}
-                    numPages={numPages}
-                    pageDetails={pageDetails}
-                    placeholder={true}
-                    drop={drop}
-                    handleDeleteSign={handleDeleteSign}
-                    handleTabDrag={handleTabDrag}
-                    handleStop={handleStop}
-                    setPdfLoadFail={setPdfLoadFail}
-                    pdfLoadFail={pdfLoadFail}
-                    setSignerPos={setSignerPos}
-                    containerWH={containerWH}
-                    setIsResize={setIsResize}
-                    setZIndex={setZIndex}
-                    setIsPageCopy={setIsPageCopy}
-                    signersdata={signersdata}
-                    setSignKey={setSignKey}
-                    setSignerObjId={setSignerObjId}
-                    handleLinkUser={handleLinkUser}
-                    setUniqueId={setUniqueId}
-                    isDragging={isDragging}
-                    setShowDropdown={setShowDropdown}
-                    setWidgetType={setWidgetType}
-                    setIsRadio={setIsRadio}
-                    setIsCheckbox={setIsCheckbox}
-                    setCurrWidgetsDetails={setCurrWidgetsDetails}
-                    setSelectWidgetId={setSelectWidgetId}
-                    selectWidgetId={selectWidgetId}
-                    handleNameModal={setIsNameModal}
-                    setTempSignerId={setTempSignerId}
-                    uniqueId={uniqueId}
-                    setPdfRenderHeight={setPdfRenderHeight}
-                    pdfRenderHeight={pdfRenderHeight}
-                    handleTextSettingModal={handleTextSettingModal}
-                    pdfOriginalWH={pdfOriginalWH}
-                  />
-                )}
               </div>
+              <PdfZoom
+                setScale={setScale}
+                scale={scale}
+                pdfOriginalWH={pdfOriginalWH}
+                containerWH={containerWH}
+                setZoomPercent={setZoomPercent}
+                zoomPercent={zoomPercent}
+              />
             </div>
 
             {/* signature button */}

@@ -195,11 +195,11 @@ export const handleImageResize = (
   setSignerPos,
   pageNumber,
   containerScale,
+  scale,
   signerId,
   showResize
 ) => {
   const filterSignerPos = signerPos.filter((data) => data.Id === signerId);
-
   if (filterSignerPos.length > 0) {
     const getPlaceHolder = filterSignerPos[0].placeHolder;
     const getPageNumer = getPlaceHolder.filter(
@@ -1305,10 +1305,9 @@ export const multiSignEmbed = async (
   pdfDoc,
   pdfOriginalWH,
   signyourself,
-  containerWH,
-  zoomPercent
+  containerWH
+  // zoomPercent
 ) => {
-  console.log("zoommul", zoomPercent);
   for (let item of pngUrl) {
     const typeExist = item.pos.some((data) => data?.type);
     let updateItem;
@@ -1323,9 +1322,9 @@ export const multiSignEmbed = async (
     } else {
       updateItem = item.pos;
     }
-    const newWidth = containerWH.width;
+    // const newWidth = containerWH.width;
     // const scale = pdfOriginalWH.width / newWidth;
-    const scale = newWidth / pdfOriginalWH.width;
+    // const scale = newWidth / pdfOriginalWH.width;
 
     // isMobile ? pdfOriginalWidth / newWidth : 1;
     const pageNo = item.pageNumber;
@@ -1375,23 +1374,23 @@ export const multiSignEmbed = async (
       }
       let scaleWidth, scaleHeight;
       scaleWidth = placeholderWidth(
-        position,
-        scale,
-        signyourself,
-        pdfOriginalWH,
-        zoomPercent
+        position
+        // scale,
+        // signyourself,
+        // pdfOriginalWH,
+        // zoomPercent
       );
       scaleHeight = placeholderHeight(
-        position,
-        scale,
-        signyourself,
-        pdfOriginalWH.height,
-        zoomPercent
+        position
+        // scale,
+        // signyourself,
+        // pdfOriginalWH.height,
+        // zoomPercent
       );
       const xPos = (pos) => {
         const resizePos = pos.xPosition;
 
-        return resizePos / zoomPercent;
+        return resizePos;
         // if (signyourself) {
         //   return resizePos;
         // } else {
@@ -1432,7 +1431,7 @@ export const multiSignEmbed = async (
               ? 10
               : newUpdateHeight;
         const newHeight = ind ? (ind > 0 ? widgetHeight : 0) : widgetHeight;
-        return page.getHeight() - resizePos / zoomPercent - newHeight;
+        return page.getHeight() - resizePos - newHeight;
         // if (signyourself) {
         //   if (isMobile) {
         //     if (ind && ind > 0 && position.type === "checkbox") {
@@ -1558,7 +1557,6 @@ export const multiSignEmbed = async (
       } else if (widgetTypeExist) {
         const font = await pdfDoc.embedFont("Helvetica");
         const fontSize = parseInt(position?.options?.fontSize) || 12;
-        console.log("fontsize", fontSize);
         const color = position?.options?.fontColor;
         let updateColorInRgb;
         if (color === "red") {
@@ -1729,11 +1727,11 @@ export function urlValidator(url) {
 }
 
 export const placeholderWidth = (
-  pos,
-  scale,
-  signyourself,
-  containerWH,
-  zoomPercent
+  pos
+  // scale,
+  // signyourself,
+  // containerWH,
+  // zoomPercent
 ) => {
   const defaultWidth = defaultWidthHeight(pos.type).width;
   const posWidth = pos.Width || defaultWidth;
@@ -1775,17 +1773,16 @@ export const placeholderWidth = (
   // }
 };
 export const placeholderHeight = (
-  pos,
-  scale,
-  signyourself,
-  pdfRenderHeight,
-  zoomPercent
+  pos
+  // scale,
+  // signyourself,
+  // pdfRenderHeight,
+  // zoomPercent
 ) => {
-  let height;
+  // let height;
   const posHeight = pos.Height;
   const defaultHeight = defaultWidthHeight(pos.type).height;
   const posUpdateHeight = posHeight || defaultHeight;
-  let pixelHeight;
 
   return posUpdateHeight;
   // if (signyourself) {

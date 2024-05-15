@@ -40,6 +40,7 @@ import ModalUi from "../primitives/ModalUi";
 import { useSelector } from "react-redux";
 import SignerListComponent from "../components/pdf/SignerListComponent";
 import VerifyEmail from "../components/pdf/VerifyEmail";
+import PdfZoom from "../components/pdf/PdfZoom";
 
 function PdfRequestFiles() {
   const { docId } = useParams();
@@ -110,6 +111,9 @@ function PdfRequestFiles() {
   const [isVerifyModal, setIsVerifyModal] = useState(false);
   const [otp, setOtp] = useState("");
   const [pdfRenderHeight, setPdfRenderHeight] = useState();
+  const [zoomPercent, setZoomPercent] = useState(0);
+  const [totalZoomPercent, setTotalZoomPercent] = useState();
+  const [scale, setScale] = useState(1);
   const isHeader = useSelector((state) => state.showHeader);
   const divRef = useRef(null);
   const rowLevel =
@@ -699,9 +703,10 @@ function PdfRequestFiles() {
               pdfDoc,
               pdfOriginalWH,
               isSignYourSelfFlow,
-              containerWH
+              containerWH,
+              scale
             );
-            // console.log('pdfte',pdfBytes)
+            // console.log("pdfte", pdfBytes);
             //get ExistUserPtr object id of user class to get tenantDetails
             const objectId = pdfDetails?.[0]?.ExtUserPtr?.UserId?.objectId;
             //get ExistUserPtr email to get userDetails
@@ -1209,7 +1214,7 @@ function PdfRequestFiles() {
                       ? "none"
                       : "auto"
                 }}
-                className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]"
+                className="flex min-h-screen flex-row justify-center bg-[#EBEBEB]"
               >
                 <ModalUi
                   headerColor={"#dc3545"}
@@ -1373,129 +1378,149 @@ function PdfRequestFiles() {
                   setPageNumber={setPageNumber}
                   pageNumber={pageNumber}
                 />
-
                 {/* pdf render view */}
-                <div className="min-h-screen w-full md:w-[57%]">
-                  {/* this modal is used show this document is already sign */}
-                  <ModalUi
-                    isOpen={isCompleted.isModal}
-                    title={"Sign Documents"}
-                    handleClose={() => {
-                      setIsCompleted((prev) => ({ ...prev, isModal: false }));
-                    }}
-                  >
-                    <div style={{ height: "100%", padding: 20 }}>
-                      <p>
-                        {" "}
-                        {isCompleted?.message ||
-                          "This document has been signed by all Signers."}
-                      </p>
+                <div className="min-h-screen w-full md:w-[57%] flex ml-4">
+                  <div className="min-h-screen w-full md:w-[97%] ">
+                    {/* this modal is used show this document is already sign */}
+                    <ModalUi
+                      isOpen={isCompleted.isModal}
+                      title={"Sign Documents"}
+                      handleClose={() => {
+                        setIsCompleted((prev) => ({ ...prev, isModal: false }));
+                      }}
+                    >
+                      <div style={{ height: "100%", padding: 20 }}>
+                        <p>
+                          {" "}
+                          {isCompleted?.message ||
+                            "This document has been signed by all Signers."}
+                        </p>
 
-                      <div
-                        style={{
-                          height: "1px",
-                          backgroundColor: "#9f9f9f",
-                          width: "100%",
-                          marginTop: "15px",
-                          marginBottom: "15px"
-                        }}
-                      ></div>
-                      <button
-                        type="button"
-                        className="finishBtn cancelBtn"
-                        onClick={() => {
-                          setIsCompleted((prev) => ({
-                            ...prev,
-                            isModal: false
-                          }));
-                        }}
-                      >
-                        Close
-                      </button>
+                        <div
+                          style={{
+                            height: "1px",
+                            backgroundColor: "#9f9f9f",
+                            width: "100%",
+                            marginTop: "15px",
+                            marginBottom: "15px"
+                          }}
+                        ></div>
+                        <button
+                          type="button"
+                          className="finishBtn cancelBtn"
+                          onClick={() => {
+                            setIsCompleted((prev) => ({
+                              ...prev,
+                              isModal: false
+                            }));
+                          }}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </ModalUi>
+
+                    {/* this component is used for signature pad modal */}
+                    <SignPad
+                      isSignPad={isSignPad}
+                      isStamp={isStamp}
+                      setIsImageSelect={setIsImageSelect}
+                      setIsSignPad={setIsSignPad}
+                      setImage={setImage}
+                      isImageSelect={isImageSelect}
+                      imageRef={imageRef}
+                      onImageChange={onImageChange}
+                      setSignature={setSignature}
+                      image={image}
+                      onSaveImage={saveImage}
+                      onSaveSign={saveSign}
+                      defaultSign={defaultSignImg}
+                      myInitial={myInitial}
+                      isInitial={isInitial}
+                      setIsInitial={setIsInitial}
+                      setIsStamp={setIsStamp}
+                      currWidgetsDetails={currWidgetsDetails}
+                      setCurrWidgetsDetails={setCurrWidgetsDetails}
+                    />
+                    {/* pdf header which contain funish back button */}
+                    <Header
+                      isPdfRequestFiles={true}
+                      pageNumber={pageNumber}
+                      allPages={allPages}
+                      changePage={changePage}
+                      pdfDetails={pdfDetails}
+                      signerPos={signerPos}
+                      isSigned={isSigned}
+                      isCompleted={isCompleted.isCertificate}
+                      embedWidgetsData={embedWidgetsData}
+                      isShowHeader={true}
+                      setIsDecline={setIsDecline}
+                      decline={true}
+                      currentSigner={currentSigner}
+                      pdfUrl={pdfUrl}
+                      alreadySign={alreadySign}
+                      totalZoomPercent={totalZoomPercent}
+                      setTotalZoomPercent={setTotalZoomPercent}
+                      setScale={setScale}
+                      scale={scale}
+                      pdfOriginalWH={pdfOriginalWH}
+                      containerWH={containerWH}
+                      setZoomPercent={setZoomPercent}
+                      zoomPercent={zoomPercent}
+                    />
+                    <div
+                      ref={divRef}
+                      data-tut="reactourSecond"
+                      className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+                    >
+                      {containerWH && (
+                        <RenderPdf
+                          pageNumber={pageNumber}
+                          pdfOriginalWH={pdfOriginalWH}
+                          pdfNewWidth={pdfNewWidth}
+                          setIsSignPad={setIsSignPad}
+                          setIsStamp={setIsStamp}
+                          setSignKey={setSignKey}
+                          pdfDetails={pdfDetails}
+                          signerPos={signerPos}
+                          successEmail={false}
+                          pdfUrl={pdfUrl}
+                          numPages={numPages}
+                          pageDetails={pageDetails}
+                          pdfRequest={true}
+                          signerObjectId={signerObjectId}
+                          signedSigners={signedSigners}
+                          setCurrentSigner={setCurrentSigner}
+                          setPdfLoadFail={setPdfLoadFail}
+                          pdfLoadFail={pdfLoadFail}
+                          setSignerPos={setSignerPos}
+                          containerWH={containerWH}
+                          setIsInitial={setIsInitial}
+                          setValidateAlert={setValidateAlert}
+                          unSignedWidgetId={unSignedWidgetId}
+                          setSelectWidgetId={setSelectWidgetId}
+                          selectWidgetId={selectWidgetId}
+                          setCurrWidgetsDetails={setCurrWidgetsDetails}
+                          divRef={divRef}
+                          setPdfRenderHeight={setPdfRenderHeight}
+                          pdfRenderHeight={pdfRenderHeight}
+                          setIsResize={setIsResize}
+                          isResize={isResize}
+                          setTotalZoomPercent={setTotalZoomPercent}
+                          setScale={setScale}
+                          scale={scale}
+                        />
+                      )}
                     </div>
-                  </ModalUi>
-
-                  {/* this component is used for signature pad modal */}
-                  <SignPad
-                    isSignPad={isSignPad}
-                    isStamp={isStamp}
-                    setIsImageSelect={setIsImageSelect}
-                    setIsSignPad={setIsSignPad}
-                    setImage={setImage}
-                    isImageSelect={isImageSelect}
-                    imageRef={imageRef}
-                    onImageChange={onImageChange}
-                    setSignature={setSignature}
-                    image={image}
-                    onSaveImage={saveImage}
-                    onSaveSign={saveSign}
-                    defaultSign={defaultSignImg}
-                    myInitial={myInitial}
-                    isInitial={isInitial}
-                    setIsInitial={setIsInitial}
-                    setIsStamp={setIsStamp}
-                    currWidgetsDetails={currWidgetsDetails}
-                    setCurrWidgetsDetails={setCurrWidgetsDetails}
-                  />
-                  {/* pdf header which contain funish back button */}
-                  <Header
-                    isPdfRequestFiles={true}
-                    pageNumber={pageNumber}
-                    allPages={allPages}
-                    changePage={changePage}
-                    pdfDetails={pdfDetails}
-                    signerPos={signerPos}
-                    isSigned={isSigned}
-                    isCompleted={isCompleted.isCertificate}
-                    embedWidgetsData={embedWidgetsData}
-                    isShowHeader={true}
-                    setIsDecline={setIsDecline}
-                    decline={true}
-                    currentSigner={currentSigner}
-                    pdfUrl={pdfUrl}
-                    alreadySign={alreadySign}
-                  />
-                  <div
-                    ref={divRef}
-                    data-tut="reactourSecond"
-                    className="h-[95%] 2xl:mt-[6px] mt-[3px]"
-                  >
-                    {containerWH && (
-                      <RenderPdf
-                        pageNumber={pageNumber}
-                        pdfOriginalWH={pdfOriginalWH}
-                        pdfNewWidth={pdfNewWidth}
-                        setIsSignPad={setIsSignPad}
-                        setIsStamp={setIsStamp}
-                        setSignKey={setSignKey}
-                        pdfDetails={pdfDetails}
-                        signerPos={signerPos}
-                        successEmail={false}
-                        pdfUrl={pdfUrl}
-                        numPages={numPages}
-                        pageDetails={pageDetails}
-                        pdfRequest={true}
-                        signerObjectId={signerObjectId}
-                        signedSigners={signedSigners}
-                        setCurrentSigner={setCurrentSigner}
-                        setPdfLoadFail={setPdfLoadFail}
-                        pdfLoadFail={pdfLoadFail}
-                        setSignerPos={setSignerPos}
-                        containerWH={containerWH}
-                        setIsInitial={setIsInitial}
-                        setValidateAlert={setValidateAlert}
-                        unSignedWidgetId={unSignedWidgetId}
-                        setSelectWidgetId={setSelectWidgetId}
-                        selectWidgetId={selectWidgetId}
-                        setCurrWidgetsDetails={setCurrWidgetsDetails}
-                        divRef={divRef}
-                        setPdfRenderHeight={setPdfRenderHeight}
-                        pdfRenderHeight={pdfRenderHeight}
-                        setIsResize={setIsResize}
-                        isResize={isResize}
-                      />
-                    )}
                   </div>
+                  <PdfZoom
+                    setScale={setScale}
+                    scale={scale}
+                    pdfOriginalWH={pdfOriginalWH}
+                    containerWH={containerWH}
+                    setZoomPercent={setZoomPercent}
+                    zoomPercent={zoomPercent}
+                  />
                 </div>
 
                 {/* <div className="signerComponent"> */}

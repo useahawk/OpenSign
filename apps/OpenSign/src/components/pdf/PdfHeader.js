@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PrevNext from "./PrevNext";
 import printModule from "print-js";
 import { getBase64FromUrl } from "../../constant/Utils";
@@ -34,15 +34,7 @@ function Header({
   isSignYourself,
   setIsEmail,
   completeBtnTitle,
-  setIsEditTemplate,
-  totalZoomPercent,
-  setTotalZoomPercent,
-  setScale,
-  scale,
-  pdfOriginalWH,
-  containerWH,
-  setZoomPercent,
-  zoomPercent
+  setIsEditTemplate
 }) {
   const filterPrefill =
     signerPos && signerPos?.filter((data) => data.Role !== "prefill");
@@ -50,18 +42,6 @@ function Header({
   const navigate = useNavigate();
   const [isCertificate, setIsCertificate] = useState(false);
   const isGuestSigner = localStorage.getItem("isGuestSigner");
-  const [fixedZoom, setFixedZoom] = useState();
-
-  const getZoomPercent = () => {
-    return Math.floor(totalZoomPercent);
-  };
-  useEffect(() => {
-    if (pdfOriginalWH) {
-      const value = (containerWH.width / pdfOriginalWH.width) * 100;
-      setFixedZoom(value);
-      console.log("value", value);
-    }
-  }, [pdfOriginalWH, containerWH]);
 
   //for go to previous page
   function previousPage() {
@@ -193,17 +173,7 @@ function Header({
       }
     }
   };
-  const onClickZoomIn = () => {
-    setScale(scale + 0.1 * scale);
-    setTotalZoomPercent(totalZoomPercent + 10);
-    setZoomPercent(zoomPercent + 10);
-  };
-  console.log("zoom", zoomPercent);
-  const onClickZoomOut = () => {
-    setScale(scale - 0.1 * scale);
-    setTotalZoomPercent(totalZoomPercent - 10);
-    setZoomPercent(zoomPercent - 10);
-  };
+
   return (
     <div style={{ padding: "5px 0px 5px 0px" }} className="mobileHead">
       {isMobile && isShowHeader ? (
@@ -448,6 +418,7 @@ function Header({
                     </div>
                   )}
               </div>
+
               <div className="flex">
                 {setIsEditTemplate && (
                   <button
@@ -485,76 +456,81 @@ function Header({
               </div>
             </>
           ) : isPdfRequestFiles ? (
-            alreadySign ? (
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                {isCompleted && (
+            <>
+              {alreadySign ? (
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  {isCompleted && (
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadCertificate()}
+                      className="flex flex-row  2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] items-center shadow rounded-[3px] py-[3px] px-[11px] text-white font-[500] text-[13px] mr-[5px] bg-[#08bc66]"
+                    >
+                      <i
+                        className="fa-solid fa-award py-[3px]"
+                        aria-hidden="true"
+                      ></i>
+                      <span className="hidden lg:block ml-1">Certificate</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleToPrint}
+                    type="button"
+                    className="flex flex-row items-center  2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px]  shadow rounded-[3px] py-[3px] px-[11px] text-white font-[500] text-[13px] mr-[5px] bg-[#188ae2]"
+                  >
+                    <i className="fa fa-print py-[3px]" aria-hidden="true"></i>
+                    <span className="hidden lg:block ml-1">Print</span>
+                  </button>
+
                   <button
                     type="button"
-                    onClick={() => handleDownloadCertificate()}
-                    className="flex flex-row  2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] items-center shadow rounded-[3px] py-[3px] px-[11px] text-white font-[500] text-[13px] mr-[5px] bg-[#08bc66]"
+                    className="flex flex-row items-center  2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] shadow rounded-[3px] py-[3px] px-[11px] text-white font-[500] text-[13px] mr-[5px] bg-[#f14343]"
+                    onClick={() => handleDownloadPdf()}
                   >
                     <i
-                      className="fa-solid fa-award py-[3px]"
+                      className="fa fa-download py-[3px]"
                       aria-hidden="true"
                     ></i>
-                    <span className="hidden lg:block ml-1">Certificate</span>
+                    <span className="hidden lg:block ml-1">Download</span>
                   </button>
-                )}
-
-                <button
-                  onClick={handleToPrint}
-                  type="button"
-                  className="flex flex-row items-center  2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px]  shadow rounded-[3px] py-[3px] px-[11px] text-white font-[500] text-[13px] mr-[5px] bg-[#188ae2]"
-                >
-                  <i className="fa fa-print py-[3px]" aria-hidden="true"></i>
-                  <span className="hidden lg:block ml-1">Print</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="flex flex-row items-center  2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] shadow rounded-[3px] py-[3px] px-[11px] text-white font-[500] text-[13px] mr-[5px] bg-[#f14343]"
-                  onClick={() => handleDownloadPdf()}
-                >
-                  <i className="fa fa-download py-[3px]" aria-hidden="true"></i>
-                  <span className="hidden lg:block ml-1">Download</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex">
-                <button
-                  onClick={() => navigate(-1)}
-                  type="button"
-                  className="flex flex-row 2xl:py-[6px] 2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] items-center shadow rounded-[3px] py-[3px] px-[18px] text-black font-[500] text-sm mr-[5px] bg-white"
-                >
-                  Back
-                </button>
-                {currentSigner && (
-                  <>
-                    <button
-                      style={{ background: "#de4337" }}
-                      className="flex flex-row items-center 2xl:py-[6px] 2xl:px-[50px]2xl:mr-[15px] 2xl:text-[30px] shadow rounded-[3px] py-[3px] px-[18px] text-white font-[500] text-[13px] mr-[5px] bg-[#f14343]"
-                      onClick={() => {
-                        handleDeclinePdfAlert();
-                      }}
-                    >
-                      Decline
-                    </button>
-                    <button
-                      style={{
-                        background: "#188ae2"
-                      }}
-                      type="button"
-                      className="flex flex-row items-center 2xl:py-[6px] 2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] shadow rounded-[3px] py-[3px] px-[18px] text-white font-[500] text-[13px] mr-[5px] bg-[#188ae2]"
-                      onClick={() => {
-                        embedWidgetsData();
-                      }}
-                    >
-                      Finish
-                    </button>
-                  </>
-                )}
-              </div>
-            )
+                </div>
+              ) : (
+                <div className="flex">
+                  <button
+                    onClick={() => navigate(-1)}
+                    type="button"
+                    className="flex flex-row 2xl:py-[6px] 2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] items-center shadow rounded-[3px] py-[3px] px-[18px] text-black font-[500] text-sm mr-[5px] bg-white"
+                  >
+                    Back
+                  </button>
+                  {currentSigner && (
+                    <>
+                      <button
+                        style={{ background: "#de4337" }}
+                        className="flex flex-row items-center 2xl:py-[6px] 2xl:px-[50px]2xl:mr-[15px] 2xl:text-[30px] shadow rounded-[3px] py-[3px] px-[18px] text-white font-[500] text-[13px] mr-[5px] bg-[#f14343]"
+                        onClick={() => {
+                          handleDeclinePdfAlert();
+                        }}
+                      >
+                        Decline
+                      </button>
+                      <button
+                        style={{
+                          background: "#188ae2"
+                        }}
+                        type="button"
+                        className="flex flex-row items-center 2xl:py-[6px] 2xl:px-[50px]2xl:mr-[15px] 2xl:text-[32px] shadow rounded-[3px] py-[3px] px-[18px] text-white font-[500] text-[13px] mr-[5px] bg-[#188ae2]"
+                        onClick={() => {
+                          embedWidgetsData();
+                        }}
+                      >
+                        Finish
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
           ) : isCompleted ? (
             <div style={{ display: "flex", flexDirection: "row" }}>
               {isCompleted && (
@@ -614,28 +590,6 @@ function Header({
             </div>
           ) : (
             <>
-              <div className="flex mx-[100px] lg:mx-0 order-last lg:order-none gap-1">
-                <button
-                  onClick={onClickZoomOut}
-                  disabled={fixedZoom === totalZoomPercent}
-                  type="button"
-                  style={{
-                    background:
-                      fixedZoom === totalZoomPercent ? "#ded7d7" : "white"
-                  }}
-                  className="flex flex-row items-center shadow rounded-[3px] px-[10px] text-black font-[500] md:text-sm 2xl:text-[29px]"
-                >
-                  -
-                </button>
-                <span className="px-[2px]">{getZoomPercent()}%</span>
-                <button
-                  onClick={onClickZoomIn}
-                  type="button"
-                  className="flex flex-row items-center shadow rounded-[3px] px-[10px] text-black font-[500] md:text-sm 2xl:text-[29px] bg-white"
-                >
-                  +
-                </button>
-              </div>
               <div className="flex">
                 <button
                   onClick={() => {
