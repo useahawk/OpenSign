@@ -389,7 +389,15 @@ function Placeholder(props) {
         <>
           {(props.isPlaceholder || props.isSignYourself) && (
             <>
-              {props.pos.type === "checkbox" && props.isSignYourself ? (
+              {[
+                "checkbox",
+                textInputWidget,
+                textWidget,
+                "name",
+                "company",
+                "job title",
+                "email"
+              ].includes(props.pos.type) && props.isSignYourself ? (
                 <i
                   onClick={(e) => {
                     e.stopPropagation();
@@ -409,9 +417,7 @@ function Placeholder(props) {
               ) : (
                 ((!props?.pos?.type && props.pos.isStamp) ||
                   (props?.pos?.type &&
-                    !["date", textWidget, "signature"].includes(
-                      props.pos.type
-                    ) &&
+                    !["date", "signature"].includes(props.pos.type) &&
                     !props.isSignYourself)) && (
                   <i
                     onClick={(e) => {
@@ -423,7 +429,11 @@ function Placeholder(props) {
                       handleOnClickSettingIcon();
                     }}
                     className="fa-solid fa-gear settingIcon"
-                    style={{ color: "#188ae2", right: "47px", top: "-19px" }}
+                    style={{
+                      color: "#188ae2",
+                      right: props?.pos?.type === textWidget ? "32px" : "47px",
+                      top: "-19px"
+                    }}
                   ></i>
                 )
               )}
@@ -634,8 +644,20 @@ function Placeholder(props) {
         setDraggingEnabled(true);
         props.setIsResize && props.setIsResize(true);
       }}
-      onResizeStop={() => {
+      onResizeStop={(e, direction, ref) => {
         props.setIsResize && props.setIsResize(false);
+        props.handleSignYourselfImageResize &&
+          props.handleSignYourselfImageResize(
+            ref,
+            props.pos.key,
+            props.xyPostion,
+            props.setXyPostion,
+            props.index,
+            props.containerScale,
+            props.scale,
+            props.data && props.data.Id,
+            props.isResize
+          );
       }}
       disableDragging={
         props.isNeedSign
@@ -652,20 +674,20 @@ function Placeholder(props) {
         x: props.xPos(props.pos, props.isSignYourself),
         y: props.yPos(props.pos, props.isSignYourself)
       }}
-      onResize={(e, direction, ref) => {
-        props.handleSignYourselfImageResize &&
-          props.handleSignYourselfImageResize(
-            ref,
-            props.pos.key,
-            props.xyPostion,
-            props.setXyPostion,
-            props.index,
-            props.containerScale,
-            props.scale,
-            props.data && props.data.Id,
-            props.isResize
-          );
-      }}
+      // onResize={(e, direction, ref) => {
+      //   props.handleSignYourselfImageResize &&
+      //     props.handleSignYourselfImageResize(
+      //       ref,
+      //       props.pos.key,
+      //       props.xyPostion,
+      //       props.setXyPostion,
+      //       props.index,
+      //       props.containerScale,
+      //       props.scale,
+      //       props.data && props.data.Id,
+      //       props.isResize
+      //     );
+      // }}
       onClick={() => handleOnClickPlaceholder()}
     >
       {props.isShowBorder &&

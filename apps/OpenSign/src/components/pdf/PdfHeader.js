@@ -405,12 +405,12 @@ function Header({
                   signersdata.length !== filterPrefill.length && (
                     <div>
                       {filterPrefill.length === 0 ? (
-                        <span className="text-[13px] text-[#f5405e] 2xl:text-[30px]">
+                        <span style={{ fontSize: "13px", color: "#f5405e" }}>
                           Add {signersdata.length - filterPrefill.length}{" "}
                           recipients signature
                         </span>
                       ) : (
-                        <span className="text-[13px] text-[#f5405e] 2xl:text-[30px]">
+                        <span style={{ fontSize: "13px", color: "#f5405e" }}>
                           Add {signersdata.length - filterPrefill.length} more
                           recipients signature
                         </span>

@@ -1063,7 +1063,7 @@ export const addInitialData = (signerPos, setXyPostion, value, userId) => {
 };
 
 //calculate width and height
-export const calculateInitialWidthHeight = (type, widgetData) => {
+export const calculateInitialWidthHeight = (widgetData) => {
   const intialText = widgetData;
   const span = document.createElement("span");
   span.textContent = intialText;
@@ -1305,8 +1305,8 @@ export const multiSignEmbed = async (
   pdfDoc,
   pdfOriginalWH,
   signyourself,
-  containerWH
-  // zoomPercent
+  containerWH,
+  zoomPercent
 ) => {
   for (let item of pngUrl) {
     const typeExist = item.pos.some((data) => data?.type);
@@ -1322,9 +1322,9 @@ export const multiSignEmbed = async (
     } else {
       updateItem = item.pos;
     }
-    // const newWidth = containerWH.width;
+    const newWidth = containerWH.width;
     // const scale = pdfOriginalWH.width / newWidth;
-    // const scale = newWidth / pdfOriginalWH.width;
+    const scale = newWidth / pdfOriginalWH.width;
 
     // isMobile ? pdfOriginalWidth / newWidth : 1;
     const pageNo = item.pageNumber;
@@ -1374,18 +1374,18 @@ export const multiSignEmbed = async (
       }
       let scaleWidth, scaleHeight;
       scaleWidth = placeholderWidth(
-        position
-        // scale,
-        // signyourself,
-        // pdfOriginalWH,
-        // zoomPercent
+        position,
+        scale,
+        signyourself,
+        pdfOriginalWH,
+        zoomPercent
       );
       scaleHeight = placeholderHeight(
-        position
-        // scale,
-        // signyourself,
-        // pdfOriginalWH.height,
-        // zoomPercent
+        position,
+        scale,
+        signyourself,
+        pdfOriginalWH.height,
+        zoomPercent
       );
       const xPos = (pos) => {
         const resizePos = pos.xPosition;
@@ -1727,16 +1727,31 @@ export function urlValidator(url) {
 }
 
 export const placeholderWidth = (
-  pos
-  // scale,
-  // signyourself,
-  // containerWH,
-  // zoomPercent
+  pos,
+  scale,
+  signyourself,
+  containerWH,
+  zoomPercent
 ) => {
   const defaultWidth = defaultWidthHeight(pos.type).width;
   const posWidth = pos.Width || defaultWidth;
 
+  //checking current zoom scale and on drop widget zoom scale
+  // if (pos.zoomScale === zoomPercent) {
+  //   if (pos.zoomScale > 1) {
+  //     return posWidth / (scale * zoomPercent);
+  //   } else {
+  //     return posWidth / scale;
+  //   }
+  // } else {
+  //   return posWidth / (scale );
+  // }
   return posWidth;
+  // else {
+  //   console.log("go here 1");
+
+  //   return posWidth / (scale / zoomPercent);
+  // }
   // if (signyourself) {
   //   return posWidth;
   // } else {
@@ -1773,11 +1788,11 @@ export const placeholderWidth = (
   // }
 };
 export const placeholderHeight = (
-  pos
-  // scale,
-  // signyourself,
-  // pdfRenderHeight,
-  // zoomPercent
+  pos,
+  scale,
+  signyourself,
+  pdfRenderHeight,
+  zoomPercent
 ) => {
   // let height;
   const posHeight = pos.Height;
@@ -1785,6 +1800,15 @@ export const placeholderHeight = (
   const posUpdateHeight = posHeight || defaultHeight;
 
   return posUpdateHeight;
+  // if (pos.zoomScale === zoomPercent) {
+  //   if (pos.zoomScale > 1) {
+  //     return posUpdateHeight / (scale * zoomPercent);
+  //   } else {
+  //     return posUpdateHeight / scale;
+  //   }
+  // } else {
+  //   return posUpdateHeight / (scale);
+  // }
   // if (signyourself) {
   //   // if (isMobile) {
   //   return posUpdateHeight;

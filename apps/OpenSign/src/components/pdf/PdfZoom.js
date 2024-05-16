@@ -17,16 +17,13 @@ function PdfZoom(props) {
     props.setZoomPercent(0);
   };
   return (
-    <span className=" flex flex-col gap-1 mt-5">
+    <span className=" hidden  md:flex flex-col gap-1 mt-5">
       <span
-        className="bg-gray-50 px-[4px]"
-        onClick={onClickZoomOut}
-        style={{
-          cursor: props.zoomPercent > 0 ? "pointer" : "default"
-        }}
+        className="bg-gray-50 px-[4px] cursor-pointer"
+        onClick={onClickZoomIn}
         title="Zoom in"
       >
-        <i className="fa-solid fa-magnifying-glass-minus text-gray-500"></i>
+        <i className="fa-solid fa-magnifying-glass-plus text-gray-500"></i>
       </span>
       <span
         className="bg-gray-50 px-[4px] cursor-pointer"
@@ -36,11 +33,14 @@ function PdfZoom(props) {
         <i className="fa-solid fa-arrows-rotate text-gray-500"></i>
       </span>
       <span
-        className="bg-gray-50 px-[4px] cursor-pointer"
-        onClick={onClickZoomIn}
+        className="bg-gray-50 px-[4px]"
+        onClick={onClickZoomOut}
+        style={{
+          cursor: props.zoomPercent > 0 ? "pointer" : "default"
+        }}
         title="Zoom out"
       >
-        <i className="fa-solid fa-magnifying-glass-plus text-gray-500"></i>
+        <i className="fa-solid fa-magnifying-glass-minus text-gray-500"></i>
       </span>
     </span>
   );

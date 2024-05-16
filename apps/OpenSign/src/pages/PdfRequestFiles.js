@@ -1379,7 +1379,15 @@ function PdfRequestFiles() {
                   pageNumber={pageNumber}
                 />
                 {/* pdf render view */}
-                <div className="min-h-screen w-full md:w-[57%] flex ml-4">
+                <div className="min-h-screen w-full md:w-[57%] md:flex md:mr-4">
+                  <PdfZoom
+                    setScale={setScale}
+                    scale={scale}
+                    pdfOriginalWH={pdfOriginalWH}
+                    containerWH={containerWH}
+                    setZoomPercent={setZoomPercent}
+                    zoomPercent={zoomPercent}
+                  />
                   <div className="min-h-screen w-full md:w-[97%] ">
                     {/* this modal is used show this document is already sign */}
                     <ModalUi
@@ -1513,14 +1521,6 @@ function PdfRequestFiles() {
                       )}
                     </div>
                   </div>
-                  <PdfZoom
-                    setScale={setScale}
-                    scale={scale}
-                    pdfOriginalWH={pdfOriginalWH}
-                    containerWH={containerWH}
-                    setZoomPercent={setZoomPercent}
-                    zoomPercent={zoomPercent}
-                  />
                 </div>
 
                 {/* <div className="signerComponent"> */}

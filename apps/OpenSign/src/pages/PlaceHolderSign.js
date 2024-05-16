@@ -459,14 +459,21 @@ function PlaceHolderSign() {
       const pdfRenderWidth = containerWH.width;
       const key = randomId();
       const containerScale = containerWH.width / pdfOriginalWH.width;
+
       let dropData = [];
       let placeHolder;
       const dragTypeValue = item?.text ? item.text : monitor.type;
+      const widgetWidth = defaultWidthHeight(dragTypeValue).width;
+      const widgetHeight = defaultWidthHeight(dragTypeValue).height;
       if (item === "onclick") {
         const dropObj = {
           //onclick put placeholder center on pdf
-          xPosition: window.innerWidth / 2 - 150,
-          yPosition: window.innerHeight / 2 - 60,
+          xPosition:
+            (containerWH.width / 2 - widgetWidth / 2) /
+            (containerScale * scale),
+          yPosition:
+            (containerWH.height / 2 - widgetHeight / 2) /
+            (containerScale * scale),
 
           isStamp:
             (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
@@ -487,7 +494,8 @@ function PlaceHolderSign() {
         };
       } else {
         const offset = monitor.getClientOffset();
-
+        const getWidth = defaultWidthHeight(dragTypeValue).width;
+        const getHeight = defaultWidthHeight(dragTypeValue).height;
         //adding and updating drop position in array when user drop signature button in div
         const containerRect = document
           .getElementById("container")
@@ -510,7 +518,9 @@ function PlaceHolderSign() {
           // isMobile: isMobile,
           zIndex: posZIndex,
           type: dragTypeValue,
-          options: addWidgetOptions(dragTypeValue)
+          options: addWidgetOptions(dragTypeValue),
+          Width: getWidth / (containerScale * scale),
+          Height: getHeight / (containerScale * scale)
         };
 
         dropData.push(dropObj);
@@ -666,6 +676,7 @@ function PlaceHolderSign() {
   const handleStop = (event, dragElement, signerId, key) => {
     if (!isResize && isDragging) {
       const dataNewPlace = addZIndex(signerPos, key, setZIndex);
+      const containerScale = containerWH.width / pdfOriginalWH.width;
       let updateSignPos = [...signerPos];
       updateSignPos.splice(0, updateSignPos.length, ...dataNewPlace);
       const signId = signerId ? signerId : uniqueId; //? signerId : signerObjId;
@@ -696,8 +707,8 @@ function PlaceHolderSign() {
               if (url.key === keyValue) {
                 return {
                   ...url,
-                  xPosition: dragElement.x,
-                  yPosition: dragElement.y
+                  xPosition: dragElement.x / (containerScale * scale),
+                  yPosition: dragElement.y / (containerScale * scale)
                 };
               }
               return url;
@@ -1763,7 +1774,15 @@ function PlaceHolderSign() {
               pageNumber={pageNumber}
             />
             {/* pdf render view */}
-            <div className="min-h-screen w-full md:w-[57%]  flex ml-4">
+            <div className="min-h-screen w-full md:w-[57%]  flex md:mr-4">
+              <PdfZoom
+                setScale={setScale}
+                scale={scale}
+                pdfOriginalWH={pdfOriginalWH}
+                containerWH={containerWH}
+                setZoomPercent={setZoomPercent}
+                zoomPercent={zoomPercent}
+              />
               <div className="min-h-screen w-full md:w-[97%] ">
                 {/* this modal is used show alert set placeholder for all signers before send mail */}
 
@@ -2062,7 +2081,7 @@ function PlaceHolderSign() {
                 <div
                   ref={divRef}
                   data-tut="reactourSecond"
-                  className="h-[95%] 2xl:mt-[6px] mt-[3px]"
+                  className="h-[95%] 2xl:mt-[6px] mt-[5px]"
                 >
                   {containerWH && (
                     <RenderPdf
@@ -2111,14 +2130,6 @@ function PlaceHolderSign() {
                   )}
                 </div>
               </div>
-              <PdfZoom
-                setScale={setScale}
-                scale={scale}
-                pdfOriginalWH={pdfOriginalWH}
-                containerWH={containerWH}
-                setZoomPercent={setZoomPercent}
-                zoomPercent={zoomPercent}
-              />
             </div>
 
             {/* signature button */}

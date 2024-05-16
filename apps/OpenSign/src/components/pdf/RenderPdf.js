@@ -79,7 +79,23 @@ function RenderPdf({
     const defaultWidth = defaultWidthHeight(pos.type).width;
     const posWidth = pos.Width ? pos.Width : defaultWidth;
     if (signYourself) {
+      // if (pos.scale === containerScale) {
+      //   if (scale > 1) {
+      //     return posWidth * pos.scale * scale;
+      //   } else {
+      //     return posWidth * pos.scale;
+      //   }
+      // } else {
       return posWidth * scale * containerScale;
+      // }
+      // if (pos.zoomScale > scale) {
+      //   return posWidth / scale;
+      // } else if (pos.zoomScale === scale) {
+      //   return posWidth;
+      // } else {
+      //  return posWidth * scale*containerScale;
+      //  return posWidth * scale;
+      // }
     } else {
       // if (isMobile && pos.scale) {
       //   if (!pos.isMobile) {
@@ -128,7 +144,15 @@ function RenderPdf({
 
     const posHeight = pos.Height || defaultWidthHeight(pos.type).height;
     if (signYourself) {
+      // if (pos.zoomScale > scale) {
+      //   return posHeight / scale;
+      // } else if (pos.zoomScale === scale) {
+      //   return posHeight;
+      // } else {
+      //  return posHeight * scale *containerScale;
+
       return posHeight * scale * containerScale;
+      // }
     } else {
       // if (isMobile && pos.scale) {
       //   if (!pos.isMobile) {
@@ -199,8 +223,15 @@ function RenderPdf({
           return resizePos * pos.scale;
         }
       } else {
-        // console.log("scalePos", resizePos , scale);
-        return resizePos * containerScale * scale;
+        if (pos.scale === containerScale) {
+          if (scale > 1) {
+            return resizePos * pos.scale * scale;
+          } else {
+            return resizePos * pos.scale;
+          }
+        } else {
+          return resizePos * containerScale;
+        }
       }
     }
   };
@@ -229,7 +260,7 @@ function RenderPdf({
           return resizePos * pos.scale;
         }
       } else {
-        return resizePos * containerScale * scale;
+        return resizePos * containerScale;
       }
     }
   };
@@ -512,7 +543,6 @@ function RenderPdf({
                     </React.Fragment>
                   );
                 })}
-                ;
               </React.Fragment>
             );
           })
@@ -697,6 +727,8 @@ function RenderPdf({
                                   handleTextSettingModal={
                                     handleTextSettingModal
                                   }
+                                  scale={scale}
+                                  containerScale={containerScale}
                                 />
                               )
                             );
@@ -766,9 +798,11 @@ function RenderPdf({
         >
           <div
             // className={`  autoSignScroll border-[0.1px] border-[#ebe8e8] max-h-screen relative  overflow-auto`}
-            style={{
-              marginTop: isGuestSigner && "30px"
-            }}
+            style={
+              {
+                // marginTop: isGuestSigner && "30px"
+              }
+            }
             ref={drop}
             id="container"
           >
@@ -778,7 +812,6 @@ function RenderPdf({
                     return (
                       <React.Fragment key={key}>
                         <RenderComponentPlaceholder data={data} />
-                        {/* <CheckSignedSignes data={data} /> */}
                       </React.Fragment>
                     );
                   })
@@ -787,7 +820,6 @@ function RenderPdf({
                       return (
                         <React.Fragment key={ind}>
                           <RenderComponentPlaceholder data={data} />
-                          {/* <PlaceholderSign data={data} /> */}
                         </React.Fragment>
                       );
                     })
@@ -795,7 +827,6 @@ function RenderPdf({
                       return (
                         <React.Fragment key={ind}>
                           <RenderComponentPlaceholder data={data} />
-                          {/* <SignYourSelf data={data} /> */}
                         </React.Fragment>
                       );
                     }))}

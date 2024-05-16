@@ -11,27 +11,51 @@ function PlaceholderBorder(props) {
   const getResizeBorderExtraWidth = resizeBorderExtraWidth();
   const defaultWidth = defaultWidthHeight(props.pos.type).width;
   const defaultHeight = defaultWidthHeight(props.pos.type).height;
-  console.log("props.containerScale", props.containerScale);
+
+  const width = () => {
+    const getWidth = props.pos.Width || defaultWidth;
+
+    // if (props.pos.zoomScale === props.scale) {
+    //   return (
+    //     getWidth * props.scale * props.containerScale +
+    //     getResizeBorderExtraWidth
+    //   );
+    //    // return (getWidth * props.scale) + getResizeBorderExtraWidth;
+    // } else {
+    // return getWidth * props.scale + getResizeBorderExtraWidth;
+    return (
+      getWidth * props.scale * props.containerScale + getResizeBorderExtraWidth
+    );
+    // }
+  };
+  const height = () => {
+    const getHeight = props.pos.Height || defaultHeight;
+    // if (props.pos.zoomScale === props.scale) {
+    //   // return (
+    //   //   getHeight * props.scale * props.containerScale +
+    //   //   getResizeBorderExtraWidth
+    //   // );
+    //    return (getHeight * props.scale) + getResizeBorderExtraWidth;
+    // } else {
+    //  return getHeight * props.scale + getResizeBorderExtraWidth;
+    return (
+      getHeight * props.scale * props.containerScale + getResizeBorderExtraWidth
+    );
+    // }
+  };
+
   const handleMinWidth = () => {
     if (props.pos.type === "checkbox" || props.pos.type === radioButtonWidget) {
       return props.getCheckboxRenderWidth.width + getResizeBorderExtraWidth;
     } else {
-      return props.pos.Width
-        ? props.pos.Width * props.scale * props.containerScale +
-            getResizeBorderExtraWidth
-        : defaultWidth * props.scale * props.containerScale +
-            getResizeBorderExtraWidth;
+      return width();
     }
   };
   const handleMinHeight = () => {
     if (props.pos.type === "checkbox" || props.pos.type === radioButtonWidget) {
       return props.getCheckboxRenderWidth.height + getResizeBorderExtraWidth;
     } else {
-      return props.pos.Height
-        ? props.pos.Height * props.scale * props.containerScale +
-            getResizeBorderExtraWidth
-        : defaultHeight * props.scale * props.containerScale +
-            getResizeBorderExtraWidth;
+      return height();
     }
   };
   return (

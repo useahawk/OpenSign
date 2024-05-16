@@ -461,10 +461,14 @@ function SignYourSelf() {
     );
     // const scale = pdfOriginalWH.width / containerWH.width;
     const containerScale = containerWH.width / pdfOriginalWH.width;
+
     if (item === "onclick") {
       dropObj = {
-        xPosition: containerWH.width / 2 - widgetWidth / 2,
-        yPosition: containerWH.height / 2 - widgetHeight / 2,
+        xPosition:
+          (containerWH.width / 2 - widgetWidth / 2) / (containerScale * scale),
+        yPosition:
+          (containerWH.height / 2 - widgetHeight / 2) /
+          (containerScale * scale),
         isDrag: false,
         isStamp:
           (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
@@ -499,25 +503,26 @@ function SignYourSelf() {
       const y = offset.y - containerRect.top;
       const getXPosition = signBtnPosition[0] ? x - signBtnPosition[0].xPos : x;
       const getYPosition = signBtnPosition[0] ? y - signBtnPosition[0].yPos : y;
-      dropObj = {
-        xPosition: getXPosition / (containerScale * scale),
-        yPosition: getYPosition / (containerScale * scale),
-        // isDrag: false,
-        isStamp:
-          (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
-        key: key,
-        type: dragTypeValue,
-        Width: widgetTypeExist
-          ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getWidth
-          : defaultWidthHeight(dragTypeValue).width,
-        Height: widgetTypeExist
-          ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getHeight
+      const getWidth = widgetTypeExist
+        ? calculateInitialWidthHeight(widgetValue).getWidth
+        : defaultWidthHeight(dragTypeValue).width;
+      const getHeight = widgetTypeExist
+          ? calculateInitialWidthHeight(widgetValue).getHeight
           : defaultWidthHeight(dragTypeValue).height,
-        options: addWidgetOptions(dragTypeValue),
-        pdfRenderHeight: pdfRenderHeight,
-        pdfRenderWidth: pdfRenderWidth,
-        scale: containerScale
-      };
+        dropObj = {
+          xPosition: getXPosition / (containerScale * scale),
+          yPosition: getYPosition / (containerScale * scale),
+          isStamp:
+            (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
+          key: key,
+          type: dragTypeValue,
+          Width: getWidth / (containerScale * scale),
+          Height: getHeight / (containerScale * scale),
+          options: addWidgetOptions(dragTypeValue),
+          pdfRenderHeight: pdfRenderHeight,
+          pdfRenderWidth: pdfRenderWidth,
+          scale: containerScale
+        };
 
       dropData.push(dropObj);
     }
@@ -710,9 +715,9 @@ function SignYourSelf() {
               containerWH,
               scale
             );
-            // console.log("pdf", pdfBytes);
+            console.log("pdf", pdfBytes);
             //function for call to embed signature in pdf and get digital signature pdf
-            await signPdfFun(pdfBytes, documentId);
+            //await signPdfFun(pdfBytes, documentId);
           } catch (err) {
             setIsUiLoading(false);
             if (err && err.message.includes("is encrypted.")) {
@@ -1224,7 +1229,15 @@ function SignYourSelf() {
               pageNumber={pageNumber}
               containerWH={containerWH}
             />
-            <div className="min-h-screen w-full md:w-[57%] flex ml-4">
+            <div className="min-h-screen w-full md:w-[57%] flex mr-4">
+              <PdfZoom
+                setScale={setScale}
+                scale={scale}
+                pdfOriginalWH={pdfOriginalWH}
+                containerWH={containerWH}
+                setZoomPercent={setZoomPercent}
+                zoomPercent={zoomPercent}
+              />
               <div className="min-h-screen w-full md:w-[97%] ">
                 <ModalUi
                   headerColor={"#dc3545"}
@@ -1391,14 +1404,6 @@ function SignYourSelf() {
                   )}
                 </div>
               </div>
-              <PdfZoom
-                setScale={setScale}
-                scale={scale}
-                pdfOriginalWH={pdfOriginalWH}
-                containerWH={containerWH}
-                setZoomPercent={setZoomPercent}
-                zoomPercent={zoomPercent}
-              />
             </div>
 
             <div

@@ -226,6 +226,15 @@ function Opensigndrive() {
     //documentList.scrollHeight property returns the entire height of an element,including the parts that are not visible due to overflow..
     // documentList.scrollTop property show height of element, how much the content has been scrolled from the top.
     // When the sum of scrollTop and clientHeight is equal to scrollHeight, it means that the user has scrolled to the bottom of the div.
+    console.log(
+      "loading",
+      documentList.scrollTop,
+      documentList.clientHeight,
+      documentList.scrollTop,
+      documentList.offsetHeight,
+      documentList.scrollHeight
+    );
+
     if (
       documentList &&
       documentList.scrollTop + documentList.clientHeight >=
@@ -234,8 +243,11 @@ function Opensigndrive() {
       //disableLoading is used disable initial loader
       const disableLoading = true;
       // If the fetched data length is less than the limit, it means there's no more data to fetch
-
+      console.log("loading", loading);
+      console.log("pdfData", pdfData);
+      console.log("percentpdfdata", pdfData.length % 100 === 0);
       if (!loading && pdfData.length % 100 === 0) {
+        console.log("go here get document details");
         getPdfDocumentList(disableLoading);
       }
     }
