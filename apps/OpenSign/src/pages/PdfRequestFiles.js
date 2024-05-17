@@ -706,7 +706,7 @@ function PdfRequestFiles() {
               containerWH,
               scale
             );
-            // console.log("pdfte", pdfBytes);
+            //  console.log("pdfte", pdfBytes);
             //get ExistUserPtr object id of user class to get tenantDetails
             const objectId = pdfDetails?.[0]?.ExtUserPtr?.UserId?.objectId;
             //get ExistUserPtr email to get userDetails

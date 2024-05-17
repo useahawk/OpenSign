@@ -38,6 +38,7 @@ import TourContentWithBtn from "../primitives/TourContentWithBtn";
 import DropdownWidgetOption from "../components/pdf/DropdownWidgetOption";
 import { useSelector } from "react-redux";
 import TextFontSetting from "../components/pdf/TextFontSetting";
+import PdfZoom from "../components/pdf/PdfZoom";
 const TemplatePlaceholder = () => {
   const navigate = useNavigate();
   const isHeader = useSelector((state) => state.showHeader);
@@ -68,7 +69,7 @@ const TemplatePlaceholder = () => {
   const [checkTourStatus, setCheckTourStatus] = useState(false);
   const [tourStatus, setTourStatus] = useState([]);
   const [signerUserId, setSignerUserId] = useState();
-  const [pdfOriginalWidth, setPdfOriginalWidth] = useState();
+  const [pdfOriginalWH, setPdfOriginalWH] = useState();
   const [contractName, setContractName] = useState("");
   const [containerWH, setContainerWH] = useState();
   const signRef = useRef(null);
@@ -153,6 +154,8 @@ const TemplatePlaceholder = () => {
   const [isAddRole, setIsAddRole] = useState(false);
   const [fontSize, setFontSize] = useState();
   const [fontColor, setFontColor] = useState();
+  const [zoomPercent, setZoomPercent] = useState(0);
+  const [scale, setScale] = useState(1);
   const senderUser =
     localStorage.getItem(
       `Parse/${localStorage.getItem("parseAppId")}/currentUser`
@@ -175,6 +178,8 @@ const TemplatePlaceholder = () => {
         width: divRef.current.offsetWidth,
         height: divRef.current.offsetHeight
       });
+      setScale(1);
+      setZoomPercent(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divRef.current, isHeader]);
@@ -356,32 +361,33 @@ const TemplatePlaceholder = () => {
       if (signer) {
         const posZIndex = zIndex + 1;
         setZIndex(posZIndex);
-        // const newWidth = containerWH.width;
-        // const scale = pdfOriginalWidth / newWidth;
-        const pdfRenderWidth = containerWH.width;
+        const containerScale = containerWH.width / pdfOriginalWH.width;
         const key = randomId();
-        // let filterSignerPos = signerPos.filter(
-        //   (data) => data.signerObjId === signerObjId
-        // );
         let filterSignerPos = signerPos.filter((data) => data.Id === uniqueId);
         const dragTypeValue = item?.text ? item.text : monitor.type;
+        const widgetWidth = defaultWidthHeight(dragTypeValue).width;
+        const widgetHeight = defaultWidthHeight(dragTypeValue).height;
         let dropData = [];
         let placeHolder;
         if (item === "onclick") {
           const dropObj = {
             //onclick put placeholder center on pdf
-            xPosition: window.innerWidth / 2 - 150,
-            yPosition: window.innerHeight / 2 - 60,
+            xPosition:
+              (containerWH.width / 2 - widgetWidth / 2) /
+              (containerScale * scale),
+            yPosition:
+              (containerWH.height / 2 - widgetHeight / 2) /
+              (containerScale * scale),
             isStamp:
               (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
             key: key,
-            // scale: scale,
+            scale: containerScale,
             // isMobile: isMobile,
             zIndex: posZIndex,
             type: dragTypeValue,
             options: addWidgetOptions(dragTypeValue),
-            pdfRenderHeight: pdfRenderHeight,
-            pdfRenderWidth: pdfRenderWidth
+            Width: widgetWidth / (containerScale * scale),
+            Height: widgetHeight / (containerScale * scale)
           };
           dropData.push(dropObj);
           placeHolder = {
@@ -396,19 +402,25 @@ const TemplatePlaceholder = () => {
             .getBoundingClientRect();
           const x = offset.x - containerRect.left;
           const y = offset.y - containerRect.top;
+          const getXPosition = signBtnPosition[0]
+            ? x - signBtnPosition[0].xPos
+            : x;
+          const getYPosition = signBtnPosition[0]
+            ? y - signBtnPosition[0].yPos
+            : y;
           const dropObj = {
-            xPosition: signBtnPosition[0] ? x - signBtnPosition[0].xPos : x,
-            yPosition: signBtnPosition[0] ? y - signBtnPosition[0].yPos : y,
+            xPosition: getXPosition / (containerScale * scale),
+            yPosition: getYPosition / (containerScale * scale),
             isStamp:
               (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
             key: key,
-            // scale: scale,
+            scale: containerScale,
             // isMobile: isMobile,
             zIndex: posZIndex,
             type: item.text,
             options: addWidgetOptions(dragTypeValue),
-            pdfRenderHeight: pdfRenderHeight,
-            pdfRenderWidth: pdfRenderWidth
+            Width: widgetWidth / (containerScale * scale),
+            Height: widgetHeight / (containerScale * scale)
           };
 
           dropData.push(dropObj);
@@ -517,13 +529,14 @@ const TemplatePlaceholder = () => {
 
   //function for get pdf page details
   const pageDetails = async (pdf) => {
-    const load = {
-      status: true
-    };
-    setPdfLoadFail(load);
     pdf.getPage(1).then((pdfPage) => {
       const pageWidth = pdfPage.view[2];
-      setPdfOriginalWidth(pageWidth);
+      const pageHeight = pdfPage.view[3];
+      setPdfOriginalWH({ width: pageWidth, height: pageHeight });
+      const load = {
+        status: true
+      };
+      setPdfLoadFail(load);
     });
   };
   //function for save x and y position and show signature  tab on that position
@@ -538,14 +551,9 @@ const TemplatePlaceholder = () => {
       const dataNewPlace = addZIndex(signerPos, key, setZIndex);
       let updateSignPos = [...signerPos];
       updateSignPos.splice(0, updateSignPos.length, ...dataNewPlace);
-      // signerPos.splice(0, signerPos.length, ...dataNewPlace);
-      const containerRect = document
-        .getElementById("container")
-        .getBoundingClientRect();
       const signId = signerId; //? signerId : signerObjId;
       const keyValue = key ? key : dragKey;
-      const ybottom = containerRect.height - dragElement.y;
-
+      const containerScale = containerWH.width / pdfOriginalWH.width;
       if (keyValue >= 0) {
         const filterSignerPos = updateSignPos.filter(
           (data) => data.Id === signId
@@ -566,10 +574,8 @@ const TemplatePlaceholder = () => {
               if (url.key === keyValue) {
                 return {
                   ...url,
-                  xPosition: dragElement.x,
-                  yPosition: dragElement.y,
-                  isDrag: true,
-                  yBottom: ybottom
+                  xPosition: dragElement.x / (containerScale * scale),
+                  yPosition: dragElement.y / (containerScale * scale)
                 };
               }
               return url;
@@ -1284,7 +1290,7 @@ const TemplatePlaceholder = () => {
         ) : handleError ? (
           <HandleError handleError={handleError} />
         ) : (
-          <div className="flex min-h-screen flex-row justify-center gap-x-5   bg-[#EBEBEB]">
+          <div className="flex min-h-screen flex-row justify-center  bg-[#EBEBEB]">
             {/* this component used for UI interaction and show their functionality */}
             {!checkTourStatus && (
               //this tour component used in your html component where you want to put
@@ -1319,214 +1325,224 @@ const TemplatePlaceholder = () => {
             />
 
             {/* pdf render view */}
-            <div className="min-h-screen w-full md:w-[57%]">
-              {/* this modal is used show alert set placeholder for all signers before send mail */}
-              <ModalUi
-                headerColor={"#dc3545"}
-                isOpen={isSendAlert}
-                title={"Fields required"}
-                handleClose={() => setIsSendAlert(false)}
-              >
-                <div style={{ height: "100%", padding: 20 }}>
-                  <p>Please add at least one signature field for all roles.</p>
-                </div>
-              </ModalUi>
-              <ModalUi
-                headerColor={"#dc3545"}
-                isOpen={!IsReceipent}
-                title={"Roles"}
-                handleClose={() => setIsReceipent(true)}
-              >
-                <div style={{ height: "100%", padding: 20 }}>
-                  <p>Please add a role</p>
-                </div>
-              </ModalUi>
-              {/* this modal is used show send mail  message and after send mail success message */}
-              <ModalUi
-                isOpen={isCreateDocModal}
-                title={"Create Document"}
-                handleClose={() => setIsCreateDocModal(false)}
-              >
-                <div style={{ height: "100%", padding: 20 }}>
-                  <p>
-                    Do you want to create a document using the template you just
-                    created ?
-                  </p>
-                  <div
-                    style={{
-                      height: "1px",
-                      backgroundColor: "#9f9f9f",
-                      width: "100%",
-                      marginTop: "15px",
-                      marginBottom: "15px"
-                    }}
-                  ></div>
-                  {currentEmail.length > 0 && (
-                    <>
-                      <button
-                        onClick={() => {
-                          handleCreateDocModal();
-                        }}
-                        style={{
-                          background: themeColor,
-                          color: "white"
-                        }}
-                        type="button"
-                        className="finishBtn"
-                      >
-                        Yes
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsCreateDocModal(false);
-                        }}
-                        type="button"
-                        className="finishBtn cancelBtn"
-                      >
-                        No
-                      </button>
-                    </>
+            <div className="min-h-screen w-full md:w-[57%] flex md:mr-4">
+              <PdfZoom
+                setScale={setScale}
+                scale={scale}
+                pdfOriginalWH={pdfOriginalWH}
+                containerWH={containerWH}
+                setZoomPercent={setZoomPercent}
+                zoomPercent={zoomPercent}
+              />
+              <div className="min-h-screen w-full md:w-[97%] ">
+                {/* this modal is used show alert set placeholder for all signers before send mail */}
+                <ModalUi
+                  headerColor={"#dc3545"}
+                  isOpen={isSendAlert}
+                  title={"Fields required"}
+                  handleClose={() => setIsSendAlert(false)}
+                >
+                  <div style={{ height: "100%", padding: 20 }}>
+                    <p>
+                      Please add at least one signature field for all roles.
+                    </p>
+                  </div>
+                </ModalUi>
+                <ModalUi
+                  headerColor={"#dc3545"}
+                  isOpen={!IsReceipent}
+                  title={"Roles"}
+                  handleClose={() => setIsReceipent(true)}
+                >
+                  <div style={{ height: "100%", padding: 20 }}>
+                    <p>Please add a role</p>
+                  </div>
+                </ModalUi>
+                {/* this modal is used show send mail  message and after send mail success message */}
+                <ModalUi
+                  isOpen={isCreateDocModal}
+                  title={"Create Document"}
+                  handleClose={() => setIsCreateDocModal(false)}
+                >
+                  <div style={{ height: "100%", padding: 20 }}>
+                    <p>
+                      Do you want to create a document using the template you
+                      just created ?
+                    </p>
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "#9f9f9f",
+                        width: "100%",
+                        marginTop: "15px",
+                        marginBottom: "15px"
+                      }}
+                    ></div>
+                    {currentEmail.length > 0 && (
+                      <>
+                        <button
+                          onClick={() => {
+                            handleCreateDocModal();
+                          }}
+                          style={{
+                            background: themeColor,
+                            color: "white"
+                          }}
+                          type="button"
+                          className="finishBtn"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsCreateDocModal(false);
+                          }}
+                          type="button"
+                          className="finishBtn cancelBtn"
+                        >
+                          No
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </ModalUi>
+                {isCreateDoc && <Loader isLoading={isLoading} />}
+                <ModalUi
+                  headerColor={"#dc3545"}
+                  isOpen={isShowEmail}
+                  title={"signers alert"}
+                  handleClose={() => {
+                    setIsShowEmail(false);
+                  }}
+                >
+                  <div style={{ height: "100%", padding: 20 }}>
+                    <p>Please select signer for add placeholder!</p>
+                    <div
+                      style={{
+                        height: "1px",
+                        backgroundColor: "#9f9f9f",
+                        width: "100%",
+                        marginTop: "15px",
+                        marginBottom: "15px"
+                      }}
+                    ></div>
+                    <button
+                      onClick={() => {
+                        setIsShowEmail(false);
+                      }}
+                      type="button"
+                      className="finishBtn cancelBtn"
+                    >
+                      Ok
+                    </button>
+                  </div>
+                </ModalUi>
+                <DropdownWidgetOption
+                  type={radioButtonWidget}
+                  title="Radio group"
+                  showDropdown={isRadio}
+                  setShowDropdown={setIsRadio}
+                  handleSaveWidgetsOptions={handleSaveWidgetsOptions}
+                  currWidgetsDetails={currWidgetsDetails}
+                  setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  handleClose={handleNameModal}
+                  isSubscribe={isSubscribe}
+                />
+                <DropdownWidgetOption
+                  type="checkbox"
+                  title="Checkbox"
+                  showDropdown={isCheckbox}
+                  setShowDropdown={setIsCheckbox}
+                  handleSaveWidgetsOptions={handleSaveWidgetsOptions}
+                  currWidgetsDetails={currWidgetsDetails}
+                  setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  handleClose={handleNameModal}
+                  isSubscribe={isSubscribe}
+                />
+                <DropdownWidgetOption
+                  type="dropdown"
+                  title="Dropdown options"
+                  showDropdown={showDropdown}
+                  setShowDropdown={setShowDropdown}
+                  handleSaveWidgetsOptions={handleSaveWidgetsOptions}
+                  currWidgetsDetails={currWidgetsDetails}
+                  setCurrWidgetsDetails={setCurrWidgetsDetails}
+                  handleClose={handleNameModal}
+                  isSubscribe={isSubscribe}
+                />
+                <PlaceholderCopy
+                  isPageCopy={isPageCopy}
+                  setIsPageCopy={setIsPageCopy}
+                  xyPostion={signerPos}
+                  setXyPostion={setSignerPos}
+                  allPages={allPages}
+                  pageNumber={pageNumber}
+                  signKey={signKey}
+                  // signerObjId={signerObjId}
+                  Id={uniqueId}
+                />
+                {/* pdf header which contain funish back button */}
+                <Header
+                  completeBtnTitle={"Save"}
+                  isPlaceholder={true}
+                  pageNumber={pageNumber}
+                  allPages={allPages}
+                  changePage={changePage}
+                  pdfDetails={pdfDetails}
+                  signerPos={signerPos}
+                  signersdata={signersdata}
+                  isMailSend={isMailSend}
+                  alertSendEmail={alertSendEmail}
+                  isShowHeader={true}
+                  currentSigner={true}
+                  setIsEditTemplate={handleEditTemplateModal}
+                  dataTut4="reactourFour"
+                />
+                <div ref={divRef} data-tut="reactourThird" className="h-[95%]">
+                  {containerWH && (
+                    <RenderPdf
+                      pageNumber={pageNumber}
+                      pdfNewWidth={pdfNewWidth}
+                      pdfDetails={pdfDetails}
+                      signerPos={signerPos}
+                      successEmail={false}
+                      numPages={numPages}
+                      pageDetails={pageDetails}
+                      placeholder={true}
+                      drop={drop}
+                      handleDeleteSign={handleDeleteSign}
+                      handleTabDrag={handleTabDrag}
+                      handleStop={handleStop}
+                      setPdfLoadFail={setPdfLoadFail}
+                      pdfLoadFail={pdfLoadFail}
+                      setSignerPos={setSignerPos}
+                      containerWH={containerWH}
+                      setIsResize={setIsResize}
+                      setZIndex={setZIndex}
+                      handleLinkUser={handleLinkUser}
+                      setUniqueId={setUniqueId}
+                      signersdata={signersdata}
+                      setIsPageCopy={setIsPageCopy}
+                      setSignKey={setSignKey}
+                      setSignerObjId={setSignerObjId}
+                      isDragging={isDragging}
+                      setShowDropdown={setShowDropdown}
+                      setCurrWidgetsDetails={setCurrWidgetsDetails}
+                      setWidgetType={setWidgetType}
+                      setIsRadio={setIsRadio}
+                      setSelectWidgetId={setSelectWidgetId}
+                      selectWidgetId={selectWidgetId}
+                      setIsCheckbox={setIsCheckbox}
+                      handleNameModal={setIsNameModal}
+                      setPdfRenderHeight={setPdfRenderHeight}
+                      pdfRenderHeight={pdfRenderHeight}
+                      handleTextSettingModal={handleTextSettingModal}
+                      pdfOriginalWH={pdfOriginalWH}
+                      setScale={setScale}
+                      scale={scale}
+                    />
                   )}
                 </div>
-              </ModalUi>
-              {isCreateDoc && <Loader isLoading={isLoading} />}
-              <ModalUi
-                headerColor={"#dc3545"}
-                isOpen={isShowEmail}
-                title={"signers alert"}
-                handleClose={() => {
-                  setIsShowEmail(false);
-                }}
-              >
-                <div style={{ height: "100%", padding: 20 }}>
-                  <p>Please select signer for add placeholder!</p>
-                  <div
-                    style={{
-                      height: "1px",
-                      backgroundColor: "#9f9f9f",
-                      width: "100%",
-                      marginTop: "15px",
-                      marginBottom: "15px"
-                    }}
-                  ></div>
-                  <button
-                    onClick={() => {
-                      setIsShowEmail(false);
-                    }}
-                    type="button"
-                    className="finishBtn cancelBtn"
-                  >
-                    Ok
-                  </button>
-                </div>
-              </ModalUi>
-              <DropdownWidgetOption
-                type={radioButtonWidget}
-                title="Radio group"
-                showDropdown={isRadio}
-                setShowDropdown={setIsRadio}
-                handleSaveWidgetsOptions={handleSaveWidgetsOptions}
-                currWidgetsDetails={currWidgetsDetails}
-                setCurrWidgetsDetails={setCurrWidgetsDetails}
-                handleClose={handleNameModal}
-                isSubscribe={isSubscribe}
-              />
-              <DropdownWidgetOption
-                type="checkbox"
-                title="Checkbox"
-                showDropdown={isCheckbox}
-                setShowDropdown={setIsCheckbox}
-                handleSaveWidgetsOptions={handleSaveWidgetsOptions}
-                currWidgetsDetails={currWidgetsDetails}
-                setCurrWidgetsDetails={setCurrWidgetsDetails}
-                handleClose={handleNameModal}
-                isSubscribe={isSubscribe}
-              />
-              <DropdownWidgetOption
-                type="dropdown"
-                title="Dropdown options"
-                showDropdown={showDropdown}
-                setShowDropdown={setShowDropdown}
-                handleSaveWidgetsOptions={handleSaveWidgetsOptions}
-                currWidgetsDetails={currWidgetsDetails}
-                setCurrWidgetsDetails={setCurrWidgetsDetails}
-                handleClose={handleNameModal}
-                isSubscribe={isSubscribe}
-              />
-              <PlaceholderCopy
-                isPageCopy={isPageCopy}
-                setIsPageCopy={setIsPageCopy}
-                xyPostion={signerPos}
-                setXyPostion={setSignerPos}
-                allPages={allPages}
-                pageNumber={pageNumber}
-                signKey={signKey}
-                // signerObjId={signerObjId}
-                Id={uniqueId}
-              />
-              {/* pdf header which contain funish back button */}
-              <Header
-                completeBtnTitle={"Save"}
-                isPlaceholder={true}
-                pageNumber={pageNumber}
-                allPages={allPages}
-                changePage={changePage}
-                pdfDetails={pdfDetails}
-                signerPos={signerPos}
-                signersdata={signersdata}
-                isMailSend={isMailSend}
-                alertSendEmail={alertSendEmail}
-                isShowHeader={true}
-                currentSigner={true}
-                setIsEditTemplate={handleEditTemplateModal}
-                dataTut4="reactourFour"
-              />
-              <div
-                ref={divRef}
-                data-tut="reactourThird"
-                className="h-[95%] 2xl:mt-[6px] mt-[3px]"
-              >
-                {containerWH && (
-                  <RenderPdf
-                    pageNumber={pageNumber}
-                    pdfOriginalWidth={pdfOriginalWidth}
-                    pdfNewWidth={pdfNewWidth}
-                    pdfDetails={pdfDetails}
-                    signerPos={signerPos}
-                    successEmail={false}
-                    numPages={numPages}
-                    pageDetails={pageDetails}
-                    placeholder={true}
-                    drop={drop}
-                    handleDeleteSign={handleDeleteSign}
-                    handleTabDrag={handleTabDrag}
-                    handleStop={handleStop}
-                    setPdfLoadFail={setPdfLoadFail}
-                    pdfLoadFail={pdfLoadFail}
-                    setSignerPos={setSignerPos}
-                    containerWH={containerWH}
-                    setIsResize={setIsResize}
-                    setZIndex={setZIndex}
-                    handleLinkUser={handleLinkUser}
-                    setUniqueId={setUniqueId}
-                    signersdata={signersdata}
-                    setIsPageCopy={setIsPageCopy}
-                    setSignKey={setSignKey}
-                    setSignerObjId={setSignerObjId}
-                    isDragging={isDragging}
-                    setShowDropdown={setShowDropdown}
-                    setCurrWidgetsDetails={setCurrWidgetsDetails}
-                    setWidgetType={setWidgetType}
-                    setIsRadio={setIsRadio}
-                    setSelectWidgetId={setSelectWidgetId}
-                    selectWidgetId={selectWidgetId}
-                    setIsCheckbox={setIsCheckbox}
-                    handleNameModal={setIsNameModal}
-                    setPdfRenderHeight={setPdfRenderHeight}
-                    pdfRenderHeight={pdfRenderHeight}
-                    handleTextSettingModal={handleTextSettingModal}
-                  />
-                )}
               </div>
             </div>
             {/* signature button */}

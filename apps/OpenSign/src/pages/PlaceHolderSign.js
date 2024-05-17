@@ -240,6 +240,8 @@ function PlaceHolderSign() {
         width: divRef.current.offsetWidth,
         height: divRef.current.offsetHeight
       });
+      setScale(1);
+      setZoomPercent(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divRef.current, isHeader]);
@@ -456,10 +458,8 @@ function PlaceHolderSign() {
       const posZIndex = zIndex + 1;
       setZIndex(posZIndex);
       const signer = signersdata.find((x) => x.Id === uniqueId);
-      const pdfRenderWidth = containerWH.width;
       const key = randomId();
       const containerScale = containerWH.width / pdfOriginalWH.width;
-
       let dropData = [];
       let placeHolder;
       const dragTypeValue = item?.text ? item.text : monitor.type;
@@ -484,8 +484,8 @@ function PlaceHolderSign() {
           zIndex: posZIndex,
           type: dragTypeValue,
           options: addWidgetOptions(dragTypeValue),
-          pdfRenderHeight: pdfRenderHeight,
-          pdfRenderWidth: pdfRenderWidth
+          Width: widgetWidth / (containerScale * scale),
+          Height: widgetHeight / (containerScale * scale)
         };
         dropData.push(dropObj);
         placeHolder = {
@@ -494,8 +494,6 @@ function PlaceHolderSign() {
         };
       } else {
         const offset = monitor.getClientOffset();
-        const getWidth = defaultWidthHeight(dragTypeValue).width;
-        const getHeight = defaultWidthHeight(dragTypeValue).height;
         //adding and updating drop position in array when user drop signature button in div
         const containerRect = document
           .getElementById("container")
@@ -519,8 +517,8 @@ function PlaceHolderSign() {
           zIndex: posZIndex,
           type: dragTypeValue,
           options: addWidgetOptions(dragTypeValue),
-          Width: getWidth / (containerScale * scale),
-          Height: getHeight / (containerScale * scale)
+          Width: widgetWidth / (containerScale * scale),
+          Height: widgetHeight / (containerScale * scale)
         };
 
         dropData.push(dropObj);
@@ -676,11 +674,11 @@ function PlaceHolderSign() {
   const handleStop = (event, dragElement, signerId, key) => {
     if (!isResize && isDragging) {
       const dataNewPlace = addZIndex(signerPos, key, setZIndex);
-      const containerScale = containerWH.width / pdfOriginalWH.width;
       let updateSignPos = [...signerPos];
       updateSignPos.splice(0, updateSignPos.length, ...dataNewPlace);
       const signId = signerId ? signerId : uniqueId; //? signerId : signerObjId;
       const keyValue = key ? key : dragKey;
+      const containerScale = containerWH.width / pdfOriginalWH.width;
 
       if (keyValue >= 0) {
         let filterSignerPos;
@@ -2081,7 +2079,7 @@ function PlaceHolderSign() {
                 <div
                   ref={divRef}
                   data-tut="reactourSecond"
-                  className="h-[95%] 2xl:mt-[6px] mt-[5px]"
+                  className="h-[95%]  "
                 >
                   {containerWH && (
                     <RenderPdf

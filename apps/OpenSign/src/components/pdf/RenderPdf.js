@@ -67,76 +67,38 @@ function RenderPdf({
   const isMobile = window.innerWidth < 767;
   //check isGuestSigner is present in local if yes than handle login flow header in mobile view
   const isGuestSigner = localStorage.getItem("isGuestSigner");
-  // useEffect(() => {
-  //   if (pdfOriginalWH) {
-  //     const value = (containerWH.width / pdfOriginalWH.width) * 100;
-  //     setTotalZoomPercent(value);
-  //   }
-  // }, [pdfOriginalWH, containerWH]);
+  useEffect(() => {
+    if (pdfOriginalWH?.width) {
+      const containerScale = containerWH.width / pdfOriginalWH.width;
+      setContainerScale(containerScale);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfOriginalWH]);
   // handle signature block width and height according to screen
   const posWidth = (pos, signYourself) => {
     const containerScale = containerWH.width / pdfOriginalWH.width;
     const defaultWidth = defaultWidthHeight(pos.type).width;
     const posWidth = pos.Width ? pos.Width : defaultWidth;
     if (signYourself) {
-      // if (pos.scale === containerScale) {
-      //   if (scale > 1) {
-      //     return posWidth * pos.scale * scale;
-      //   } else {
-      //     return posWidth * pos.scale;
-      //   }
-      // } else {
       return posWidth * scale * containerScale;
-      // }
-      // if (pos.zoomScale > scale) {
-      //   return posWidth / scale;
-      // } else if (pos.zoomScale === scale) {
-      //   return posWidth;
-      // } else {
-      //  return posWidth * scale*containerScale;
-      //  return posWidth * scale;
-      // }
     } else {
-      // if (isMobile && pos.scale) {
-      //   if (!pos.isMobile) {
-      //     if (pos.IsResize) {
-      //       width = posWidth ? posWidth : defaultWidth;
-      //       return width;
-      //     } else {
-      //       width = (posWidth || defaultWidth) / scale;
-
-      //       return width;
-      //     }
-      //   } else {
-      //     width = posWidth;
-      //     return width;
-      //   }
-      // } else {
-      //   if (pos.isMobile && pos.scale) {
-      //     if (pos.IsResize) {
-      //       width = posWidth ? posWidth : defaultWidth;
-      //       return width;
-      //     } else {
-      //       width = (posWidth || defaultWidth) * pos.scale;
-      //       return width;
-      //     }
-      //   } else if (pos.scale) {
-      //     width = posWidth ? posWidth : defaultWidth;
-      //     return width;
-      //   } else {
-      //     if (pos.IsResize) {
-      //       pixelWidth = calculateResolutionWidth(
-      //         posWidth,
-      //         containerWH.widthF,
-      //         containerWH.width
-      //       );
-      //       return pixelWidth;
-      //     } else {
-      //       return pixelWidth;
-      //     }
-      //   }
-      // }
-      return posWidth * scale * containerScale;
+      if (pos.isMobile && pos.scale) {
+        if (pos.IsResize) {
+          if (scale > 1) {
+            return posWidth * pos.scale * containerScale * scale;
+          } else {
+            return posWidth * containerScale;
+          }
+        } else {
+          if (scale > 1) {
+            return posWidth * pos.scale * containerScale * scale;
+          } else {
+            return posWidth * pos.scale * containerScale;
+          }
+        }
+      } else {
+        return posWidth * scale * containerScale;
+      }
     }
   };
   const posHeight = (pos, signYourself) => {
@@ -144,62 +106,30 @@ function RenderPdf({
 
     const posHeight = pos.Height || defaultWidthHeight(pos.type).height;
     if (signYourself) {
-      // if (pos.zoomScale > scale) {
-      //   return posHeight / scale;
-      // } else if (pos.zoomScale === scale) {
-      //   return posHeight;
-      // } else {
-      //  return posHeight * scale *containerScale;
-
       return posHeight * scale * containerScale;
-      // }
     } else {
-      // if (isMobile && pos.scale) {
-      //   if (!pos.isMobile) {
-      //     if (pos.IsResize) {
-      //       height = posHeight ? posHeight : defaultHeight;
-      //       return height;
-      //     } else {
-      //       height = (posHeight || defaultHeight) / scale;
-
-      //       return height;
-      //     }
-      //   } else {
-      //     height = posHeight ? posHeight : defaultHeight;
-      //     return height;
-      //   }
-      // } else {
-      //   if (pos.isMobile && pos.scale) {
-      //     if (pos.IsResize) {
-      //       height = posHeight ? posHeight : defaultHeight;
-      //       return height;
-      //     } else {
-      //       height = (posHeight || defaultHeight) * pos.scale;
-      //       return height;
-      //     }
-      //   } else if (pos.scale) {
-      //     height = posHeight ? posHeight : defaultHeight;
-      //     return height;
-      //   } else {
-      //     if (pos.IsResize) {
-      //       pixelHeight = calculateResolutionHeight(
-      //         posUpdateHeight,
-      //         pdfRenderHeight,
-      //         pdfRenderHeight
-      //       );
-      //       return pixelHeight;
-      //     } else {
-      //       return pixelHeight;
-      //     }
-      //   }
-      // }
-      return posHeight * scale * containerScale;
+      if (pos.isMobile && pos.scale) {
+        if (pos.IsResize) {
+          if (scale > 1) {
+            return posHeight * pos.scale * containerScale * scale;
+          } else {
+            return posHeight * containerScale;
+          }
+        } else {
+          if (scale > 1) {
+            return posHeight * pos.scale * containerScale * scale;
+          } else {
+            return posHeight * pos.scale * containerScale;
+          }
+        }
+      } else {
+        return posHeight * scale * containerScale;
+      }
     }
   };
 
   const xPos = (pos, signYourself) => {
     const containerScale = containerWH.width / pdfOriginalWH.width;
-    setContainerScale(containerScale);
     const resizePos = pos.xPosition;
 
     if (signYourself) {
@@ -215,7 +145,11 @@ function RenderPdf({
     } else {
       //checking both condition mobile and desktop view
       if (pos.isMobile && pos.scale) {
-        return pos.scale && resizePos * pos.scale;
+        if (scale > 1) {
+          return resizePos * pos.scale * containerScale * scale;
+        } else {
+          return resizePos * pos.scale * containerScale;
+        }
       } else if (pos.scale === containerScale) {
         if (scale > 1) {
           return resizePos * pos.scale * scale;
@@ -252,7 +186,11 @@ function RenderPdf({
     } else {
       // checking both condition mobile and desktop view
       if (pos.isMobile && pos.scale) {
-        return pos.scale && resizePos * pos.scale;
+        if (scale > 1) {
+          return resizePos * pos.scale * containerScale * scale;
+        } else {
+          return resizePos * pos.scale * containerScale;
+        }
       } else if (pos.scale === containerScale) {
         if (scale > 1) {
           return resizePos * pos.scale * scale;
@@ -401,6 +339,7 @@ function RenderPdf({
   };
 
   const RenderComponentPlaceholder = ({ data }) => {
+    const containerScale = containerWH.width / pdfOriginalWH.width;
     const checkSign =
       pdfRequest &&
       signedSigners.filter((sign) => sign.objectId === data.signerObjId);
@@ -865,8 +804,6 @@ function RenderPdf({
                   key={index}
                   width={containerWH.width}
                   scale={scale || 1}
-                  // scale={1}
-                  // height={containerWH.height}
                   pageNumber={pageNumber}
                   renderAnnotationLayer={false}
                   renderTextLayer={false}

@@ -8,7 +8,7 @@ function WidgetList(props) {
     return (
       <div className="2xl:p-3" key={ind} style={{ marginBottom: "5px" }}>
         <div
-          className="widgets"
+          className="widgets mx-[2px] md:mx-0"
           onClick={() => {
             props.addPositionOfSignature &&
               props.addPositionOfSignature("onclick", item);

@@ -212,8 +212,8 @@ export const handleImageResize = (
         if (url.key === key) {
           return {
             ...url,
-            Width: ref.offsetWidth,
-            Height: ref.offsetHeight,
+            Width: ref.offsetWidth / (containerScale * scale),
+            Height: ref.offsetHeight / (containerScale * scale),
             IsResize: showResize ? true : false
           };
         }
@@ -371,51 +371,8 @@ export const addWidgetOptions = (type) => {
 export const getWidgetType = (item, marginLeft, isHeader) => {
   return (
     <>
-      {/* <div
-        className="border-[1.5px] border-[#47a3ad] rounded-[3px] flex flex-row p-0 justify-between items-center bg-[#FFFFFF]
-        cursor-move w-auto h-[30px] 2xl:h-[70px] widgets"
-        style={{
-          boxShadow:
-            "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.18)",
-          marginLeft: marginLeft && `${marginLeft}px`
-        }}
-      >
-        <div className="flex items-center mr-1">
-          {!isMobile && (
-            <i
-              className={
-                "fa-sharp fa-solid fa-grip-vertical text-[13px] 2xl:text-[30px] ml-[4px] "
-              }
-              style={{ color: "#908d8d" }}
-            ></i>
-          )}
-          <span
-            className={
-              isHeader
-                ? " font-[400] text-[15px] 2xl:text-[33px] text-black ml-[5px] md:hidden lg:block"
-                : " font-[400] text-[15px] 2xl:text-[33px] text-black ml-[5px] "
-            }
-          >
-            {item.type}
-          </span>
-        </div>
-        <div
-        className={`flex w-[25px] 2xl:w-[50px] h-full  items-center justify-center `}
-          style={{
-            backgroundColor: themeColor,
-            // padding: "0 5px",
-            // display: "flex",
-            // alignItems: "center"
-          }}
-        >
-          <i
-            //  style={{ fontSize: item.iconSize }}
-            className={`${item.icon}  text-sm 2xl:text-3xl text-[#FFFFFF] `}
-          ></i>
-        </div>
-      </div> */}
       <div
-        style={{ marginLeft: marginLeft && `${marginLeft}px` }}
+        style={{ margin: isMobile && "0 2px" }}
         className="flex h-[30px] w-full items-center justify-between rounded shadow border-[1.5px] border-[#47a3ad] 2xl:h-[70px] overflow-hidden"
       >
         <div className="flex items-center justify-center gap-1 lg:gap-2 ml-1 lg:ml-3">
@@ -1389,33 +1346,12 @@ export const multiSignEmbed = async (
       );
       const xPos = (pos) => {
         const resizePos = pos.xPosition;
-
-        return resizePos;
-        // if (signyourself) {
-        //   return resizePos;
-        // } else {
-        //   //checking both condition mobile and desktop view
-        //   if (isMobile && pos.scale) {
-        //     //if pos.isMobile false -- placeholder saved from desktop view then handle position in mobile view divided by scale
-        //     if (pos.isMobile) {
-        //       const x = resizePos * (pos.scale / scale);
-        //       return x * scale;
-        //     } else {
-        //       const x = resizePos / scale;
-        //       return x * scale;
-        //     }
-        //   } else {
-        //     //else if pos.isMobile true -- placeholder saved from mobile or tablet view then handle position in desktop view divide by scale
-        //     if (pos.isMobile && pos.scale) {
-        //       const x = resizePos * pos.scale;
-        //       return x;
-        //     } else if (pos.scale) {
-        //       return resizePos;
-        //     } else {
-        //       return pixelX;
-        //     }
-        //   }
-        // }
+        if (pos.isMobile && pos.scale) {
+          const x = resizePos * pos.scale;
+          return x;
+        } else {
+          return resizePos;
+        }
       };
 
       const yPos = (pos, ind, labelDefaultHeight) => {
@@ -1431,71 +1367,23 @@ export const multiSignEmbed = async (
               ? 10
               : newUpdateHeight;
         const newHeight = ind ? (ind > 0 ? widgetHeight : 0) : widgetHeight;
-        return page.getHeight() - resizePos - newHeight;
-        // if (signyourself) {
-        //   if (isMobile) {
-        //     if (ind && ind > 0 && position.type === "checkbox") {
-        //       return page.getHeight() - resizePos * scale - newHeight;
-        //     } else if (!ind && position.type === "checkbox") {
-        //       return page.getHeight() - resizePos * scale - 10;
-        //     } else {
-        //       return page.getHeight() - resizePos - newHeight;
-        //     }
-        //     // return page.getHeight() - resizePos * scale - scaleHeight;
-        //   } else {
-        //     if (ind && ind > 0 && position.type === "checkbox") {
-        //       return page.getHeight() - resizePos * scale - newHeight;
-        //     } else if (!ind && position.type === "checkbox") {
-        //       return page.getHeight() - resizePos * scale - 10;
-        //     } else {
-        //       return page.getHeight() - resizePos - newHeight;
-        //     }
-        //     // return page.getHeight() - resizePos - scaleHeight;
-        //   }
-        // } else {
-        //   //checking both condition mobile and desktop view
-        //   const y = resizePos / scale;
-        //   if (isMobile && pos.scale) {
-        //     //if pos.isMobile false -- placeholder saved from desktop view then handle position in mobile view divided by scale
-        //     if (pos.isMobile && pos.scale) {
-        //       const y = resizePos * (pos.scale / scale);
-        //       return page.getHeight() - y * scale - newUpdateHeight;
-        //     } else if (pos.scale) {
-        //       if (pos.IsResize) {
-        //         return page.getHeight() - y * scale - newUpdateHeight;
-        //       } else {
-        //         return page.getHeight() - y * scale - newUpdateHeight;
-        //       }
-        //     }
-        //   } else {
-        //     //else if pos.isMobile true -- placeholder saved from mobile or tablet view then handle position in desktop view divide by scale
-        //     if (pos.isMobile && pos.scale) {
-        //       if (pos.IsResize) {
-        //         const y = resizePos * pos.scale;
-        //         return page.getHeight() - y - newUpdateHeight;
-        //       } else {
-        //         const y = resizePos * pos.scale;
-        //         return page.getHeight() - y - newUpdateHeight;
-        //       }
-        //     } else if (pos.scale) {
-        //       if (ind && ind > 0 && position.type === "checkbox") {
-        //         return page.getHeight() - resizePos - newHeight;
-        //       } else if (position.type === "checkbox") {
-        //         return page.getHeight() - resizePos - 10;
-        //       } else {
-        //         return page.getHeight() - resizePos - newHeight;
-        //       }
-        //     } else {
-        //       if (ind && ind > 0 && position.type === "checkbox") {
-        //         return page.getHeight() - pixelY - newHeight;
-        //       } else if (position.type === "checkbox") {
-        //         return page.getHeight() - pixelY - 10;
-        //       } else {
-        //         return page.getHeight() - pixelY - newHeight;
-        //       }
-        //     }
-        //   }
-        // }
+        if (pos.isMobile && pos.scale) {
+          if (pos.IsResize) {
+            const y = resizePos * pos.scale;
+            return page.getHeight() - y - newUpdateHeight;
+          } else {
+            const y = resizePos * pos.scale;
+            return page.getHeight() - y - newUpdateHeight;
+          }
+        } else {
+          if (ind && ind > 0 && position.type === "checkbox") {
+            return page.getHeight() - resizePos - newHeight;
+          } else if (position.type === "checkbox") {
+            return page.getHeight() - resizePos - 10;
+          } else {
+            return page.getHeight() - resizePos - newHeight;
+          }
+        }
       };
       const widgetTypeExist = [
         textWidget,
@@ -1725,130 +1613,39 @@ export function urlValidator(url) {
     return false;
   }
 }
-
-export const placeholderWidth = (
-  pos,
-  scale,
-  signyourself,
-  containerWH,
-  zoomPercent
-) => {
+//calculate placeholder width to embed in pdf
+export const placeholderWidth = (pos) => {
   const defaultWidth = defaultWidthHeight(pos.type).width;
   const posWidth = pos.Width || defaultWidth;
 
-  //checking current zoom scale and on drop widget zoom scale
-  // if (pos.zoomScale === zoomPercent) {
-  //   if (pos.zoomScale > 1) {
-  //     return posWidth / (scale * zoomPercent);
-  //   } else {
-  //     return posWidth / scale;
-  //   }
-  // } else {
-  //   return posWidth / (scale );
-  // }
-  return posWidth;
-  // else {
-  //   console.log("go here 1");
-
-  //   return posWidth / (scale / zoomPercent);
-  // }
-  // if (signyourself) {
-  //   return posWidth;
-  // } else {
-  //   if (isMobile && pos.scale) {
-  //     if (pos.isMobile) {
-  //       width = posWidth ? posWidth * scale : defaultWidth * scale;
-  //       return width;
-  //     } else {
-  //       if (pos.IsResize) {
-  //         width = posWidth ? posWidth * scale : defaultWidth * scale;
-  //         return width;
-  //       } else {
-  //         width = posWidth ? posWidth : defaultWidth;
-  //         return width;
-  //       }
-  //     }
-  //   } else {
-  //     if (pos.isMobile && pos.scale) {
-  //       if (pos.IsResize) {
-  //         width = posWidth ? posWidth : defaultWidth;
-  //         return width;
-  //       } else {
-  //         width = posWidth ? posWidth * pos.scale : defaultWidth * pos.scale;
-
-  //         return width;
-  //       }
-  //     } else if (pos.scale) {
-  //       width = posWidth;
-  //       return width;
-  //     } else {
-  //       return pixelWidth;
-  //     }
-  //   }
-  // }
+  //condition to handle old data saved from mobile view to get widthh
+  if (pos.isMobile && pos.scale) {
+    if (pos.IsResize) {
+      return posWidth;
+    } else {
+      return posWidth * pos.scale;
+    }
+  } else {
+    return posWidth;
+  }
 };
-export const placeholderHeight = (
-  pos,
-  scale,
-  signyourself,
-  pdfRenderHeight,
-  zoomPercent
-) => {
-  // let height;
+
+//calculate placeholder height to embed in pdf
+export const placeholderHeight = (pos) => {
   const posHeight = pos.Height;
   const defaultHeight = defaultWidthHeight(pos.type).height;
   const posUpdateHeight = posHeight || defaultHeight;
 
-  return posUpdateHeight;
-  // if (pos.zoomScale === zoomPercent) {
-  //   if (pos.zoomScale > 1) {
-  //     return posUpdateHeight / (scale * zoomPercent);
-  //   } else {
-  //     return posUpdateHeight / scale;
-  //   }
-  // } else {
-  //   return posUpdateHeight / (scale);
-  // }
-  // if (signyourself) {
-  //   // if (isMobile) {
-  //   return posUpdateHeight;
-  //   // } else {
-  //   //   return posHeight ? posHeight : defaultHeight;
-  //   // }
-  // } else {
-  //   if (isMobile && pos.scale) {
-  //     if (pos.isMobile) {
-  //       height = posHeight ? posHeight * scale : defaultHeight * scale;
-  //       return height;
-  //     } else {
-  //       if (pos.IsResize) {
-  //         height = posHeight ? posHeight * scale : defaultHeight * scale;
-  //         return height;
-  //       } else {
-  //         height = posHeight ? posHeight : defaultHeight;
-
-  //         return height;
-  //       }
-  //     }
-  //   } else {
-  //     if (pos.isMobile && pos.scale) {
-  //       if (pos.IsResize) {
-  //         height = posHeight ? posHeight : defaultHeight;
-  //         return height;
-  //       } else {
-  //         height = posHeight
-  //           ? posHeight * pos.scale
-  //           : defaultHeight * pos.scale;
-  //         return height;
-  //       }
-  //     } else if (pos.scale) {
-  //       height = posHeight ? posHeight : defaultHeight;
-  //       return height;
-  //     } else {
-  //       return pixelHeight;
-  //     }
-  //   }
-  // }
+  //condition to handle old data saved from mobile view to get height
+  if (pos.isMobile && pos.scale) {
+    if (pos.IsResize) {
+      return posUpdateHeight;
+    } else {
+      return posUpdateHeight * pos.scale;
+    }
+  } else {
+    return posUpdateHeight;
+  }
 };
 
 //function for getting contracts_contactbook details

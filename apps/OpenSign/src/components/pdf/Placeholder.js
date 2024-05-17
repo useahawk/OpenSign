@@ -87,6 +87,7 @@ const getDefaultdate = (selectedDate, format = "dd-MM-yyyy") => {
 const getDefaultFormat = (dateFormat) => dateFormat || "MM/dd/yyyy";
 
 function Placeholder(props) {
+  const [placeholderBorder, setPlaceholderBorder] = useState({ w: 0, h: 0 });
   const [isDraggingEnabled, setDraggingEnabled] = useState(true);
   const [isShowDateFormat, setIsShowDateFormat] = useState(false);
   const [selectDate, setSelectDate] = useState({
@@ -674,20 +675,12 @@ function Placeholder(props) {
         x: props.xPos(props.pos, props.isSignYourself),
         y: props.yPos(props.pos, props.isSignYourself)
       }}
-      // onResize={(e, direction, ref) => {
-      //   props.handleSignYourselfImageResize &&
-      //     props.handleSignYourselfImageResize(
-      //       ref,
-      //       props.pos.key,
-      //       props.xyPostion,
-      //       props.setXyPostion,
-      //       props.index,
-      //       props.containerScale,
-      //       props.scale,
-      //       props.data && props.data.Id,
-      //       props.isResize
-      //     );
-      // }}
+      onResize={(e, direction, ref) => {
+        setPlaceholderBorder({
+          w: ref.offsetWidth / (props.scale * props.containerScale),
+          h: ref.offsetHeight / (props.scale * props.containerScale)
+        });
+      }}
       onClick={() => handleOnClickPlaceholder()}
     >
       {props.isShowBorder &&
@@ -717,10 +710,11 @@ function Placeholder(props) {
           getCheckboxRenderWidth={getCheckboxRenderWidth}
           scale={props.scale}
           containerScale={props.containerScale}
+          placeholderBorder={placeholderBorder}
         />
       )}
       <div
-        className=" sm:inline-block md:inline-block lg:hidden "
+        className="sm:inline-block md:inline-block lg:hidden "
         style={{
           left: props.xPos(props.pos, props.isSignYourself),
           top: props.yPos(props.pos, props.isSignYourself),

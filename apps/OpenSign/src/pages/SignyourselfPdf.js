@@ -463,6 +463,16 @@ function SignYourSelf() {
     const containerScale = containerWH.width / pdfOriginalWH.width;
 
     if (item === "onclick") {
+      const getWidth = widgetTypeExist
+        ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getWidth
+        : dragTypeValue === "initials"
+          ? defaultWidthHeight(dragTypeValue).width
+          : "";
+      const getHeight = widgetTypeExist
+        ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getHeight
+        : dragTypeValue === "initials"
+          ? defaultWidthHeight(dragTypeValue).height
+          : "";
       dropObj = {
         xPosition:
           (containerWH.width / 2 - widgetWidth / 2) / (containerScale * scale),
@@ -476,16 +486,8 @@ function SignYourSelf() {
         type: dragTypeValue,
         yBottom: window.innerHeight / 2 - 60,
         scale: containerScale,
-        Width: widgetTypeExist
-          ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getWidth
-          : dragTypeValue === "initials"
-            ? defaultWidthHeight(dragTypeValue).width
-            : "",
-        Height: widgetTypeExist
-          ? calculateInitialWidthHeight(dragTypeValue, widgetValue).getHeight
-          : dragTypeValue === "initials"
-            ? defaultWidthHeight(dragTypeValue).height
-            : "",
+        Width: getWidth / (containerScale * scale),
+        Height: getHeight / (containerScale * scale),
         options: addWidgetOptions(dragTypeValue),
         pdfRenderHeight: pdfRenderHeight,
         pdfRenderWidth: pdfRenderWidth
@@ -507,22 +509,22 @@ function SignYourSelf() {
         ? calculateInitialWidthHeight(widgetValue).getWidth
         : defaultWidthHeight(dragTypeValue).width;
       const getHeight = widgetTypeExist
-          ? calculateInitialWidthHeight(widgetValue).getHeight
-          : defaultWidthHeight(dragTypeValue).height,
-        dropObj = {
-          xPosition: getXPosition / (containerScale * scale),
-          yPosition: getYPosition / (containerScale * scale),
-          isStamp:
-            (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
-          key: key,
-          type: dragTypeValue,
-          Width: getWidth / (containerScale * scale),
-          Height: getHeight / (containerScale * scale),
-          options: addWidgetOptions(dragTypeValue),
-          pdfRenderHeight: pdfRenderHeight,
-          pdfRenderWidth: pdfRenderWidth,
-          scale: containerScale
-        };
+        ? calculateInitialWidthHeight(widgetValue).getHeight
+        : defaultWidthHeight(dragTypeValue).height;
+      dropObj = {
+        xPosition: getXPosition / (containerScale * scale),
+        yPosition: getYPosition / (containerScale * scale),
+        isStamp:
+          (dragTypeValue === "stamp" || dragTypeValue === "image") && true,
+        key: key,
+        type: dragTypeValue,
+        Width: getWidth / (containerScale * scale),
+        Height: getHeight / (containerScale * scale),
+        options: addWidgetOptions(dragTypeValue),
+        pdfRenderHeight: pdfRenderHeight,
+        pdfRenderWidth: pdfRenderWidth,
+        scale: containerScale
+      };
 
       dropData.push(dropObj);
     }
@@ -715,9 +717,9 @@ function SignYourSelf() {
               containerWH,
               scale
             );
-            console.log("pdf", pdfBytes);
+            // console.log("pdf", pdfBytes);
             //function for call to embed signature in pdf and get digital signature pdf
-            //await signPdfFun(pdfBytes, documentId);
+            await signPdfFun(pdfBytes, documentId);
           } catch (err) {
             setIsUiLoading(false);
             if (err && err.message.includes("is encrypted.")) {

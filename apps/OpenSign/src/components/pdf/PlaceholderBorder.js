@@ -11,37 +11,21 @@ function PlaceholderBorder(props) {
   const getResizeBorderExtraWidth = resizeBorderExtraWidth();
   const defaultWidth = defaultWidthHeight(props.pos.type).width;
   const defaultHeight = defaultWidthHeight(props.pos.type).height;
-
   const width = () => {
-    const getWidth = props.pos.Width || defaultWidth;
+    const getWidth =
+      props.placeholderBorder.w || props.pos.Width || defaultWidth;
 
-    // if (props.pos.zoomScale === props.scale) {
-    //   return (
-    //     getWidth * props.scale * props.containerScale +
-    //     getResizeBorderExtraWidth
-    //   );
-    //    // return (getWidth * props.scale) + getResizeBorderExtraWidth;
-    // } else {
-    // return getWidth * props.scale + getResizeBorderExtraWidth;
     return (
       getWidth * props.scale * props.containerScale + getResizeBorderExtraWidth
     );
-    // }
   };
   const height = () => {
-    const getHeight = props.pos.Height || defaultHeight;
-    // if (props.pos.zoomScale === props.scale) {
-    //   // return (
-    //   //   getHeight * props.scale * props.containerScale +
-    //   //   getResizeBorderExtraWidth
-    //   // );
-    //    return (getHeight * props.scale) + getResizeBorderExtraWidth;
-    // } else {
-    //  return getHeight * props.scale + getResizeBorderExtraWidth;
+    const getHeight =
+      props.placeholderBorder.h || props.pos.Height || defaultHeight;
+
     return (
       getHeight * props.scale * props.containerScale + getResizeBorderExtraWidth
     );
-    // }
   };
 
   const handleMinWidth = () => {
