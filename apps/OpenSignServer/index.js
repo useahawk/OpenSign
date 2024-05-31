@@ -18,7 +18,6 @@ import { createTransport } from 'nodemailer';
 import { app as v1 } from './cloud/customRoute/v1/apiV1.js';
 import { PostHog } from 'posthog-node';
 import { useLocal } from './Utils.js';
-import { SSOAuth } from './cloud/AuthAdapter.js';
 
 let fsAdapter;
 if (useLocal !== 'true') {
@@ -148,7 +147,14 @@ export const config = {
     google: {
       enabled: true,
     },
-    sso: SSOAuth,
+    ldap: {
+      enabled: true,
+      url: 'ldap://ldap.forumsys.com:389',
+      suffix: 'dc=example,dc=com',
+      // dn: 'ou=mathematicians, dc=example, dc=com',
+      groupCn: 'mathematicians',
+      groupFilter: '(&(uniqueMember=uid=,dc=example,dc=com)(objectClass=groupOfUniqueNames))',
+    },
   },
 };
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
