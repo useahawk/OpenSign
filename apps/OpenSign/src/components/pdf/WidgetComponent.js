@@ -249,12 +249,8 @@ function WidgetComponent({
     <>
       {isMobile ? (
         !isMailSend && (
-          <div
-            id="navbar"
-            className="fixed z-[99] bottom-0 right-0"
-            style={{ width: window.innerWidth + "px" }}
-          >
-            <div className="mx-1">
+          <div id="navbar" className="fixed z-[99] bottom-0 right-0 w-full">
+            {/* <div className="mx-1">
               {isSigners && (
                 <div
                   data-tut="recipientArea"
@@ -324,6 +320,45 @@ function WidgetComponent({
                   </div>
                 )
               )}
+            </div> */}
+            <div className="op-join flex justify-center items-center border-[1px] w-full">
+              <select className="w-full op-select op-select-bordered op-join-item">
+                <option>Sci-fi</option>
+                <option>Drama</option>
+                <option>Action</option>
+              </select>
+              <div className="op-indicator">
+                {handleAddSigner ? (
+                  // <div
+                  //   data-tut="reactourAddbtn"
+                  //   className="op-btn op-btn-accent w-full my-[2px]"
+                  //   onClick={() => handleAddSigner()}
+                  // >
+                  //   <i className="fa-light fa-plus"></i>
+                  //   <span>Add role</span>
+                  // </div>
+                  <button
+                    data-tut="reactourAddbtn"
+                    onClick={() => handleAddSigner()}
+                    className="op-btn op-btn-accent op-join-item"
+                  >
+                    {" "}
+                    Add
+                  </button>
+                ) : (
+                  setIsAddSigner && (
+                    <button
+                      data-tut="addRecipient"
+                      onClick={() => setIsAddSigner(true)}
+                      className="op-btn op-btn-accent op-join-item"
+                    >
+                      {" "}
+                      Add
+                    </button>
+                  )
+                )}
+                {/* <button className="op-btn op-btn-accent op-join-item">Add</button> */}
+              </div>
             </div>
             <div
               data-tut="addWidgets"
