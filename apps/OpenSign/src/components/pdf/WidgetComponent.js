@@ -37,7 +37,6 @@ function WidgetComponent({
   sendInOrder,
   isTemplateFlow,
   setBlockColor,
-  blockColor,
   setIsAddSigner
 }) {
   const [isSignersModal, setIsSignersModal] = useState(false);
@@ -188,20 +187,6 @@ function WidgetComponent({
   const scrollContainerRef = useRef(null);
   const [widget, setWidget] = useState([]);
 
-  const color = [
-    "#93a3db",
-    "#e6c3db",
-    "#c0e3bc",
-    "#bce3db",
-    "#b8ccdb",
-    "#ceb8db",
-    "#ffccff",
-    "#99ffcc",
-    "#cc99ff",
-    "#ffcc99",
-    "#66ccff",
-    "#ffffcc"
-  ];
   const handleModal = () => {
     setIsSignersModal(!isSignersModal);
   };
@@ -245,6 +230,19 @@ function WidgetComponent({
       ? textWidgetData
       : widget;
 
+  const handleSelectRecipient = () => {
+    if (
+      signersdata[isSelectListId]?.Email ||
+      signersdata[isSelectListId]?.Role
+    ) {
+      const userData =
+        signersdata[isSelectListId]?.Name || signersdata[isSelectListId]?.Role;
+      const name =
+        userData?.length > 20 ? `${userData.slice(0, 20)}...` : userData;
+      return name;
+    }
+  };
+
   return (
     <>
       {isMobile ? (
@@ -259,8 +257,8 @@ function WidgetComponent({
                     background: blockColor
                       ? blockColor
                       : isSelectListId
-                        ? color[isSelectListId % color.length]
-                        : color[0]
+                      ? color[isSelectListId % color.length]
+                      : color[0]
                   }}
                   onClick={() => handleModal()}
                 >
@@ -321,45 +319,45 @@ function WidgetComponent({
                 )
               )}
             </div> */}
-            <div className="op-join flex justify-center items-center border-[1px] w-full">
-              <select className="w-full op-select op-select-bordered op-join-item">
-                <option>Sci-fi</option>
-                <option>Drama</option>
-                <option>Action</option>
-              </select>
-              <div className="op-indicator">
-                {handleAddSigner ? (
-                  // <div
-                  //   data-tut="reactourAddbtn"
-                  //   className="op-btn op-btn-accent w-full my-[2px]"
-                  //   onClick={() => handleAddSigner()}
-                  // >
-                  //   <i className="fa-light fa-plus"></i>
-                  //   <span>Add role</span>
-                  // </div>
-                  <button
-                    data-tut="reactourAddbtn"
-                    onClick={() => handleAddSigner()}
-                    className="op-btn op-btn-accent op-join-item"
+            {isSigners && (
+              <div className="op-join flex justify-center items-center border-[1px] w-full">
+                <div className="w-full" onClick={() => handleModal()}>
+                  <select
+                    className="w-full op-select op-select-bordered op-join-item pointer-events-none"
+                    value={handleSelectRecipient()}
                   >
-                    {" "}
-                    Add
-                  </button>
-                ) : (
-                  setIsAddSigner && (
+                    <option value={handleSelectRecipient()}>
+                      {handleSelectRecipient()}
+                    </option>
+                  </select>
+                </div>
+
+                <div className="op-indicator ">
+                  {handleAddSigner ? (
                     <button
-                      data-tut="addRecipient"
-                      onClick={() => setIsAddSigner(true)}
-                      className="op-btn op-btn-accent op-join-item"
+                      data-tut="reactourAddbtn"
+                      onClick={() => handleAddSigner()}
+                      className="op-btn op-btn-accent op-join-item "
                     >
                       {" "}
                       Add
                     </button>
-                  )
-                )}
-                {/* <button className="op-btn op-btn-accent op-join-item">Add</button> */}
+                  ) : (
+                    setIsAddSigner && (
+                      <button
+                        data-tut="addRecipient"
+                        onClick={() => setIsAddSigner(true)}
+                        className="op-btn op-btn-accent op-join-item "
+                      >
+                        {" "}
+                        Add
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
             <div
               data-tut="addWidgets"
               ref={scrollContainerRef}
