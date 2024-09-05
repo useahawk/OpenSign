@@ -37,12 +37,12 @@
   "edit": "Bearbeiten",
   "change-password": "Kennwort ändern",
   "save": "Speichern",
-  "cancel": "Stornieren",
+  "cancel": "Abbrechen",
   "upgrade-now": "Jetzt upgraden",
   "upgrade-to": "Upgrade auf",
   "plan": "Planen",
   "subscribe-card-teamplan": "Nutzen Sie die volle Kraft der Zusammenarbeit! ",
-  "subscribe-card-plan": "Schalten Sie Premium-Funktionen ab nur frei {{premiumPrice}}/Monat.  {{addonPrice}} pro zusätzlichem Guthaben nach Ihrem enthaltenen Prämienguthaben.",
+  "subscribe-card-plan": "Schalten Sie Premium-Funktionen ab {{premiumPrice}}/Monat frei.  {{addonPrice}} pro zusätzlichem Guthaben nach Ihrem enthaltenen Prämienguthaben.",
   "user-name-limit-char": "Um einen Benutzernamen mit weniger als 8 Zeichen zu erhalten, abonnieren Sie bitte",
   "tour-content": "Zeige das nicht noch einmal",
   "pro": "PRO",
@@ -81,7 +81,7 @@
     "OpenSign™ Drive": "OpenSign™-Laufwerk",
     "Reports": "Berichte",
     "Reports-Children": {
-      "Need your sign": "Brauche dein Schild",
+      "Need your sign": "Brauche deine Unterschrift",
       "In Progress": "Im Gange",
       "Completed": "Vollendet",
       "Drafts": "Entwürfe",
@@ -94,18 +94,18 @@
       "My Signature": "Meine Unterschrift",
       "API Token": "API-Token",
       "Webhook": "Webhook",
-      "Teams": "Mannschaften",
+      "Teams": "Teams",
       "Team-update-successfully": "Team erfolgreich aktualisiert.",
       "Users": "Benutzer"
     }
   },
   "dashboard-card": {
-    "Need your Signature": "Benötigen Sie Ihre Unterschrift",
+    "Need your Signature": "Benötigt Ihre Unterschrift",
     "Out for signatures": "Auf der Suche nach Unterschriften"
   },
   "report-name": {
     "Draft Documents": "Entwurfsdokumente",
-    "Need your sign": "Brauche dein Schild",
+    "Need your sign": "Braucht deine Unterschrift",
     "In-progress documents": "In Bearbeitung befindliche Dokumente",
     "Completed Documents": "Abgeschlossene Dokumente",
     "Declined Documents": "Abgelehnte Dokumente",
@@ -115,12 +115,12 @@
     "Drafts": "Entwürfe",
     "Contactbook": "Kontaktbuch",
     "Templates": "Vorlagen",
-    "Teams": "Mannschaften",
+    "Teams": "Teams",
     "Users": "Benutzer"
   },
   "btnLabel": {
-    "sign": "Zeichen",
-    "Sign": "ZEICHEN",
+    "sign": "Unterschreiben",
+    "Sign": "Unterschreiben",
     "Resend": "Erneut senden",
     "Revoke": "Widerrufen",
     "Delete": "Löschen",
@@ -128,8 +128,8 @@
     "Quick send": "Schnell verschicken",
     "Edit": "Bearbeiten",
     "Share with team": "Mit dem Team teilen",
-    "Share": "Aktie",
-    "View": "Sicht",
+    "Share": "Teilen",
+    "View": "Ansicht",
     "option": "Option",
     "Embed": "Einbetten"
   },
@@ -164,7 +164,7 @@
     "Templates": "Dies ist eine Liste von Vorlagen, die Ihnen zum Erstellen von Dokumenten zur Verfügung stehen. "
   },
   "form-name": {
-    "Sign Yourself": "Unterschreiben Sie sich",
+    "Sign Yourself": "Unterschreiben Sie selbst",
     "Request Signatures": "Unterschriften anfordern",
     "New Template": "Neue Vorlage"
   },
